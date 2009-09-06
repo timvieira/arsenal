@@ -41,8 +41,7 @@ def sliding_window(iterable, k):
 
 def iterview(x, every_k=None):
    """
-   Takes an iterable `x` and returns an iterator over it
-   which prints its progress to *stderr* as it iterates through.
+   iterator which prints its progress to *stderr*.
    """
    import time
    import sys

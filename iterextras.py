@@ -39,6 +39,8 @@ def sliding_window(iterable, k):
     return izip(*iterators)
 
 
+# TODO:
+#  * nicer formatting, right now is pretty redundant and ugly...
 def iterview(x, every_k=None):
    """
    iterator which prints its progress to *stderr*.
@@ -94,8 +96,11 @@ def example_iterview():
     for x in iterview(xrange(1000), every_k=20):
         import time
         time.sleep(0.01)
-        print x
+#        print x
     print '---------'
+
+if __name__ == '__main__':
+    example_iterview()
 
 #_______________________________________________________________________________
 #

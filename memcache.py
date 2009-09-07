@@ -1034,9 +1034,8 @@ if __name__ == "__main__":
                 print "OK"
                 return 1
             else:
-                print "FAIL"
+                print >>sys.stderr, "FAIL"
                 return 0
-
 
         class FooStruct:
             def __init__(self):
@@ -1055,7 +1054,7 @@ if __name__ == "__main__":
             if mc.delete("long"):
                 print "OK"
             else:
-                print "FAIL"
+                print >>sys.stderr, "FAIL"
         print "Testing get_multi ...",
         print mc.get_multi(["a_string", "an_integer"])
 
@@ -1070,24 +1069,23 @@ if __name__ == "__main__":
         if x == 43:
             print "OK"
         else:
-            print "FAIL"
+            print >>sys.stderr, "FAIL"
 
         print "Testing decr ...",
         x = mc.decr("an_integer", 1)
         if x == 42:
             print "OK"
         else:
-            print "FAIL"
+            print >>sys.stderr, "FAIL"
 
         # sanity tests
         print "Testing sending spaces...",
         try:
-            #x = mc.set("this has spaces", 1)
             x = mc.set("this has spaces", 1)
         except Client.MemcachedKeyCharacterError, msg:
             print "OK"
         else:
-            print "FAIL"
+            print >>sys.stderr, "FAIL"
 
         print "Testing sending control characters...",
         try:
@@ -1095,7 +1093,7 @@ if __name__ == "__main__":
         except Client.MemcachedKeyCharacterError, msg:
             print "OK"
         else:
-            print "FAIL"
+            print >>sys.stderr, "FAIL"
 
         print "Testing using insanely long key...",
         try:
@@ -1103,7 +1101,7 @@ if __name__ == "__main__":
         except Client.MemcachedKeyLengthError, msg:
             print "OK"
         else:
-            print "FAIL"
+            print >>sys.stderr, "FAIL"
 
         print "Testing sending a unicode-string key...",
         try:
@@ -1111,11 +1109,11 @@ if __name__ == "__main__":
         except Client.MemcachedStringEncodingError, msg:
             print "OK",
         else:
-            print "FAIL",
+            print >>sys.stderr, "FAIL",
         try:
             x = mc.set((u'a'*SERVER_MAX_KEY_LENGTH).encode('utf-8'), 1)
         except:
-            print "FAIL",
+            print >>sys.stderr, "FAIL",
         else:
             print "OK",
         import pickle
@@ -1125,25 +1123,25 @@ if __name__ == "__main__":
         except Client.MemcachedKeyLengthError:
             print "OK"
         else:
-            print "FAIL"
+            print >>sys.stderr, "FAIL"
 
         print "Testing using a value larger than the memcached value limit...",
         x = mc.set('keyhere', 'a'*SERVER_MAX_VALUE_LENGTH)
         if mc.get('keyhere') == None:
             print "OK",
         else:
-            print "FAIL",
+            print >>sys.stderr, "FAIL",
         x = mc.set('keyhere', 'a'*SERVER_MAX_VALUE_LENGTH + 'aaa')
         if mc.get('keyhere') == None:
             print "OK"
         else:
-            print "FAIL"
+            print >>sys.stderr, "FAIL"
 
         print "Testing set_multi() with no memcacheds running",
         mc.disconnect_all()
         errors = mc.set_multi({'keyhere' : 'a', 'keythere' : 'b'})
         if errors != []:
-            print "FAIL"
+            print >>sys.stderr, "FAIL"
         else:
             print "OK"
 
@@ -1151,7 +1149,7 @@ if __name__ == "__main__":
         mc.disconnect_all()
         ret = mc.delete_multi({'keyhere' : 'a', 'keythere' : 'b'})
         if ret != 1:
-            print "FAIL"
+            print >>sys.stderr, "FAIL"
         else:
           print "OK"
 

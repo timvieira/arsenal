@@ -276,7 +276,7 @@ def assert_throws(exc):
                 raise
             else:
                 if exc is not None:
-                    raise Exception('Failed test.')
+                    raise Exception('TEST-FAILED: %s did not raise required %s.' % (f.__name__, exc.__name__))
                 else:
                     print 'pass.'
         return wrap2

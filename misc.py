@@ -6,12 +6,10 @@ import gc
 import sys
 import time
 import threading
-
 from functools import wraps, partial
 from itertools import *
 from StringIO import StringIO
 from contextlib import contextmanager
-
 
 # the interpreter periodically does some stuff that slows you
 # down if you aren't using threads.
@@ -19,11 +17,14 @@ from contextlib import contextmanager
 
 @contextmanager
 def preserve_cwd():
+    """ contenxt manager to preserve current working directory """
     cwd = os.getcwd()
     yield
     os.chdir(cwd)
 
+
 def preserve_cwd_dec(f):
+    """ decorator to preserve current working directory """
     @wraps(f)
     def wrap(*args, **kwargs):
         with preserve_cwd():
@@ -95,7 +96,7 @@ def get_current_traceback_tuple():
     return (exceptionclass, exceptioninstance, tb_lines)
 
 #_________________________________________________________________________
-# 
+#
 
 @contextmanager
 def ctx_redirect_io():
@@ -136,7 +137,7 @@ def redirect_io(f):
     return wrap
 
 
-#_______________________________________________________________________________
+#______________________________________________________________________________
 # Function decorators
 
 def threaded(callback=lambda *args, **kwargs: None, daemonic=False):
@@ -152,7 +153,8 @@ def threaded(callback=lambda *args, **kwargs: None, daemonic=False):
     return innerDecorator
 
 def garbagecollect(f):
-    """ Decorate a function to invoke the garbage collecter after each execution. """
+    """ Decorate a function to invoke the garbage collecter after each
+    execution. """
     @wraps(f)
     def inner(*args, **kwargs):
         result = f(*args, **kwargs)
@@ -188,7 +190,7 @@ def try_k_times_decorator(k, pause=0.1):
 # TODO:
 #  * add option to pass in your own cache.
 class memoize(object):
-    """ Decorator that caches a function's return value to avoid recalulation """
+    """ cache a function's return value to avoid recalulation """
     def __init__(self, func):
         self.func = func
         self.cache = {}
@@ -215,7 +217,7 @@ class Dispatch(threading.Thread):
         self.args = args
         self.kwargs = kwargs
         self.result = None
-        self.error = None        
+        self.error = None
         self.setDaemon(True)
         self.start()
     def run(self):
@@ -226,17 +228,19 @@ class Dispatch(threading.Thread):
             self.error = sys.exc_info()
 
 
-class TimeoutError(Exception): pass
+class TimeoutError(Exception):
+    pass
+
 def timelimit(timeout):
     """
-    A decorator to limit a function to `timeout` seconds, raising `TimeoutError`
+    A decorator to limit a function to `timeout` seconds, raising TimeoutError
     if it takes longer.
-    
+
         >>> import time
         >>> def meaningoflife():
         ...     time.sleep(.2)
         ...     return 42
-        >>> 
+        >>>
         >>> timelimit(.1)(meaningoflife)()
         Traceback (most recent call last):
             ...
@@ -244,10 +248,10 @@ def timelimit(timeout):
         >>> timelimit(1)(meaningoflife)()
         42
 
-    _Caveat:_ The function isn't stopped after `timeout` seconds but continues 
-    executing in a separate thread. (There seems to be no way to kill a thread.)
-
-    inspired by <http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/473878>
+    _Caveat:_ The function isn't stopped after `timeout` seconds but continues
+    executing in a separate thread. (There seems to be no way to kill a thread)
+    inspired by
+        <http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/473878>
     """
     def _1(f):
         @wraps(f)
@@ -255,7 +259,7 @@ def timelimit(timeout):
             c = Dispatch(f, *args, **kwargs)
             c.join(timeout)
             if c.isAlive():
-                raise TimeoutError, 'took too long'
+                raise TimeoutError('took too long')
             if c.error:
                 raise c.error[0], c.error[1]
             return c.result
@@ -309,14 +313,8 @@ if __name__ == '__main__':
     def run_tests():
 
         def nasty_function():
-            #print '<nasty_function>'
             os.chdir('..')
-            #print '  cd ..'
-            #print '  cwd:', os.getcwd()
             os.chdir('..')
-            #print '  cd ..'
-            #print '  cwd:', os.getcwd()
-            #print '</nasty_function>'
 
         def test_cwd_ctx_manager():
             print 'test_cwd_ctx_manager:'

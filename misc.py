@@ -162,7 +162,7 @@ def garbagecollect(f):
         return result
     return inner
 
-## TODO: add option to only suppress some Exceptions
+## TODO: add option to suppress a some user-defined list of Exceptions
 def try_k_times(fn, args, k, pause=0.1):
     """ attempt to call fn up to k times with the args as arguments.
         All exceptions up to the kth will be ignored. """
@@ -186,9 +186,8 @@ def try_k_times_decorator(k, pause=0.1):
         return wrap
     return wrap2
 
-
 # TODO:
-#  * add option to pass in your own cache.
+#  * add option to pass in a reference to your own cache (maybe even a memcached client).
 class memoize(object):
     """ cache a function's return value to avoid recalulation """
     def __init__(self, func):

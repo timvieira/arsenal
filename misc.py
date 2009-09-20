@@ -31,7 +31,6 @@ def preserve_cwd_dec(f):
             return f(*args, **kwargs)
     return wrap
 
-
 #______________________________________________________________________________
 # Debugging utils
 
@@ -47,53 +46,6 @@ def dumpobj(o, double_underscores=0):
         except:
             pass
     print ""
-
-_count = 0
-def trace(func, stream=sys.stdout):
-    """
-    Good old fashioned Lisp-style tracing.  Example usage:
-    WARNING: definitely not thread safe
-
-    >>> def f(a, b, c=3):
-    >>>     print a, b, c
-    >>>     return a + b
-    >>>
-    >>>
-    >>> f = trace(f)
-    >>> f(1, 2)
-    |>> f called args: [1, 2]
-    1 2 3
-    <<| f returned 3
-    3
-
-    TODO: print out default keywords (maybe)
-    """
-    name = func.func_name
-    global _count
-    def tracer(*args, **kw):
-        global _count
-        s = ('\t' * _count) + '|>> %s called with' % name
-        _count += 1
-        if args:
-            s += ' args: %r' % list(args)
-        if kw:
-            s += ' kw: %r' % kw
-        print >>stream, s
-        ret = func(*args, **kw)
-        _count -= 1
-        print >>stream, ('\t' * _count) + '<<| %s returned %s' % (name, ret)
-        return ret
-    return tracer
-
-
-def get_current_traceback_tuple():
-    """Returns a semiformatted traceback of the current exception as a tuple
-    in this form:
-       (exceptionclass, exceptioninstance, lines_of_string_traceback_lines)"""
-    import traceback
-    exceptionclass, exceptioninstance, tb = sys.exc_info()
-    tb_lines = traceback.format_tb(tb)
-    return (exceptionclass, exceptioninstance, tb_lines)
 
 #_________________________________________________________________________
 #
@@ -143,6 +95,7 @@ def redirect_io(f):
 def threaded(callback=lambda *args, **kwargs: None, daemonic=False):
     """Decorate  a function to run in its own thread and report the result
     by calling callback with it."""
+    @wraps(func)
     def innerDecorator(func):
         def inner(*args, **kwargs):
             target = lambda: callback(func(*args, **kwargs))
@@ -179,6 +132,7 @@ def try_k_times(fn, args, k, pause=0.1):
     return output
 
 def try_k_times_decorator(k, pause=0.1):
+    @wraps(fn)
     def wrap2(fn):
         @wraps(fn)
         def wrap(*args):
@@ -187,7 +141,7 @@ def try_k_times_decorator(k, pause=0.1):
     return wrap2
 
 # TODO:
-#  * add option to pass in a reference to your own cache (maybe even a memcached client).
+#  * add option to pass a reference to another cache (maybe memcached client)
 class memoize(object):
     """ cache a function's return value to avoid recalulation """
     def __init__(self, func):
@@ -279,7 +233,8 @@ def assert_throws(exc):
                 raise
             else:
                 if exc is not None:
-                    raise Exception('TEST-FAILED: %s did not raise required %s.' % (f.__name__, exc.__name__))
+                    raise Exception('TEST: %s did not raise required %s.' \
+                                        % (f.__name__, exc.__name__))
                 else:
                     print 'pass.'
         return wrap2

@@ -93,10 +93,9 @@ def iterview(x, every_k=None):
 
 def example_iterview():
     print '-----'
-    for x in iterview(xrange(1000), every_k=20):
+    for x in iterview(xrange(400), every_k=20):
         import time
         time.sleep(0.01)
-#        print x
     print '---------'
 
 if __name__ == '__main__':

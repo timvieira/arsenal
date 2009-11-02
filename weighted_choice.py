@@ -9,7 +9,7 @@ from random import random
 from bisect import bisect
 from itertools import izip
 
-def wchoice(objects, frequences, filter=True, normalize=True):
+def wchoice(objects, frequences, filter=True, normalize=True, return_index=False):
     """
     wchoice(objects, frequences, filter=True, normalize=True): return
     a function that return the given objects with the specified frequency
@@ -58,6 +58,10 @@ def wchoice(objects, frequences, filter=True, normalize=True):
     for freq in frequences:
         lastSum += freq
         addedFreq.append(lastSum)
+
+
+    if return_index:
+        return lambda : bisect(addedFreq, random()*lastSum)
 
     # If the choice method is called many times, then the frequences
     # can be normalized to sum 1, so instead of random()*self.sumFreq

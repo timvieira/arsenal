@@ -17,14 +17,31 @@ from contextlib import contextmanager
 
 @contextmanager
 def preserve_cwd():
-    """ contenxt manager to preserve current working directory """
+    """ context manager to preserve current working directory
+
+    Usage example:
+        >>> before = os.getcwd()
+        >>> with preserve_cwd():
+        ...     os.chdir('..')
+        >>> before == os.getcwd()
+        True
+    """
     cwd = os.getcwd()
     yield
     os.chdir(cwd)
 
 
 def preserve_cwd_dec(f):
-    """ decorator to preserve current working directory """
+    """ decorator to preserve current working directory
+
+    Usage example:
+        >>> before = os.getcwd()
+        >>> @preserve_cwd_dec
+        ... def foo():
+        ...     os.chdir('..')
+        >>> before == os.getcwd()
+        True
+    """
     @wraps(f)
     def wrap(*args, **kwargs):
         with preserve_cwd():
@@ -53,10 +70,11 @@ def dumpobj(o, double_underscores=0):
 @contextmanager
 def ctx_redirect_io():
     """
-    Usage Example:
-        with ctx_redirect_io() as io_target:
-            print 'how is this for io?'
-        print 'redirected>', repr(io_target.getvalue())
+    Usage example:
+        >>> with ctx_redirect_io() as io_target:
+        ...    print 'how is this for io?'
+        >>> io_target.getvalue().strip()
+        'how is this for io?'
     """
     target = StringIO()
 
@@ -74,12 +92,16 @@ def ctx_redirect_io():
 
 def redirect_io(f):
     """
+    redirect all of the output to standard out to a StringIO instance,
+    which can be accessed as an attribute of the function, f.io_target
+
     Usage Example:
-        @redirect_io
-        def foo(x):
-            print x
-        foo('hello there?')
-        print 'redirected>', foo.io_target.getvalue()
+        >>> @redirect_io
+        ... def foo(x):
+        ...    print x
+        >>> foo('hello?')
+        >>> foo.io_target.getvalue().strip()
+        'hello?'
     """
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -220,14 +242,25 @@ def timelimit(timeout):
     return _1
 
 
+## XXX: This is more of a job for a context manager...
 def assert_throws(exc):
+    """
+    >>> @assert_throws(ZeroDivisionError)
+    ... def foo():
+    ...     1 + 1   # should not raise ZeroDivisionError
+    ...
+    >>> foo()
+    Traceback (most recent call last):
+        ...
+    Exception: TEST: foo did not raise required ZeroDivisionError.
+    """
     def wrap1(f):
         @wraps(f)
         def wrap2(*args, **kwargs):
             try:
                 f(*args, **kwargs)
             except exc, e:
-                print 'pass.'
+                pass
             except Exception, e:
                 print 'function raised a different Exception than required:'
                 raise
@@ -236,7 +269,7 @@ def assert_throws(exc):
                     raise Exception('TEST: %s did not raise required %s.' \
                                         % (f.__name__, exc.__name__))
                 else:
-                    print 'pass.'
+                    pass
         return wrap2
     return wrap1
 
@@ -266,15 +299,12 @@ if __name__ == '__main__':
 
     def run_tests():
 
-        def nasty_function():
-            os.chdir('..')
-            os.chdir('..')
-
         def test_cwd_ctx_manager():
             print 'test_cwd_ctx_manager:'
             before = os.getcwd()
             with preserve_cwd():
-                nasty_function()
+                os.chdir('..')
+                os.chdir('..')
             assert before == os.getcwd()
             print 'pass.'
 
@@ -282,7 +312,8 @@ if __name__ == '__main__':
             print 'test_preserve_cwd_dec:'
             @preserve_cwd_dec
             def foo():
-                nasty_function()
+                os.chdir('..')
+                os.chdir('..')
             cwd_before = os.getcwd()
             foo()
             assert os.getcwd() == cwd_before
@@ -326,4 +357,8 @@ if __name__ == '__main__':
         foo(msg)
         assert str(foo.io_target.getvalue().strip()) == msg
 
+if __name__ == '__main__':
     run_tests()
+
+    import doctest
+    doctest.testmod()

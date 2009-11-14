@@ -11,13 +11,17 @@ import os
 import re
 import sys
 
+
+## TODO: add support for autoreload
+
+
 def setup():
     """ Set-up some interactive features """
 
     __builtins__._H = [None]
     class Prompt:
         def __init__(self):
-            self.str = '_H[%d]$ '    #'\001\033[0:1;31m\002h[%d] >>> \001\033[0m\002'
+            self.str = '[%d]$ '    #'\001\033[0:1;31m\002h[%d] >>> \001\033[0m\002'
         def __str__(self):
             if hasattr(__builtins__, '_'):  # initially '_' this is not there.
                 __builtins__._H.append(__builtins__._)

@@ -69,12 +69,16 @@ def dumpobj(o, double_underscores=0):
 
 @contextmanager
 def ctx_redirect_io():
-    """
+    r"""
     Usage example:
         >>> with ctx_redirect_io() as io_target:
         ...    print 'how is this for io?'
-        >>> io_target.getvalue().strip()
-        'how is this for io?'
+        >>> io_target.getvalue()
+        'how is this for io?\n'
+        >>> print io_target.getvalue()   # doctest:+NORMALIZE_WHITESPACE
+        how is this for io?
+        >>>
+
     """
     target = StringIO()
 
@@ -100,8 +104,9 @@ def redirect_io(f):
         ... def foo(x):
         ...    print x
         >>> foo('hello?')
-        >>> foo.io_target.getvalue().strip()
-        'hello?'
+        >>> print foo.io_target.getvalue()    # doctest:+NORMALIZE_WHITESPACE
+        hello?
+        >>>
     """
     @wraps(f)
     def wrap(*args, **kwargs):

@@ -1,3 +1,4 @@
+stopwords = """
 a
 aboard
 about
@@ -197,3 +198,4 @@ you-all
 yours
 yourself
 yourselves
+"""

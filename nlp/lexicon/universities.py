@@ -7,6 +7,9 @@ Taken from University of Florida's Index of American Universities
 TODO:
     * add list of Canadian universities <http://www.uwaterloo.ca/canu/>
     * add list of international univerisities: http://www.findaschool.org/
+
+    **** CLEAN UP HTML ENTITIES! *****
+
 """
 
 def update_list(output_file):
@@ -1409,13 +1412,13 @@ universities = [
     ['http://www.tntech.edu/', 'Tennessee Technological University'],
     ['http://www.tntemple.edu/', 'Tennessee Temple University'],
     ['http://www.twcnet.edu/', 'Tennessee Wesleyan College'],
-    ['http://www.tamiu.edu/', 'Texas A&amp;M International University'],
-    ['http://www.tamu.edu/', 'Texas A&amp;M University'],
-    ['http://www.tamu-commerce.edu', 'Texas A&amp;M University, Commerce'],
-    ['http://www.tamucc.edu/', 'Texas A&amp;M University, Corpus Christi'],
-    ['http://www.tamug.edu/', 'Texas A&amp;M University, Galveston'],
-    ['http://www.tamuk.edu/', 'Texas A&amp;M University, Kingsville'],
-    ['http://www.tamut.edu/', 'Texas A&amp;M University, Texarkana'],
+    ['http://www.tamiu.edu/', 'Texas A&M International University'],
+    ['http://www.tamu.edu/', 'Texas A&M University'],
+    ['http://www.tamu-commerce.edu', 'Texas A&M University, Commerce'],
+    ['http://www.tamucc.edu/', 'Texas A&M University, Corpus Christi'],
+    ['http://www.tamug.edu/', 'Texas A&M University, Galveston'],
+    ['http://www.tamuk.edu/', 'Texas A&M University, Kingsville'],
+    ['http://www.tamut.edu/', 'Texas A&M University, Texarkana'],
     ['http://www.texaschiro.edu', 'Texas Chiropractic College'],
     ['http://www.tcu.edu/', 'Texas Christian University'],
     ['http://www.txlutheran.edu/', 'Texas Lutheran University'],
@@ -1784,12 +1787,12 @@ universities = [
     ['http://www.wts.edu/', 'Westminster Theological Seminary'],
     ['http://www.wtscal.edu/', 'Westminster Theological Seminary in California'],
     ['http://www.westmont.edu/', 'Westmont College'],
-    ['http://www.westwoodcollegecalifornia.com/', 'Westwood College &#8212; California'],
-    ['http://www.westwoodcollegecolorado.com/', 'Westwood College &#8212; Colorado'],
-    ['http://www.westwoodcollegegeorgia.com/', 'Westwood College &#8212; Georgia'],
-    ['http://www.westwoodcollegeillinois.com/', 'Westwood College &#8212; Illinois'],
-    ['http://www.westwoodcollegetexas.com/', 'Westwood College &#8212; Texas'],
-    ['http://www.westwoodcollegevirginia.com/', 'Westwood College &#8212; Virginia'],
+    ['http://www.westwoodcollegecalifornia.com/', 'Westwood College - California'],
+    ['http://www.westwoodcollegecolorado.com/', 'Westwood College - Colorado'],
+    ['http://www.westwoodcollegegeorgia.com/', 'Westwood College - Georgia'],
+    ['http://www.westwoodcollegeillinois.com/', 'Westwood College - Illinois'],
+    ['http://www.westwoodcollegetexas.com/', 'Westwood College - Texas'],
+    ['http://www.westwoodcollegevirginia.com/', 'Westwood College - Virginia'],
     ['http://www.westwood.edu/', 'Westwood College of Technology'],
     ['http://www.wheaton.edu/', 'Wheaton College, Wheaton Illinois'],
     ['http://www.wheatonma.edu/', 'Wheaton College, Massachusetts'],

@@ -1,3 +1,5 @@
+# dist.male.first_USCensus1990.lower
+male_names = """
 James
 John
 Robert
@@ -1217,3 +1219,7 @@ Dorsey
 Darell
 Broderick
 Alonso
+"""
+
+
+

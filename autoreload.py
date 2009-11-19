@@ -1,34 +1,25 @@
-# Autoreloading launcher.
-# Borrowed from Peter Hunt and the CherryPy project (http://www.cherrypy.org).
-# Some taken from Ian Bicking's Paste (http://pythonpaste.org/).
-#
-# Portions copyright (c) 2004, CherryPy Team (team@cherrypy.org)
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without modification,
-# are permitted provided that the following conditions are met:
-#
-#     * Redistributions of source code must retain the above copyright notice,
-#       this list of conditions and the following disclaimer.
-#     * Redistributions in binary form must reproduce the above copyright notice,
-#       this list of conditions and the following disclaimer in the documentation
-#       and/or other materials provided with the distribution.
-#     * Neither the name of the CherryPy Team nor the names of its contributors
-#       may be used to endorse or promote products derived from this software
-#       without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import os
+import sys
+import time
 
-import os, sys, time
+__doc__ = """
+
+usage:
+
+    >>> with file('watch_me.py', 'wb') as f:
+    ...     f.write('f = lambda : "hello there!"')
+    >>> import autoreload
+    >>> import watch_me
+    >>> autoreload.start_reloader(watch_me, quiet=True)
+    >>> with file('watch_me.py', 'wb') as f:
+    ...     f.write('f = lambda : "new message :-)"')
+    >>> import time; time.sleep(2)  # give it a few seconds...
+    >>> msg = watch_me.f()
+    >>> print msg
+    new message :-)
+
+"""
+
 
 try:
     import thread
@@ -42,25 +33,17 @@ try:
 except ImportError:
     pass
 
-RUN_RELOADER = True
-
 _mtimes = {}
 _win = (sys.platform == "win32")
 
-##def code_changed():
-##    global _mtimes, _win
-##    for filename in filter(lambda v: v, map(lambda m: getattr(m, "__file__", None), sys.modules.values())):
-##        if filename.endswith(".pyc") or filename.endswith(".pyo"):
-##            filename = filename[:-1]
-##        if not os.path.exists(filename):
-##            continue # File might be in an egg, so it can't be reloaded.
-##        if file_changed(filename):
-##            return True
-##    return False
-
 
 def file_changed(filename):
-    global _mtimes, _win
+    global _mtimes
+    global _win
+
+    if not os.path.exists(filename):
+        # print 'file doens't exist...'
+        return False
 
     stat = os.stat(filename)
     mtime = stat.st_mtime
@@ -75,61 +58,56 @@ def file_changed(filename):
     return False
 
 
-def reloader_thread(hook=lambda : sys.exit(3)):
-    while RUN_RELOADER:
-        #if code_changed():
-        hook()
-        time.sleep(1)
-
 def start_reloader(mod):
-    def reload_hookin():
-        if file_changed(mod.__file__):
-            print 'reloaded:', mod.__file__
-            globals()[mod.__name__] = reload(mod)
-    thread.start_new_thread(reloader_thread, (reload_hookin,))
+
+    def reloader_thread():
+        f = mod.__file__
+        if f.endswith('.pyc') or f.endswith('.pyo'):
+            f = f[0:-1]
+        print 'watching file:', f, 'module:', mod.__name__
+        while True:
+            if file_changed(f) or file_changed(mod.__file__):
+                print 'file %s changed.' % f
+                try:
+                    print 'reloading module named:', mod.__name__
+                    globals()[mod.__name__] = reload(mod)
+                except:
+                    print 'error in:', f, '... ignoring reload.'
+
+            time.sleep(1)
+        print 'thread done...'
+
+    thread.start_new_thread(reloader_thread, tuple())
 
 
-##def restart_with_reloader():
-##    while True:
-##        args = [sys.executable] + sys.argv
-##        if sys.platform == "win32":
-##            args = ['"%s"' % arg for arg in args]
-##        new_environ = os.environ.copy()
-##        new_environ["RUN_MAIN"] = 'true'
-##        exit_code = os.spawnve(os.P_WAIT, sys.executable, args, new_environ)
-##        if exit_code != 3:
-##            return exit_code
-##
-##def python_reloader(main_func, args, kwargs):
-##    if os.environ.get("RUN_MAIN") == "true":
-##        thread.start_new_thread(main_func, args, kwargs)
-##        try:
-##            reloader_thread()
-##        except KeyboardInterrupt:
-##            pass
-##    else:
-##        try:
-##            sys.exit(restart_with_reloader())
-##        except KeyboardInterrupt:
-##            pass
-##
-##def jython_reloader(main_func, args, kwargs):
-##    from _systemrestart import SystemRestart
-##    thread.start_new_thread(main_func, args)
-##    while True:
-##        if code_changed():
-##            raise SystemRestart
-##        time.sleep(1)
-##
-##
-##def main(main_func, args=None, kwargs=None):
-##    if args is None:
-##        args = ()
-##    if kwargs is None:
-##        kwargs = {}
-##    if sys.platform.startswith('java'):
-##        reloader = jython_reloader
-##    else:
-##        reloader = python_reloader
-##    reloader(main_func, args, kwargs)
-##
+
+### BROKEN: (!)
+if __name__ == '__main__':
+
+    with file('watch_me.py', 'wb') as f:
+        f.write('f = lambda : "old message"')
+
+    import watch_me
+    start_reloader(watch_me)
+
+    b4 = watch_me.f()
+    print b4
+
+    #os.remove('watch_me.py')
+    with file('watch_me.py', 'wb') as f:
+        f.write('f = lambda : "new message :-)"')
+    #os.remove('watch_me.pyc')
+    time.sleep(5)  # give it a few seconds...
+
+#x    watch_me = reload(watch_me)
+
+    msg = watch_me.f()
+    print msg
+
+
+    try:
+        os.remove('watch_me.py')
+        os.remove('watch_me.pyc')
+    except OSError:
+        pass
+

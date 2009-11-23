@@ -67,18 +67,18 @@ def start_reloader(mod):
         print 'watching file:', f, 'module:', mod.__name__
         while True:
             if file_changed(f) or file_changed(mod.__file__):
-                print 'file %s changed.' % f
+                #print 'file %s changed.' % f
                 try:
-                    print 'reloading module named:', mod.__name__
+                    #print 'reloading module named:', mod.__name__
                     globals()[mod.__name__] = reload(mod)
-                except:
+                except Exception as e:
                     print 'error in:', f, '... ignoring reload.'
+                    print e
 
             time.sleep(1)
         print 'thread done...'
 
     thread.start_new_thread(reloader_thread, tuple())
-
 
 
 ### BROKEN: (!)

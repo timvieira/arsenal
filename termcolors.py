@@ -66,3 +66,15 @@ def make_style(opts=(), **kwargs):
         COMMENT = make_style(fg='blue', opts=('bold',))
     """
     return lambda text: colorize(text, opts, **kwargs)
+
+
+if __name__ == '__main__':
+    
+    colorize('hello', fg='red', bg='blue', opts=('blink',))
+    colorize()
+    colorize('goodbye', opts=('underscore',))
+    print colorize('first line', fg='red', opts=('noreset',))
+    print 'this should be red too'
+    print colorize('and so should this')
+    print 'this should not be red'
+

@@ -21,7 +21,8 @@ def setup():
     __builtins__._H = [None]
     class Prompt:
         def __init__(self):
-            self.str = '[%d]$ '    #'\001\033[0:1;31m\002h[%d] >>> \001\033[0m\002'
+            self.str = '[%d]$ '
+            #self.str = '\001\033[0:1;31m\002h[%d] >>> \001\033[0m\002'
         def __str__(self):
             if hasattr(__builtins__, '_'):  # initially '_' this is not there.
                 __builtins__._H.append(__builtins__._)

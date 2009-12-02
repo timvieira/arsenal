@@ -550,7 +550,7 @@ Chuck
 Damian
 Reuben
 Stan
-August
+#August
 Leonardo
 Jasper
 Russel
@@ -601,7 +601,7 @@ Carey
 Rod
 Quinton
 Hal
-Brain
+#Brain
 Rob
 Elwood
 Kendrick
@@ -752,7 +752,7 @@ Landon
 Dirk
 Branden
 Adan
-Numbers
+#Numbers
 Clair
 Buford
 German
@@ -806,7 +806,7 @@ Duncan
 Kennith
 Carmine
 Augustine
-Young
+#Young
 Erich
 Chadwick
 Wilburn
@@ -988,7 +988,7 @@ Rupert
 Rolland
 Kenton
 Damion
-Chi
+#Chi
 Antone
 Waldo
 Fredric
@@ -1054,7 +1054,7 @@ Raleigh
 Lawerence
 Abram
 Rashad
-King
+#King
 Emmitt
 Daron
 Chong
@@ -1071,7 +1071,7 @@ Buster
 Antonia
 Wilber
 Renato
-Jc
+#Jc
 Hoyt
 Haywood
 Ezekiel
@@ -1090,7 +1090,7 @@ Nathanial
 Jordon
 Danilo
 Claud
-Val
+#Val
 Sherwood
 Raymon
 Rayford
@@ -1103,7 +1103,7 @@ Ezequiel
 Erasmo
 Stanton
 Lonny
-Len
+#Len
 Ike
 Milan
 Lino
@@ -1121,7 +1121,7 @@ Ellsworth
 Virgilio
 Toney
 Nathanael
-Del
+#Del
 Britt
 Benedict
 Mose
@@ -1132,7 +1132,7 @@ Isreal
 Gayle
 Garret
 Fausto
-Asa
+#Asa
 Arlen
 Zack
 Warner
@@ -1156,7 +1156,7 @@ Cristopher
 Cortez
 Antione
 Malcom
-Long
+#Long
 Korey
 Jospeh
 Colton
@@ -1175,7 +1175,7 @@ Lesley
 Kristofer
 Boyce
 Benton
-Man
+#Man
 Kasey
 Jewell
 Hayden
@@ -1222,4 +1222,17 @@ Alonso
 """
 
 
+
+if __name__ == '__main__':
+    names = map(str.strip, male_names.split())
+
+    with file('/home/timv/projects/python-extras/nlp/lexicon/english-words.txt','r') as f:
+        words = frozenset(map(str.strip, f.xreadlines()))
+        
+        print 'loaded %s words' % len(words)
+        print 'loaded %s names' % len(names)
+
+        for name in names:
+            if name.lower() in words:
+                print name
 

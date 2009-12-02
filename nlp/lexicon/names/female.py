@@ -88,7 +88,7 @@ Jacqueline
 Wanda
 Bonnie
 Julia
-Ruby
+#Ruby
 Lois
 Tina
 Phyllis
@@ -140,7 +140,7 @@ Hazel
 Amber
 Eva
 Debbie
-April
+#April
 Leslie
 Clara
 Lucille
@@ -174,7 +174,7 @@ Bernice
 Audrey
 Yvonne
 Annette
-June
+#June
 Samantha
 Marion
 Dana
@@ -216,19 +216,19 @@ Kristin
 Jessie
 Natalie
 Agnes
-Vera
+#Vera
 Willie
 Charlene
 Bessie
 Delores
 Melinda
-Pearl
+#Pearl
 Arlene
 Maureen
 Colleen
 Allison
 Tamara
-Joy
+#Joy
 Georgia
 Constance
 Lillie
@@ -248,7 +248,7 @@ Marian
 Stella
 Caroline
 Dora
-Jo
+#Jo
 Vickie
 Mattie
 Terry
@@ -270,7 +270,7 @@ Nina
 Cassandra
 Leah
 Penny
-Kay
+#Kay
 Priscilla
 Naomi
 Carole
@@ -290,7 +290,7 @@ Bobbie
 Violet
 Kristina
 Toni
-Misty
+#Misty
 Mae
 Shelly
 Daisy
@@ -308,7 +308,7 @@ Margarita
 Sheryl
 Cora
 Faye
-Ada
+#Ada
 Natasha
 Sabrina
 Isabel
@@ -425,8 +425,8 @@ Rosemarie
 Angel
 Desiree
 Antonia
-Hope
-Ginger
+#Hope
+#Ginger
 Janis
 Betsy
 Christie
@@ -436,7 +436,7 @@ Meredith
 Lynette
 Teri
 Cristina
-Eula
+#Eula
 Leigh
 Meghan
 Sophia
@@ -454,7 +454,7 @@ Kerry
 Jenna
 Tricia
 Laverne
-Olive
+#Olive
 Alexis
 Tasha
 Silvia
@@ -470,7 +470,7 @@ Sonja
 Lila
 Lana
 Darla
-May
+#May
 Mindy
 Essie
 Mandy
@@ -482,7 +482,7 @@ Miranda
 Dixie
 Lucia
 Marta
-Faith
+#Faith
 Lela
 Johanna
 Shari
@@ -492,7 +492,7 @@ Shawna
 Elisa
 Ebony
 Melba
-Ora
+#Ora
 Nettie
 Tabitha
 Ollie
@@ -520,7 +520,7 @@ Cheri
 Shelby
 Abigail
 Celeste
-Jewel
+#Jewel
 Cara
 Adele
 Rebekah
@@ -597,7 +597,7 @@ Carolina
 Cleo
 Stefanie
 Rosario
-Ola
+#Ola
 Janine
 Mollie
 Lupe
@@ -658,7 +658,7 @@ Claudette
 Cathleen
 Angelia
 Gabrielle
-Autumn
+#Autumn
 Katharine
 Summer
 Jodie
@@ -740,14 +740,14 @@ Brianna
 Rosalyn
 Earline
 Catalina
-Ava
+#Ava
 Mia
 Clarissa
 Lidia
 Corrine
 Alexandria
 Concepcion
-Tia
+#Tia
 Sharron
 Rae
 Dona
@@ -793,7 +793,7 @@ Rosalinda
 Jordan
 Lilia
 Alana
-Gay
+#Gay
 Clare
 Alejandra
 Elinor
@@ -817,7 +817,6 @@ Selena
 Tanisha
 Katy
 Julianne
-John
 Lakisha
 Edwina
 Maricela
@@ -836,7 +835,6 @@ Tammi
 Suzette
 Corine
 Kaye
-Jerry
 Merle
 Chrystal
 Lina
@@ -855,7 +853,6 @@ Yesenia
 Nadia
 Madge
 Kathie
-Eddie
 Ophelia
 Valeria
 Nona
@@ -921,7 +918,7 @@ Aisha
 Wilda
 Karyn
 Cherry
-Queen
+#Queen
 Maura
 Mai
 Evangelina
@@ -1019,7 +1016,7 @@ Antionette
 Margot
 Bobby
 Adelaide
-Nan
+#Nan
 Leeann
 Elisha
 Dessie
@@ -1034,7 +1031,7 @@ Jasmin
 Renae
 Zelda
 Elda
-Ma
+#Ma
 Justina
 Gussie
 Emilie
@@ -1054,7 +1051,7 @@ Michaela
 Dayna
 Caryn
 Rosalia
-Sun
+#Sun
 Jacquline
 Rebeca
 Marybeth
@@ -1150,12 +1147,12 @@ Adelina
 Vernice
 Shiela
 Portia
-Merry
+#Merry
 Lashawn
 Devon
 Dara
 Tawana
-Oma
+#Oma
 Verda
 Christin
 Alene
@@ -1178,7 +1175,7 @@ Madonna
 Larissa
 Vesta
 Renita
-India
+#India
 Delois
 Shanda
 Phillis
@@ -1256,8 +1253,8 @@ Charles
 Zenaida
 Harriette
 Caridad
-Vada
-Una
+#Vada
+#Una
 Aretha
 Pearline
 Marjory
@@ -1303,7 +1300,7 @@ Stacia
 Roxann
 Micaela
 Nikita
-Mei
+#Mei
 Velda
 Marlys
 Johnna
@@ -1347,7 +1344,6 @@ Tiana
 Roma
 Richelle
 Ray
-Princess
 Oleta
 Jacque
 Idella
@@ -1375,14 +1371,12 @@ Shantel
 Belen
 Venessa
 Rosalina
-Ona
 Genoveva
 Corey
 Clementine
 Rosalba
 Renate
 Renata
-Mi
 Ivory
 Georgianna
 Floy
@@ -1414,7 +1408,7 @@ Twyla
 Precious
 Nedra
 Latonia
-Lan
+#Lan
 Hellen
 Fabiola
 Annamarie
@@ -1425,7 +1419,7 @@ Niki
 Maud
 Lizette
 Lindy
-Kia
+#Kia
 Kesha
 Jeana
 Danelle
@@ -1433,17 +1427,17 @@ Charline
 Chanel
 Carrol
 Valorie
-Lia
+#Lia
 Dortha
 Cristal
-Sunny
+#Sunny
 Leone
 Leilani
 Gerri
 Debi
 Andra
 Keshia
-Ima
+#Ima
 Eulalia
 Easter
 Dulce
@@ -1471,8 +1465,8 @@ Shanta
 Mickey
 Latosha
 Carlotta
-Windy
-Soon
+#Windy
+#Soon
 Rosina
 Mariann
 Leisa
@@ -1515,7 +1509,7 @@ Lyndsey
 Kendall
 Janina
 Chrissy
-Ami
+#Ami
 Starla
 Phylis
 Phuong
@@ -1545,7 +1539,7 @@ Candelaria
 Tony
 Toby
 Sherie
-Ok
+#Ok
 Mark
 Lucie
 Leatrice
@@ -1588,8 +1582,8 @@ Magnolia
 Lida
 Kyle
 Joellen
-Era
-Coral
+#Era
+#Coral
 Carleen
 Tresa
 Peggie
@@ -1598,7 +1592,7 @@ Nila
 Maybelle
 Jenelle
 Carina
-Nova
+#Nova
 Melina
 Marquerite
 Margarette
@@ -1671,8 +1665,8 @@ Melony
 Kori
 Jennette
 Jamila
-Ena
-Anh
+#Ena
+#Anh
 Yoshiko
 Susannah
 Salina
@@ -1700,7 +1694,7 @@ Kandice
 Kandi
 Deb
 Dean
-America
+#America
 Alycia
 Tommy
 Ronna
@@ -1713,8 +1707,8 @@ Gemma
 Christel
 Audry
 Zora
-Vita
-Van
+#Vita
+#Van
 Trish
 Stephaine
 Shirlee
@@ -1723,13 +1717,13 @@ Melonie
 Mazie
 Jazmin
 Inga
-Hoa
+#Hoa
 Hettie
 Geralyn
 Fonda
 Estrella
 Adella
-Su
+#Su
 Sarita
 Rina
 Milissa
@@ -1833,7 +1827,7 @@ Wanita
 Shirly
 Rosaura
 Hulda
-Eun
+#Eun
 Bailey
 Yetta
 Verona
@@ -1841,7 +1835,7 @@ Thomasina
 Sibyl
 Shannan
 Mechelle
-Lue
+#Lue
 Leandra
 Lani
 Kylee
@@ -1862,7 +1856,7 @@ Hortensia
 Gaynell
 Cameron
 Adria
-Vina
+#Vina
 Vicenta
 Tangela
 Stephine
@@ -1872,7 +1866,7 @@ Liana
 Leslee
 Kimberely
 Iliana
-Glory
+#Glory
 Felica
 Emogene
 Elfriede
@@ -1888,7 +1882,7 @@ Jacalyn
 Carlota
 Arielle
 Yu
-Star
+#Star
 Otilia
 Kirstin
 Kacey
@@ -1949,10 +1943,10 @@ Asha
 Angella
 Paola
 Ninfa
-Leda
-Lai
-Eda
-Sunshine
+#Leda
+#Lai
+#Eda
+#Sunshine
 Stefani
 Shanell
 Palma
@@ -1964,7 +1958,7 @@ Karlene
 Julissa
 Jettie
 Jenniffer
-Hui
+#Hui
 Corrina
 Christopher
 Carolann
@@ -1977,7 +1971,7 @@ Liane
 Kenyatta
 Judie
 Janey
-In
+#In
 Elmira
 Eldora
 Denna
@@ -2046,8 +2040,8 @@ Zenobia
 Sharen
 Sharee
 Patrick
-Page
-My
+#Page
+#My
 Lavinia
 Kum
 Kacie
@@ -2114,10 +2108,10 @@ Adelle
 Tiffiny
 Stormy
 Simona
-Numbers
+#Numbers
 Nicolasa
 Nichol
-Nia
+#Nia
 Nakisha
 Mee
 Maira
@@ -2141,7 +2135,7 @@ Irmgard
 Idell
 Hilma
 Evelina
-Esta
+#Esta
 Emilee
 Dennise
 Dania
@@ -2166,7 +2160,7 @@ Florencia
 Dorian
 Denita
 Dallas
-Chi
+#Chi
 Billye
 Alexander
 Tomika
@@ -2190,12 +2184,12 @@ Violette
 Vannessa
 Thresa
 Retta
-Pia
+#Pia
 Patience
 Noella
 Nickie
 Jonell
-Delta
+#Delta
 Chung
 Chaya
 Camelia
@@ -2274,7 +2268,7 @@ Shane
 Serina
 Rayna
 Ramonita
-Nga
+#Nga
 Margurite
 Lucrecia
 Kourtney
@@ -2298,7 +2292,7 @@ Jolie
 Jessi
 Janessa
 Hana
-Ha
+#Ha
 Elease
 Carletta
 Britany
@@ -2322,7 +2316,7 @@ Emmy
 Deeann
 Coretta
 Arnetta
-Velvet
+#Velvet
 Thalia
 Shanice
 Neta
@@ -2356,7 +2350,7 @@ Shawnee
 Shaneka
 Quiana
 Pamelia
-Min
+#Min
 Merri
 Merlene
 Margit
@@ -2367,7 +2361,7 @@ Jodee
 Jenise
 Erlene
 Emmie
-Else
+#Else
 Daryl
 Dalila
 Daisey
@@ -2408,7 +2402,7 @@ Trinity
 Tamala
 Stevie
 Shonna
-Sha
+#Sha
 Sarina
 Oneida
 Micah
@@ -2419,7 +2413,7 @@ Lenna
 Katherin
 Jin
 Jeni
-Hae
+#Hae
 Gracia
 Glady
 Farah
@@ -2437,7 +2431,7 @@ Alethia
 Vena
 Theresia
 Tawny
-Song
+#Song
 Shakira
 Samara
 Sachiko
@@ -2481,7 +2475,7 @@ Myrtie
 Mckenzie
 Malika
 Maida
-Loan
+#Loan
 Leonarda
 Kayleigh
 France
@@ -2506,7 +2500,7 @@ Santana
 Meghann
 Manda
 Macie
-Lady
+#Lady
 Kellye
 Kellee
 Joslyn
@@ -2519,9 +2513,9 @@ Fernanda
 Faustina
 Eneida
 Elicia
-Dot
-Digna
-Dell
+#Dot
+#Digna
+#Dell
 Arletta
 Andre
 Willia
@@ -2624,13 +2618,13 @@ Chantell
 Cathey
 Arnita
 Arla
-Angle
+#Angle
 Angelic
 Alyse
 Zofia
 Thomasine
 Tennie
-Son
+#Son
 Sherly
 Sherley
 Sharyl
@@ -2643,7 +2637,7 @@ Mozella
 Louanne
 Lisha
 Latia
-Lane
+#Lane
 Krysta
 Julienne
 Joel
@@ -2660,13 +2654,13 @@ Antonietta
 Alise
 Alex
 Verdell
-Val
+#Val
 Tyler
 Tomoko
 Thao
 Talisha
 Steven
-So
+#So
 Shemika
 Shaun
 Scarlet
@@ -2679,14 +2673,14 @@ Nana
 Minna
 Magan
 Lynelle
-Le
-Karma
+#Le
+#Karma
 Joeann
 Ivana
 Inell
 Ilana
 Hye
-Honey
+#Honey
 Hee
 Gudrun
 Frank
@@ -2736,7 +2730,7 @@ Yang
 Willette
 Vanita
 Tuyet
-Tiny
+#Tiny
 Syreeta
 Silva
 Scott
@@ -2776,8 +2770,8 @@ Nerissa
 Micheal
 Meridith
 Mellie
-Maye
-Maple
+#Maye
+#Maple
 Magaret
 Luis
 Lili
@@ -2988,12 +2982,12 @@ Jen
 Janay
 Jacquiline
 Hilde
-Fe
+#Fe
 Fae
 Evan
 Eugene
 Elois
-Echo
+#Echo
 Devorah
 Chau
 Brinda
@@ -3014,7 +3008,7 @@ Rudy
 Renetta
 Reiko
 Rasheeda
-Omega
+#Omega
 Obdulia
 Mika
 Melaine
@@ -3032,7 +3026,7 @@ Latashia
 Lasandra
 Kelle
 Isidra
-Isa
+#Isa
 Inocencia
 Gwyn
 Francoise
@@ -3074,7 +3068,7 @@ Loris
 Lizzette
 Leisha
 Kaila
-Ka
+#Ka
 Joannie
 Jerrica
 Jene
@@ -3087,7 +3081,7 @@ Doretta
 Delaine
 Daniell
 Claudie
-China
+#China
 Britta
 Apolonia
 Amberly
@@ -3132,7 +3126,7 @@ Ivelisse
 Glynis
 Gianna
 Gaynelle
-Emerald
+#Emerald
 Demetrius
 Danyell
 Danille
@@ -3141,7 +3135,7 @@ Coralee
 Cher
 Ceola
 Brett
-Bell
+#Bell
 Arianne
 Aleshia
 Yung
@@ -3184,7 +3178,7 @@ Bernardine
 Becki
 Arletha
 Argelia
-Ara
+#Ara
 Alita
 Yulanda
 Yon
@@ -3242,7 +3236,7 @@ Sharie
 Shanae
 Sau
 Raisa
-Pa
+#Pa
 Neda
 Mitsuko
 Mirella
@@ -3290,7 +3284,7 @@ Viki
 Valrie
 Tona
 Tinisha
-Thi
+#Thi
 Terisa
 Tatum
 Taneka
@@ -3299,13 +3293,13 @@ Shalanda
 Serita
 Ressie
 Refugia
-Paz
+#Paz
 Olene
-Na
+#Na
 Merrill
 Margherita
 Mandie
-Man
+#Man
 Maire
 Lyndia
 Luci
@@ -3331,7 +3325,7 @@ Deon
 Deloise
 Deedee
 Dannie
-Conception
+#Conception
 Clora
 Cherilyn
 Chang
@@ -3372,18 +3366,18 @@ Leon
 Lavenia
 Laurinda
 Lashon
-Kit
+#Kit
 Kimi
 Keila
 Katelynn
 Kai
 Jone
 Joane
-Ji
+#Ji
 Jayna
 Janella
-Ja
-Hue
+#Ja
+#Hue
 Hertha
 Francene
 Elinore
@@ -3396,7 +3390,7 @@ Carolin
 Carlos
 Bulah
 Brittanie
-Bok
+#Bok
 Blondell
 Bibi
 Beaulah
@@ -3405,7 +3399,7 @@ Annita
 Agripina
 Virgen
 Valene
-Un
+#Un
 Twanda
 Tommye
 Toi
@@ -3476,8 +3470,8 @@ Onita
 Nisha
 Niesha
 Nida
-Nevada
-Nam
+#Nevada
+#Nam
 Merlyn
 Mayola
 Marylouise
@@ -3542,13 +3536,13 @@ Rosamaria
 Priscila
 Olinda
 Nadene
-Muoi
+#Muoi
 Michelina
 Mercedez
 Maryrose
 Marin
 Marcene
-Mao
+#Mao
 Magali
 Mafalda
 Logan
@@ -3566,7 +3560,7 @@ Iraida
 Gerald
 Georgeanna
 Franchesca
-Fairy
+#Fairy
 Emeline
 Elane
 Ehtel
@@ -3584,7 +3578,7 @@ Brian
 Bethanie
 Ayako
 Arica
-An
+#An
 Alysa
 Alessandra
 Akilah
@@ -3667,9 +3661,9 @@ Azzie
 Andera
 Aiko
 Adena
-Yer
+#Yer
 Yajaira
-Wan
+#Wan
 Vania
 Ulrike
 Toshia
@@ -3682,7 +3676,7 @@ Sharolyn
 Sharilyn
 Shaquana
 Shantay
-See
+#See
 Rozanne
 Roselee
 Rickie
@@ -3722,10 +3716,10 @@ Herma
 Helaine
 Gwyneth
 Glenn
-Gita
+#Gita
 Eustolia
 Emelina
-Elin
+#Elin
 Edris
 Donnette
 Donnetta
@@ -3760,7 +3754,7 @@ Tobie
 Tempie
 Sumiko
 Sulema
-Sparkle
+#Sparkle
 Somer
 Sheba
 Shayne
@@ -3774,14 +3768,14 @@ Roselia
 Renay
 Rema
 Reena
-Porsche
+#Porsche
 Ping
 Peg
 Ozie
 Oretha
 Oralee
 Oda
-Nu
+#Nu
 Ngan
 Nakesha
 Milly
@@ -3846,7 +3840,7 @@ Torie
 Tonisha
 Tilda
 Tien
-Temple
+#Temple
 Sirena
 Sherril
 Shanti
@@ -3861,7 +3855,7 @@ Paulita
 Nobuko
 Nguyet
 Neomi
-Moon
+#Moon
 Mikaela
 Melania
 Maximina
@@ -3892,9 +3886,9 @@ Eleonora
 Dwana
 Dorla
 Dong
-Delmy
-Deja
-Dede
+#Delmy
+#Deja
+#Dede
 Dann
 Crysta
 Clelia
@@ -3906,7 +3900,7 @@ Cherelle
 Charmain
 Chara
 Cammy
-Bee
+#Bee
 Arnette
 Ardelle
 Annika
@@ -3928,14 +3922,14 @@ Temika
 Telma
 Teisha
 Taren
-Ta
+#Ta
 Stacee
 Shin
 Shawnta
 Saturnina
 Ricarda
-Pok
-Pasty
+#Pok
+#Pasty
 Onie
 Nubia
 Mora
@@ -3944,7 +3938,7 @@ Marielle
 Mariella
 Marianela
 Mardell
-Many
+#Many
 Luanna
 Loise
 Lisabeth
@@ -3978,7 +3972,7 @@ Donette
 Delcie
 Deeanna
 Darcey
-Cuc
+#Cuc
 Clarinda
 Cira
 Chae
@@ -3991,7 +3985,7 @@ Camellia
 Breana
 Bobette
 Bernardina
-Bebe
+#Bebe
 Basilia
 Arlyne
 Amal
@@ -4001,10 +3995,10 @@ Zenia
 Yuriko
 Yaeko
 Wynell
-Willow
+#Willow
 Willena
 Vernia
-Tu
+#Tu
 Travis
 Tora
 Terrilyn
@@ -4014,8 +4008,8 @@ Tawna
 Tajuana
 Taina
 Stephnie
-Sona
-Sol
+#Sona
+#Sol
 Sina
 Shondra
 Shizuko
@@ -4070,7 +4064,7 @@ Elizabet
 Eladia
 Dodie
 Dion
-Dia
+#Dia
 Denisse
 Deloras
 Delila
@@ -4081,7 +4075,7 @@ Crystle
 Concha
 Colby
 Claretta
-Chu
+#Chu
 Christia
 Charlsie
 Charlena
@@ -4090,7 +4084,7 @@ Bettyann
 Asley
 Ashlea
 Amira
-Ai
+#Ai
 Agueda
 Agnus
 Yuette
@@ -4108,7 +4102,7 @@ Shenna
 Sharmaine
 Shantae
 Shandi
-September
+#September
 Saran
 Sarai
 Sana
@@ -4131,7 +4125,7 @@ Mertie
 Margy
 Mahalia
 Madalene
-Love
+#Love
 Loura
 Lorean
 Lewis
@@ -4185,7 +4179,7 @@ Zana
 Wilhemina
 Wanetta
 Virgil
-Vi
+#Vi
 Veronika
 Vernon
 Verline
@@ -4275,3 +4269,19 @@ Angila
 Alona
 Allyn
 """
+
+
+
+if __name__ == '__main__':
+    names = map(str.strip, female_names.split())
+
+    with file('/home/timv/projects/python-extras/nlp/lexicon/english-words.txt','r') as f:
+        words = frozenset(map(str.strip, f.xreadlines()))
+        
+        print 'loaded %s words' % len(words)
+        print 'loaded %s names' % len(names)
+
+        for name in names:
+            if name.lower() in words:
+                print name
+

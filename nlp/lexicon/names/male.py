@@ -1222,17 +1222,3 @@ Alonso
 """
 
 
-
-if __name__ == '__main__':
-    names = map(str.strip, male_names.split())
-
-    with file('/home/timv/projects/python-extras/nlp/lexicon/english-words.txt','r') as f:
-        words = frozenset(map(str.strip, f.xreadlines()))
-        
-        print 'loaded %s words' % len(words)
-        print 'loaded %s names' % len(names)
-
-        for name in names:
-            if name.lower() in words:
-                print name
-

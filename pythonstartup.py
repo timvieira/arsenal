@@ -11,17 +11,18 @@ import os
 import re
 import sys
 
-
 ## TODO: add support for autoreload
-
 
 def setup():
     """ Set-up some interactive features """
 
+    import pprint
+
     __builtins__._H = [None]
     class Prompt:
         def __init__(self):
-            self.str = '[%d]$ '
+            #self.str = '[%d]$ '
+            self.str = '\x1b[30m[\x1b[33m%d\x1b[30m]\x1b[32m$\x1b[30m '
             #self.str = '\001\033[0:1;31m\002h[%d] >>> \001\033[0m\002'
         def __str__(self):
             if hasattr(__builtins__, '_'):  # initially '_' this is not there.
@@ -42,26 +43,39 @@ def setup():
     #sys.excepthook = LazyPython()
     
     # Pretty-print at the command prompt for more readable dicts and lists.
-    from pprint import pprint
     def my_displayhook(val):
         if val is not None:
             __builtins__._ = val
-            pprint(val)
+            pprint.pprint(val)
     sys.displayhook = my_displayhook
 
+    # print errors in red.
+    original_excepthook = sys.excepthook
+    def my_excepthook(*args):
+        sys.stderr.write('\x1b[31m')
+        original_excepthook(*args)
+        sys.stderr.write('\x1b[30m')
+    sys.excepthook = my_excepthook
 
     # Try to set up command history completion, saving, and reloading
     try:
         import readline
     except ImportError:
-        print "Module readline not available."
+        print "\x1b[31mModule readline not available.\x1b[30m"
     else:
         import rlcompleter
-        readline.parse_and_bind("tab: complete")
+        readline.parse_and_bind("tab: complete") 
+
+        #print 'hacking readline...'
+        #import inspect
+        #cmpl = readline.get_completer()
+        #import re
+        #def complete(text, state):
+        #    return cmpl(text, state)
+        #readline.set_completer(complete)
 
         # The place to store your command history between sessions
         histfile = os.environ['HOME'] + '/.python-history'
-
         readline.read_history_file(histfile)
 
         # atexit module does not seem to cover all cases of exiting (at least in cygwin)

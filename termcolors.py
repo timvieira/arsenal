@@ -77,4 +77,3 @@ if __name__ == '__main__':
     print 'this should be red too'
     print colorize('and so should this')
     print 'this should not be red'
-

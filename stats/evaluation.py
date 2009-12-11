@@ -2,6 +2,7 @@ from __future__ import division
 
 from collections import defaultdict
 class F1:
+
     def __init__(self, confusion_matrix=False):
         if confusion_matrix:
             self.confusion_matrix = defaultdict(lambda : defaultdict(int))
@@ -10,12 +11,22 @@ class F1:
         self.n_examples = 0
         self.relevant  = defaultdict(set)
         self.retrieved = defaultdict(set)
+
     def report(self, instance, prediction, target):
         if self.confusion_matrix is not None:
             self.confusion_matrix[target][prediction] += 1
         self.n_examples += 1
-        self.relevant[target].add(instance)
-        self.retrieved[prediction].add(instance)
+        #self.relevant[target].add(instance)
+        #self.retrieved[prediction].add(instance)
+        self.add_relevant(target, instance)
+        self.add_retrieved(prediction, instance)
+
+    def add_relevant(self, label, instance):
+        self.relevant[label].add(instance)
+
+    def add_retrieved(self, label, instance):
+        self.retrieved[label].add(instance)
+
     def scores(self, verbose=True):
         relevant  = self.relevant
         retrieved = self.retrieved

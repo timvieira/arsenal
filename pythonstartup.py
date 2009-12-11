@@ -52,9 +52,10 @@ def setup():
     # print errors in red.
     original_excepthook = sys.excepthook
     def my_excepthook(*args):
-        sys.stderr.write('\x1b[31m')
+        sys.stdout.write('\x1b[31m')
         original_excepthook(*args)
-        sys.stderr.write('\x1b[30m')
+        sys.stdout.write('\x1b[30m')
+        sys.stdout.flush()
     sys.excepthook = my_excepthook
 
     # Try to set up command history completion, saving, and reloading

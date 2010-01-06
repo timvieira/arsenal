@@ -32,9 +32,9 @@ class F1:
         retrieved = self.retrieved
 
         if verbose:
-            print ' =================================='
-            print ' |        |   P   |   R   |   F   |'
-            print ' |================================|'
+            print ' ===================================='
+            print ' |          |   P   |   R   |   F   |'
+            print ' |==================================|'
 
         labels = self.relevant.keys()
         labels.sort()
@@ -53,12 +53,12 @@ class F1:
                 F = 2*P*R / (P + R)
 
             if verbose:
-                print ' | %6s | %5.1f | %5.1f | %5.1f |' % (label, P*100, R*100, F*100)
+                print ' | %8s | %5.1f | %5.1f | %5.1f |' % (label, P*100, R*100, F*100)
 
             yield (label, (P,R,F))
 
         if verbose:
-            print ' =================================='
+            print ' ===================================='
 
     def confusion(self):
         assert self.confusion_matrix is not None

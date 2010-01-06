@@ -90,15 +90,15 @@ opt_dict = {
     'conceal': '8',
 }
 
-#def bold():      o(1)
+# def bold(): o(1)
 for name, key in opt_dict.iteritems():
     exec 'def {name}(): o({key})'.format(name=name, key=key)
 
-# def black():     o(30)
+# def black(): o(30)
 for key, name in enumerate(colors):
     exec 'def {name}(): o(3{key})'.format(name=name, key=key)
 
-# def bgred():     o(41)
+# def bgred(): o(41)
 for key, name in enumerate(colors):
     exec 'def bg{name}(): o(4{key})'.format(name=name, key=key)
 

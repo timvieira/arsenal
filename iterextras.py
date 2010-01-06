@@ -11,6 +11,7 @@ __all__ = ['take', 'tabulate', 'iteritems', 'nth', 'all', 'any', 'no',
 
 def xCross(sets):
     """ take the cartesian product of a bunch of iterables. """
+    sets = list(sets)
     wheels = map(iter, sets) # wheels like in an odometer
     digits = [it.next() for it in wheels]
     while True:
@@ -69,7 +70,6 @@ def iterview(x, every_k=None):
            secs = int((elapsed/n) * (lenx-n))
        mins, secs = divmod(secs, 60)
        hrs, mins = divmod(mins, 60)
-
        return '%02d:%02d:%02d' % (hrs, mins, secs)
 
    def format(starttime, n, lenx):

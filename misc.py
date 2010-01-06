@@ -4,12 +4,43 @@ import re
 import os
 import gc
 import sys
+import pdb
 import time
 import threading
 from functools import wraps, partial
 from itertools import *
 from StringIO import StringIO
 from contextlib import contextmanager
+
+
+
+# TODO:
+# * I see a lot of potential in this function
+#   if might be a good place for code generation and other interesting things
+# * borrow ideas form the "decorator" module
+def decorator(d):
+    """ automatically preserves the-functions-being-decorated's signature 
+    
+    Example:
+    >>> def goo(f): return lambda *args, **kw: f(*args,**kw)
+    >>> def foo(): pass
+    >>> foo.__name__
+    'foo'
+    >>> goo(foo).__name__
+    '<lambda>'
+    >>> goo = decorator(goo)
+    >>> goo(foo).__name__
+    'foo'
+    """
+    @wraps(d)
+    def f1(f):
+        f3 = d(f)
+        @wraps(f)
+        def f2(*args, **kw):
+            return f3(*args, **kw)
+        return f2
+    return f1
+
 
 # the interpreter periodically does some stuff that slows you
 # down if you aren't using threads.
@@ -63,6 +94,16 @@ def dumpobj(o, double_underscores=0):
         except:
             pass
     print ""
+
+def into_debugger(f):
+    """ hops into the pdb (debugger) if the decorated function dies via uncaught exception. """
+    @wraps(f)
+    def f1(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except:
+            pdb.post_mortem()
+    return wrap
 
 #_________________________________________________________________________
 #
@@ -364,6 +405,5 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     run_tests()
+    import doctest; doctest.testmod()
 
-    import doctest
-    doctest.testmod()

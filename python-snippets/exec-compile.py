@@ -10,8 +10,7 @@ def create_something(some_code, name):
 
     # from the python standard library collections module's implementation of namedtuple:
     #   For pickling to work, the __module__ variable needs to be set to the frame
-    #   where the named tuple is created.  Bypass this step in enviroments where
-    #   sys._getframe is not defined (Jython for example).
+    #   where the named tuple is created.
     import sys
     if hasattr(sys, '_getframe'):
         # we need to hack the stack b/c we're inside a function

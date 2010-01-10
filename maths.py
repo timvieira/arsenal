@@ -1,3 +1,4 @@
+from __future__ import division
 from numpy import array, empty, zeros
 import math
 from math import exp as math_exp, log as math_log

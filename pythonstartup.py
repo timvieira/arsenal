@@ -37,8 +37,8 @@ def setup():
         def __radd__(self, other):
             return str(other) + str(self)
 
-    sys.ps1 = Prompt()
-    sys.ps2 = Prompt2()
+#    sys.ps1 = Prompt()
+#    sys.ps2 = Prompt2()
 
     #sys.excepthook = LazyPython()
     

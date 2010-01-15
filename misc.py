@@ -341,6 +341,64 @@ class ondemand(property):
             pass
 
 
+# borrowed from IPython
+def debug_expr(expr, msg=''):
+    """
+    Print the value of an expression from the caller's frame.
+
+    Takes an expression, evaluates it in the caller's frame and prints both
+    the given expression and the resulting value (as well as a debug mark
+    indicating the name of the calling function.  The input must be of a form
+    suitable for eval().
+    """
+    cf = sys._getframe(1)
+    val = eval(expr, cf.f_globals, cf.f_locals)
+    print '[DEBUG:%s] %s%s -> %r' % (cf.f_code.co_name, msg, expr, val)
+
+
+import inspect
+def debugx(obj):
+    """
+    I often write debugging print statements which look like
+
+      >>> somevar = 'somevalue'
+      >>> print 'somevar:', somevar
+      somevar: somevalue
+
+    What this function attempts to do is provide a shortcut
+
+      >>> debugx(somevar)
+      somevar: somevalue
+
+    Warning: this should only be used for debugging because
+    if relies on introspection, which can really slow your
+    program down.
+    """
+
+    cf = sys._getframe(1)
+    ctx_lines = inspect.getframeinfo(cf).code_context
+    code = ''.join(map(str.strip, ctx_lines))
+
+    code = re.sub('debugx\((.*)\)', r'\1', code)
+    print code + ':', obj
+    
+
+def marquee(txt='',width=78,mark='*'):
+    """
+    Return the input string centered in a 'marquee'.
+
+    >>> marquee('hello', width=50)
+    '********************* hello *********************'
+
+    """
+    if not txt:
+        return (mark*width)[:width]
+    nmark = (width-len(txt)-2)/len(mark)/2
+    if nmark < 0: nmark =0
+    marks = mark*nmark
+    return '%s %s %s' % (marks,txt,marks)
+
+
 if __name__ == '__main__':
 
     def run_tests():
@@ -407,3 +465,10 @@ if __name__ == '__main__':
     run_tests()
     import doctest; doctest.testmod()
 
+    x = 15
+    debug_expr('x')
+
+    debugx(x)
+    debugx(x**2 + 2*x + 3)
+    f = lambda x: x**2
+    debugx(f(x))

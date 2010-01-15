@@ -32,6 +32,11 @@ class F1:
         retrieved = self.retrieved
 
         if verbose:
+            #from prettytable import PrettyTable
+            #t = PrettyTable(["","P","R","F"])
+
+            #x.set_field_align("City name", "l") # Left align city names
+        
             print ' ===================================='
             print ' |          |   P   |   R   |   F   |'
             print ' |==================================|'
@@ -54,11 +59,14 @@ class F1:
 
             if verbose:
                 print ' | %8s | %5.1f | %5.1f | %5.1f |' % (label, P*100, R*100, F*100)
+                #t.add_row([label, P*100, R*100, F*100])
 
             yield (label, (P,R,F))
 
         if verbose:
             print ' ===================================='
+            #print t
+
 
     def confusion(self):
         assert self.confusion_matrix is not None

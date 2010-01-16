@@ -106,8 +106,7 @@ LightBGColors = ColorScheme(
     }  )
 
 # Build table of color schemes (needed by the parser)
-ANSICodeColors = ColorSchemeTable([NoColor,LinuxColors,LightBGColors],
-                                  _scheme_default)
+ANSICodeColors = ColorSchemeTable([NoColor,LinuxColors,LightBGColors], _scheme_default)
 
 class Parser:
     """ Format colored Python source.

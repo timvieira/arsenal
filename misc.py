@@ -16,7 +16,7 @@ from contextlib import contextmanager
 
 # TODO:
 # * I see a lot of potential in this function
-#   if might be a good place for code generation and other interesting things
+#   it might be a good place for code generation and other interesting things
 # * borrow ideas form the "decorator" module
 def decorator(d):
     """ automatically preserves the-functions-being-decorated's signature 
@@ -230,6 +230,65 @@ class memoize(object):
         """ Return the function's docstring. """
         return self.func.__doc__
 
+
+import atexit
+import cPickle as pickle
+class memoize_persistent(object):
+    """
+    cache a function's return value to avoid recalulation and save the 
+    cache (via pickle) at system exit so that it persists.
+    """
+    def __init__(self, func):
+        self.func = func
+        self.filename = '{self.func.__name__}.cache.pkl~'.format(self=self)
+
+        key = 0  # WARNING: this needs to be fixed.
+
+        def save():
+            pickle.dump((self.cache, key), file(self.filename,'wb'))
+            print 'atexit: saved persistent cache for {self.func.__name__}'.format(self=self)
+        atexit.register(save)
+
+        loaded_key = None
+        try:
+            (cache, loaded_key) = pickle.load(file(self.filename,'r'))
+        except IOError:
+            pass
+        finally:
+            if key == loaded_key:
+                self.cache = cache
+                print 'loaded cache for {self.func.__name__}'.format(self=self)
+            else:
+                self.cache = {}
+                print 'failed to load cache for {self.func.__name__}'.format(self=self)
+
+    def __call__(self, *args):
+        try:
+            if args in self.cache:
+                return self.cache[args]
+            else:
+                self.cache[args] = value = self.func(*args)
+                return value
+        except TypeError:
+            # uncachable -- for instance, passing a list as an argument.
+            raise TypeError('uncachable instance passed to memoized function.')
+            # Better to not cache than to blow up entirely?
+            #return self.func(*args)
+
+
+def print_elapsed_time():
+    begin = time.clock()
+    def handler():
+        secs = time.clock() - begin
+        mins, secs = divmod(secs, 60)
+        hrs, mins = divmod(mins, 60)       
+        print
+        print '======================================================================'
+        #print 'Finished:  ', time.ctime()
+        print 'Finished on', time.strftime("%B %d, %Y at %I:%M:%S %p", time.localtime())
+        print 'Total time:', '%02d:%02d:%02d' % (hrs, mins, secs)
+        print
+    atexit.register(handler)
 
 class Dispatch(threading.Thread):
     def __init__(self, f, *args, **kwargs):

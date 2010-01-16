@@ -137,8 +137,11 @@ def exception_colors():
     
     ex_colors = ColorSchemeTable()
 
+
     # Populate it with color schemes
     C = TermColors # shorthand and local lookup
+
+    """
     ex_colors.add_scheme(ColorScheme(
         'NoColor',
         # The color to be used for the top line
@@ -165,7 +168,9 @@ def exception_colors():
         caret = C.NoColor,
         Normal = C.NoColor
         ))
+    """
 
+    """
     # make some schemes as instances so we can copy them for modification easily
     ex_colors.add_scheme(ColorScheme(
         'Linux',
@@ -193,6 +198,7 @@ def exception_colors():
         caret = C.White,
         Normal = C.Normal
         ))
+    """
 
     # For light backgrounds, swap dark/light colors
     ex_colors.add_scheme(ColorScheme(
@@ -201,13 +207,13 @@ def exception_colors():
         topline = C.Red,
 
         # The colors to be used in the traceback
-        filename = C.LightGreen,
-        lineno = C.LightGreen,
-        name = C.LightPurple,
+        filename = C.Green,
+        lineno = C.Brown,
+        name = C.Purple,
         vName = C.Cyan,
-        val = C.LightGreen,
+        val = C.Green,
         em = C.Cyan,
-
+        
         # Emphasized colors for the last frame of the traceback
         normalEm = C.Cyan,
         filenameEm = C.Green,
@@ -263,7 +269,7 @@ INDENT_SIZE = 8
 # formatter.  When running in an actual IPython instance, the user's rc.colors
 # value is used, but havinga module global makes this functionality available
 # to users of ultraTB who are NOT running inside ipython.
-DEFAULT_SCHEME = 'NoColor'
+DEFAULT_SCHEME = 'LightBG'
 
 #---------------------------------------------------------------------------
 # Code begins
@@ -418,7 +424,7 @@ def _fixed_getinnerframes(etb, context=1,tb_offset=0):
 
 _parser = PyColorize.Parser()
     
-def _formatTracebackLines(lnum, index, lines, Colors, lvals=None,scheme=None):
+def _formatTracebackLines(lnum, index, lines, Colors, lvals=None, scheme='LightBG'):
     numbers_width = INDENT_SIZE - 1
     res = []
     i = lnum - index
@@ -467,7 +473,7 @@ def _formatTracebackLines(lnum, index, lines, Colors, lvals=None,scheme=None):
 class TBTools:
     """Basic tools used by all traceback printer classes."""
 
-    def __init__(self,color_scheme = 'NoColor',call_pdb=False):
+    def __init__(self,color_scheme='LightBG', call_pdb=False):
         # Whether to call the interactive pdb debugger after printing
         # tracebacks or not
         self.call_pdb = call_pdb
@@ -525,8 +531,8 @@ class ListTB(TBTools):
     Because they are meant to be called without a full traceback (only a
     list), instances of this class can't call the interactive pdb debugger."""
 
-    def __init__(self,color_scheme = 'NoColor'):
-        TBTools.__init__(self,color_scheme = color_scheme,call_pdb=0)
+    def __init__(self,color_scheme='LightBG'):
+        TBTools.__init__(self, color_scheme=color_scheme, call_pdb=0)
         
     def __call__(self, etype, value, elist):
         Term.cout.flush()
@@ -668,9 +674,13 @@ class ListTB(TBTools):
 def enable():
     """ register VerboseTB as the system exception handler """
     h = VerboseTB()
+    c = ColorTB()
     def exception_handler(exc_type, value, tb):
-        h(exc_type, value, tb)
-
+        if exc_type is not KeyboardInterrupt:
+            h(exc_type, value, tb)
+        else:
+            print
+            c(exc_type, value, tb)
     sys.excepthook = exception_handler
 
 
@@ -682,7 +692,7 @@ class VerboseTB(TBTools):
     traceback, to be used with alternate interpreters (because their own code
     would appear in the traceback)."""
 
-    def __init__(self,color_scheme = 'LightBG',tb_offset=0,long_header=0,
+    def __init__(self,color_scheme='LightBG', tb_offset=0, long_header=0,
                  call_pdb = 0, include_vars=1):
         """Specify traceback offset, headers and color scheme.
 
@@ -690,7 +700,7 @@ class VerboseTB(TBTools):
         tb_offset=1 allows use of this handler in interpreters which will have
         their own code at the top of the traceback (VerboseTB will first
         remove that frame before printing the traceback info)."""
-        TBTools.__init__(self,color_scheme=color_scheme,call_pdb=call_pdb)
+        TBTools.__init__(self, color_scheme=color_scheme, call_pdb=call_pdb)
         self.tb_offset = tb_offset
         self.long_header = long_header
         self.include_vars = include_vars
@@ -1070,14 +1080,14 @@ class FormattedTB(VerboseTB,ListTB):
     like Python shells).  """
     
     def __init__(self, mode = 'Plain', color_scheme='LightBG',
-                 tb_offset = 0,long_header=0,call_pdb=0,include_vars=0):
+                 tb_offset = 0, long_header=0, call_pdb=0, include_vars=0):
 
         # NEVER change the order of this list. Put new modes at the end:
         self.valid_modes = ['Plain','Context','Verbose']
         self.verbose_modes = self.valid_modes[1:3]
 
-        VerboseTB.__init__(self,color_scheme,tb_offset,long_header,
-                           call_pdb=call_pdb,include_vars=include_vars)
+        VerboseTB.__init__(self, color_scheme, tb_offset, long_header,
+                           call_pdb=call_pdb, include_vars=include_vars)
         self.set_mode(mode)
         
     def _extract_tb(self,tb):
@@ -1142,14 +1152,13 @@ class AutoFormattedTB(FormattedTB):
 
     A brief example:
     
-    AutoTB = AutoFormattedTB(mode = 'Verbose',color_scheme='Linux')
+    AutoTB = AutoFormattedTB(mode='Verbose', color_scheme='Linux')
     try:
       ...
     except:
       AutoTB()  # or AutoTB(out=logfile) where logfile is an open file object
     """
-    def __call__(self,etype=None,evalue=None,etb=None,
-                 out=None,tb_offset=None):
+    def __call__(self,etype=None,evalue=None,etb=None, out=None,tb_offset=None):
         """Print out a formatted exception traceback.
 
         Optional arguments:
@@ -1184,9 +1193,8 @@ class AutoFormattedTB(FormattedTB):
 # A simple class to preserve Nathan's original functionality.
 class ColorTB(FormattedTB):
     """Shorthand to initialize a FormattedTB in Linux colors mode."""
-    def __init__(self,color_scheme='LightBG',call_pdb=0):
-        FormattedTB.__init__(self,color_scheme=color_scheme,
-                             call_pdb=call_pdb)
+    def __init__(self, color_scheme='LightBG', call_pdb=0):
+        FormattedTB.__init__(self, color_scheme=color_scheme, call_pdb=call_pdb)
 
 #----------------------------------------------------------------------------
 # module testing (minimal)
@@ -1220,7 +1228,6 @@ if __name__ == "__main__":
         apply(handler, sys.exc_info() )
     print ''
     
-
     handler = VerboseTB()
     print '*** VerboseTB ***'
     try:
@@ -1228,4 +1235,3 @@ if __name__ == "__main__":
     except:
         apply(handler, sys.exc_info() )
     print ''
-

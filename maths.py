@@ -19,9 +19,17 @@ def log(x):
         return math_log(x)
 
 def argmax(f, seq):
+    """ 
+    >>> argmax(lambda x: -x**2 + 1, range(-10,10))
+    0
+    """
     return argmax2(f,seq)[1]
 
 def argmax2(f, seq):
+    """
+    >>> argmax2(lambda x: -x**2 + 1, range(-10,10))
+    (1, 0)
+    """
     return max(((f(x),x) for x in seq), key=itemgetter(0))
 
 def argmin(f, seq):
@@ -150,6 +158,11 @@ def sum_log_prob(vals):
    
     This saves some of unnecessary calls to log in the two-argument version.
 
+    usage:
+        >>> x = [0.7, 0.1, 0.2]
+        >>> abs(sum_log_prob(map(log, x)) - log(sum(x))) < 1e-7
+        True
+
     NOTE: this implementation IGNORES elements of the input array that are more
     than LOGTOLERANCE (currently 30.0) less than the maximum element.
 
@@ -157,7 +170,7 @@ def sum_log_prob(vals):
     """
     LOGTOLERANCE = 30.0
     N = len(vals)
-    M = Math.NEG_INF_DOUBLE;
+    M = -INF
     maxidx = 0
     for i in xrange(N):
         if vals[i] > M:
@@ -176,4 +189,5 @@ def sum_log_prob(vals):
             intermediate += exp(vals[i] - M)
     return M + log(1.0 + intermediate) if anyAdded else M
 
-
+if __name__ == '__main__':
+    import doctest; doctest.testmod()

@@ -230,23 +230,26 @@ class memoize(object):
         """ Return the function's docstring. """
         return self.func.__doc__
 
-
 import atexit
 import cPickle as pickle
 class memoize_persistent(object):
     """
     cache a function's return value to avoid recalulation and save the 
     cache (via pickle) at system exit so that it persists.
+
+    WARNING: retrieves cache for functions which might not be equivalent
+             if a revision is made to the code which is used to compute it.
     """
     def __init__(self, func):
         self.func = func
         self.filename = '{self.func.__name__}.cache.pkl~'.format(self=self)
 
-        key = 0  # WARNING: this needs to be fixed.
+        key = 0
 
         def save():
-            pickle.dump((self.cache, key), file(self.filename,'wb'))
-            print 'atexit: saved persistent cache for {self.func.__name__}'.format(self=self)
+            if self.cache:
+                pickle.dump((self.cache, key), file(self.filename,'wb'))
+                print 'atexit: saved persistent cache for {self.func.__name__} to file "{self.filename}"'.format(self=self)
         atexit.register(save)
 
         loaded_key = None
@@ -278,13 +281,14 @@ class memoize_persistent(object):
 
 def print_elapsed_time():
     begin = time.clock()
+    started = time.localtime()
     def handler():
         secs = time.clock() - begin
         mins, secs = divmod(secs, 60)
         hrs, mins = divmod(mins, 60)       
         print
         print '======================================================================'
-        #print 'Finished:  ', time.ctime()
+        print 'Started on', time.strftime("%B %d, %Y at %I:%M:%S %p", started)
         print 'Finished on', time.strftime("%B %d, %Y at %I:%M:%S %p", time.localtime())
         print 'Total time:', '%02d:%02d:%02d' % (hrs, mins, secs)
         print
@@ -419,19 +423,16 @@ import inspect
 def debugx(obj):
     """
     I often write debugging print statements which look like
-
       >>> somevar = 'somevalue'
       >>> print 'somevar:', somevar
       somevar: somevalue
 
     What this function attempts to do is provide a shortcut
-
       >>> debugx(somevar)
       somevar: somevalue
 
-    Warning: this should only be used for debugging because
-    if relies on introspection, which can really slow your
-    program down.
+    Warning: this should only be used for debugging because ir relies on 
+    introspection, which can be really slow and sometimes even buggy.
     """
 
     cf = sys._getframe(1)

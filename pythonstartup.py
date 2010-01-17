@@ -10,7 +10,6 @@ To use this set a environment variable PYTHONSTARTUP=<path-to-this-file>
 import os
 import re
 import sys
-
 ## TODO: add support for autoreload
 
 def setup():
@@ -39,6 +38,7 @@ def setup():
 
 #    sys.ps1 = Prompt()
 #    sys.ps2 = Prompt2()
+
 
     #sys.excepthook = LazyPython()
     

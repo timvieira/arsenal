@@ -230,6 +230,7 @@ class memoize(object):
         """ Return the function's docstring. """
         return self.func.__doc__
 
+## TODO: automatically make a back-up of the pickle
 import atexit
 import cPickle as pickle
 class memoize_persistent(object):
@@ -243,22 +244,28 @@ class memoize_persistent(object):
     def __init__(self, func):
         self.func = func
         self.filename = '{self.func.__name__}.cache.pkl~'.format(self=self)
+        self.dirty = False
 
-        key = 0
+        self.key = 0
+        self.load()
 
-        def save():
-            if self.cache:
-                pickle.dump((self.cache, key), file(self.filename,'wb'))
-                print 'atexit: saved persistent cache for {self.func.__name__} to file "{self.filename}"'.format(self=self)
-        atexit.register(save)
+        atexit.register(self.save)
 
+    def save(self):
+        if self.cache and self.dirty:
+            pickle.dump((self.cache, self.key), file(self.filename,'wb'))
+            print '[atexit] saved persistent cache for {self.func.__name__} to file "{self.filename}"'.format(self=self)
+        else:
+            print "[atexit] found nothing to save in {self.func.__name__}'s cache.".format(self=self)
+
+    def load(self):
         loaded_key = None
         try:
             (cache, loaded_key) = pickle.load(file(self.filename,'r'))
         except IOError:
             pass
         finally:
-            if key == loaded_key:
+            if self.key == loaded_key:
                 self.cache = cache
                 print 'loaded cache for {self.func.__name__}'.format(self=self)
             else:
@@ -270,13 +277,12 @@ class memoize_persistent(object):
             if args in self.cache:
                 return self.cache[args]
             else:
+                self.dirty = True
                 self.cache[args] = value = self.func(*args)
                 return value
         except TypeError:
             # uncachable -- for instance, passing a list as an argument.
             raise TypeError('uncachable instance passed to memoized function.')
-            # Better to not cache than to blow up entirely?
-            #return self.func(*args)
 
 
 def print_elapsed_time():
@@ -308,7 +314,7 @@ class Dispatch(threading.Thread):
         try:
             self.result = self.f(*self.args, **self.kwargs)
         except:
-            # score exception information in the thread.
+            # store exception information in the thread.
             self.error = sys.exc_info()
 
 
@@ -520,6 +526,7 @@ if __name__ == '__main__':
         msg = 'hello there?'
         foo(msg)
         assert str(foo.io_target.getvalue().strip()) == msg
+
 
 if __name__ == '__main__':
     run_tests()

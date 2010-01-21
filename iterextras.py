@@ -26,6 +26,12 @@ def xCross(sets):
         else:
             break 
 
+def cross_product(A,B):
+    """ take the cartesian product of a bunch of two collections A and B. """
+    for a in A:
+        for b in B:
+            yield (a,b)
+
 # TODO: maybe add option for padding.
 def sliding_window(iterable, k):
     "s -> (s[0],...,s[k]), (s[1],...,s[k+1]), ..., (s[i],...,s[i+k]), (s[n-1-k],...,s[n-1])"

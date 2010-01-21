@@ -6,12 +6,15 @@ import gc
 import sys
 import pdb
 import time
+import atexit
+import inspect
+import weakref
 import threading
+import cPickle as pickle
 from functools import wraps, partial
 from itertools import *
 from StringIO import StringIO
 from contextlib import contextmanager
-
 
 
 # TODO:
@@ -231,8 +234,6 @@ class memoize(object):
         return self.func.__doc__
 
 ## TODO: automatically make a back-up of the pickle
-import atexit
-import cPickle as pickle
 class memoize_persistent(object):
     """
     cache a function's return value to avoid recalulation and save the 
@@ -296,7 +297,7 @@ def print_elapsed_time():
         print '======================================================================'
         print 'Started on', time.strftime("%B %d, %Y at %I:%M:%S %p", started)
         print 'Finished on', time.strftime("%B %d, %Y at %I:%M:%S %p", time.localtime())
-        print 'Total time:', '%02d:%02d:%02d' % (hrs, mins, secs)
+        print 'Total time: %02d:%02d:%02d' % (hrs, mins, secs)
         print
     atexit.register(handler)
 
@@ -326,7 +327,6 @@ def timelimit(timeout):
     A decorator to limit a function to `timeout` seconds, raising TimeoutError
     if it takes longer.
 
-        >>> import time
         >>> def meaningoflife():
         ...     time.sleep(.2)
         ...     return 42
@@ -394,7 +394,6 @@ class ondemand(property):
     def __init__(self, fget, doc=None):
         property.__init__(self, fget=self.get, fdel=self.delete, doc=doc)
         self.loadfunc = fget
-        import weakref
         self.values = weakref.WeakKeyDictionary()
     def get(self, obj):
         if obj not in self.values:
@@ -425,7 +424,6 @@ def debug_expr(expr, msg=''):
     print '[DEBUG:%s] %s%s -> %r' % (cf.f_code.co_name, msg, expr, val)
 
 
-import inspect
 def debugx(obj):
     """
     I often write debugging print statements which look like

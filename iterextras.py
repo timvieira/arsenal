@@ -1,16 +1,24 @@
-"""Some useful iterator functions from py2.4 test_itertools.py plus a
-couple added items."""
-
 from itertools import *
-__all__ = ['take', 'tabulate', 'iteritems', 'nth', 'all', 'any', 'no',
-    'quantify', 'padnone', 'ncycles', 'dotproduct', 'flatten',
-    'repeatfunc', 'pairwise', 'tee', 'iunzip', 'batch', 'xCross']
 
-#_______________________________________________________________________________
-# TIM:
+# IDEAS:
+# * progress_meter: updates based on how much work was dones, e.g.,
+#     >> p = progress_meter(100)
+#     0.0%
+#     >> p.update(10)
+#     10.0%
 
-def xCross(sets):
-    """ take the cartesian product of a bunch of iterables. """
+def xCross(sets, *more):
+    """
+    Take the cartesian product of two or more iterables.
+    The input can be either one argument, a collection of iterables xCross([it1,it2,...]), 
+    or several arguments, each one an iterable xCross(it1, itb, ...).
+
+    >>> [(x,y,z) for x,y,z in xCross([1,2], 'AB', [5])]
+    [(1, 'A', 5), (1, 'B', 5), (2, 'A', 5), (2, 'B', 5)]
+
+    """
+    if more:
+        sets = chain((sets,), more)
     sets = list(sets)
     wheels = map(iter, sets) # wheels like in an odometer
     digits = [it.next() for it in wheels]
@@ -27,15 +35,51 @@ def xCross(sets):
             break 
 
 def cross_product(A,B):
-    """ take the cartesian product of a bunch of two collections A and B. """
+    """ take the cartesian product of two iterables A and B. """
     for a in A:
         for b in B:
             yield (a,b)
 
-# TODO: maybe add option for padding.
+def unique_everseen(iterable, key=None):
+    """ List unique elements, preserving order. Remember all elements ever seen. """
+    # unique_everseen('AAAABBBCCDAABBB') --> A B C D
+    # unique_everseen('ABBCcAD', str.lower) --> A B C D
+    seen = set()
+    seen_add = seen.add
+    if key is None:
+        for element in iterable:
+            if element not in seen:
+                seen_add(element)
+                yield element
+    else:
+        for element in iterable:
+            k = key(element)
+            if k not in seen:
+                seen_add(k)
+                yield element
+
+def roundrobin(*iterables):
+    """ roundrobin('ABC', 'D', 'EF') --> A D E B F C """
+    # Recipe credited to George Sakkis
+    pending = len(iterables)
+    nexts = cycle(iter(it).next for it in iterables)
+    while pending:
+        try:
+            for next in nexts:
+                yield next()
+        except StopIteration:
+            pending -= 1
+            nexts = cycle(islice(nexts, pending))
+
 def sliding_window(iterable, k):
-    "s -> (s[0],...,s[k]), (s[1],...,s[k+1]), ..., (s[i],...,s[i+k]), (s[n-1-k],...,s[n-1])"
-    iterators = tee(iterable, n=k)
+    """
+    s -> (s[0],...,s[k]) (s[1],...,s[k+1]) ... (s[i],...,s[i+k]) ... (s[n-1-k],...,s[n-1])
+
+    >>> [x+y+z for x,y,z in sliding_window('abcdef', 3)]
+    ['abc', 'bcd', 'cde', 'def']
+
+    """
+    iterators = tee(iterable, k)
     for i, it in enumerate(iterators):
         # advance iterator, 'it',  by i steps
         for j in xrange(i):
@@ -45,9 +89,7 @@ def sliding_window(iterable, k):
                 pass
     return izip(*iterators)
 
-
-# TODO:
-#  * nicer formatting, right now is pretty redundant and ugly...
+## TODO: add an option for changing the size
 def iterview(x, every_k=None):
    """
    iterator which prints its progress to *stderr*.
@@ -97,107 +139,46 @@ def iterview(x, every_k=None):
        yield y
    sys.stderr.write('\r' + format(starttime, n+1, lenx) + '\n')
 
-def example_iterview():
-    print '-----'
-    for x in iterview(xrange(400), every_k=20):
-        import time
-        time.sleep(0.01)
-    print '---------'
-
-if __name__ == '__main__':
-    example_iterview()
 
 #_______________________________________________________________________________
 #
 
 def take(n, seq):
-    """Return the first n items in a sequence."""
+    """ Return the first n items in a sequence. """
     return list(islice(seq, n))
 
-def tabulate(function):
-    "Return function(0), function(1), ..."
-    return imap(function, count())
-
-def iteritems(mapping):
-    """Same as dict.iteritems()"""
-    return izip(mapping.iterkeys(), mapping.itervalues())
-
 def nth(iterable, n):
-    "Returns the nth item"
+    """ Returns a list containing the nth item. """
     return list(islice(iterable, n, n+1))
 
-def all(seq, pred=None):
-    "Returns True if pred(x) is true for every element in the iterable"
-    for elem in ifilterfalse(pred, seq):
-        return False
-    return True
-
-def any(seq, pred=None):
-    "Returns True if pred(x) is true for at least one element in the iterable"
-    for elem in ifilter(pred, seq):
-        return True
-    return False
-
 def no(seq, pred=None):
-    "Returns True if pred(x) is false for every element in the iterable"
+    """" 
+    the opposite of all, returns True if pred(x) is false for every element 
+    in the iterable.
+    """
     for elem in ifilter(pred, seq):
         return False
     return True
 
 def quantify(seq, pred=None):
-    "Count how many times the predicate is true in the sequence"
+    """ Count how many times the predicate is true in the sequence """
     return sum(imap(pred, seq))
 
 def padnone(seq):
-    "Returns the sequence elements and then returns None indefinitely"
+    """ Returns the sequence elements and then returns None indefinitely """
     return chain(seq, repeat(None))
 
 def ncycles(seq, n):
-    "Returns the sequence elements n times"
+    """ Returns the sequence elements n times """
     return chain(*repeat(seq, n))
 
 def dotproduct(vec1, vec2):
-    """Return the dot product between two vectors."""
+    """ Return the dot product between two vectors. """
     return sum(imap(operator.mul, vec1, vec2))
 
 def flatten(listOfLists):
-    """Flatten a list of lists."""
+    """ (non-recursive) Flatten a list of lists. """
     return list(chain(*listOfLists))
-
-def repeatfunc(func, times=None, *args):
-    "Repeat calls to func with specified arguments."
-    "   Example:  repeatfunc(random.random)"
-    if times is None:
-        return starmap(func, repeat(args))
-    else:
-        return starmap(func, repeat(args, times))
-
-# attempt to use the real itertools.tee from python2.4
-try:
-    tee = itertools.tee
-except NameError:
-    # provide a simple implementation instead
-    def tee(iterable, n=2):
-        "tee(iterable, n=2) --> tuple of n independent iterators."
-        # TODO this is a braindead implementation
-        l = list(iterable)
-        return [iter(l) for x in range(n)]
-
-# pad option added by dmcc
-def pairwise(iterable, pad=False):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-    a, b = tee(iterable)
-    try:
-        b.next()
-    except StopIteration:
-        pass
-
-    if pad:
-        return izip(a, padnone(b))
-    else:
-        return izip(a, b)
-
-
 
 # the following are written by dmcc -- not in the real iterextras
 def batch(iterable, batchsize=2):
@@ -231,18 +212,22 @@ def iunzip(iterable, n=None):
 
     iter_tees = tee(iterable, n)
     selector = lambda index: lambda item: operator.getitem(item, index)
-    return [imap(selector(index), iter_tee) 
-        for index, iter_tee in izip(count(), iter_tees)]
+    return [imap(selector(i), it) for i,it in izip(count(), iter_tees)]
 
 if __name__ == "__main__":
-    test = zip(range(1, 10), range(21, 30), range(81, 90))
-    print test
+
+    a0,b0,c0 = range(1, 10), range(21, 30), range(81, 90)
+    test = zip(a0,b0,c0)
     a, b, c = iunzip(test)
-    al = list(a)
-    bl = list(b)
-    cl = list(c)
-    print al
-    print bl
-    print cl
-    recombined = zip(al, bl, cl)
+    a, b, c = map(list, (a,b,c))
+    assert a == a0 and b == b0 and c == c0
+    recombined = zip(a, b, c)
     assert recombined == test
+
+    import time
+    def example_iterview():
+        for x in iterview(xrange(400), every_k=20):
+            time.sleep(0.01)
+    #example_iterview()
+
+    import doctest; doctest.testmod(verbose=True)

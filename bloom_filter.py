@@ -7,7 +7,7 @@ but for some reason that was 100x slower than storing it in a bunch of 256-bit
 integers.
 """
 
-import sha
+from hashlib import sha1
 
 def nbits_required(n):
     """ Calculate the number of bits required to represent any integer in [0, n). """
@@ -54,7 +54,7 @@ class Bloom:
 
     def _hashes(self, astr):
         """ The hashes of a particular string. """
-        digest = sha.sha(astr).digest()
+        digest = sha1(astr).digest()
         # is there no better way to convert a byte string into a long?!
         hashlong = 0L
         for ch in digest:
@@ -141,7 +141,13 @@ def misspellings(passage, WORDS):
 if __name__ == '__main__':
     test_bloom()
 
-    #WORDS = '/usr/share/dict/words'
-    WORDS = 'C:/Program Files/Mozilla Firefox/dictionaries/en-US.dic'
-    misspellings('You might have a typo in yur codez ...'.split(), WORDS)
+    import sys
+    if sys.platform.startswith('win') or sys.platform == 'nt':
+        dic = 'C:/Program Files/Mozilla Firefox/dictionaries/en-US.dic'
+    else:
+        dic = '/usr/share/dict/words'
+
+    sentence = 'You might have a typo in yur codez'
+    print 'sentence:', sentence
+    misspellings(sentence.split(), dic)
 

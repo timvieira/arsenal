@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 ## NOTE: this is a hack version of the original ultraTB.py found in the 
 ##       IPython distribution. I have only made a few modifications in
 ##       order to remove the dependence on IPython.
@@ -454,6 +453,7 @@ def _formatTracebackLines(lnum, index, lines, Colors, lvals=None, scheme='LightB
             else:
                 marker = ''
             num = marker + str(i)
+
             line = '%s%s%s %s%s' %(Colors['linenoEm'], num, 
                                    Colors['line'], line, Colors['Normal'])
         else:
@@ -1067,7 +1067,7 @@ class VerboseTB(TBTools):
             print "\nKeyboardInterrupt"
 
 #----------------------------------------------------------------------------
-class FormattedTB(VerboseTB,ListTB):
+class FormattedTB(VerboseTB, ListTB):
     """Subclass ListTB but allow calling with a traceback.
 
     It can thus be used as a sys.excepthook for Python > 2.1.
@@ -1227,7 +1227,7 @@ if __name__ == "__main__":
     except:
         apply(handler, sys.exc_info() )
     print ''
-    
+
     handler = VerboseTB()
     print '*** VerboseTB ***'
     try:
@@ -1235,3 +1235,5 @@ if __name__ == "__main__":
     except:
         apply(handler, sys.exc_info() )
     print ''
+
+

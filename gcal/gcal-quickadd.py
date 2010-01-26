@@ -1,9 +1,6 @@
-#!C:/Python26/python.exe
+#!/usr/bin/env python
 
-import getpass
-
-import os
-import sys; sys.path.append('C:/projects/lib/gcal')
+import os, sys, getpass
 
 from gcal import atom, gdata
 import gdata.calendar
@@ -21,9 +18,5 @@ def quickadd(content):
     event.quick_add = gdata.calendar.QuickAdd(value='true')
     new_event = cal_client.InsertEvent(event, '/calendar/feeds/default/private/full')
 
-
-if __name__ == '__main__':
-    quickadd(' '.join(sys.argv[1:]))
-    os.system('firefox http://google.com/calendar &')
-
-
+quickadd(' '.join(sys.argv[1:]))
+os.system('firefox http://google.com/calendar 2>/dev/null &')

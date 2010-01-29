@@ -17,6 +17,67 @@ from StringIO import StringIO
 from contextlib import contextmanager
 
 
+import warnings
+import functools
+
+def deprecated(func):
+    """This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emitted
+    when the function is used."""
+
+    @functools.wraps(func)
+    def new_func(*args, **kwargs):
+        warnings.warn_explicit(
+            "Call to deprecated function %(funcname)s." % {
+                'funcname': func.__name__,
+            },
+            category=DeprecationWarning,
+            filename=func.func_code.co_filename,
+            lineno=func.func_code.co_firstlineno + 1
+        )
+        return func(*args, **kwargs)
+    return new_func
+
+
+# Retry decorator with exponential backoff
+def retry(tries, delay=3, backoff=2):
+    """Retries a function or method until it returns True.
+    
+    delay sets the initial delay, and backoff sets how much the delay should
+    lengthen after each failure. backoff must be greater than 1, or else it
+    isn't really a backoff. tries must be at least 0, and delay greater than
+    0."""
+  
+    if backoff <= 1:
+        raise ValueError("backoff must be greater than 1")
+  
+    tries = math.floor(tries)
+    if tries < 0:
+        raise ValueError("tries must be 0 or greater")
+  
+    if delay <= 0:
+        raise ValueError("delay must be greater than 0")
+  
+    def deco_retry(f):
+        def f_retry(*args, **kwargs):
+            mtries, mdelay = tries, delay # make mutable
+      
+            rv = f(*args, **kwargs) # first attempt
+            while mtries > 0:
+                if rv == True: # Done on success
+                    return True
+      
+              mtries -= 1      # consume an attempt
+              time.sleep(mdelay) # wait...
+              mdelay *= backoff  # make future wait longer
+      
+              rv = f(*args, **kwargs) # Try again
+      
+            return False # Ran out of tries :-(
+      
+        return f_retry # true decorator -> decorated function
+      return deco_retry  # @retry(arg[, ...]) -> true decorator
+  
 # TODO:
 # * I see a lot of potential in this function
 #   it might be a good place for code generation and other interesting things

@@ -94,7 +94,7 @@ def pdf2image(input_files, outputdir_fmt='{f.name}.d', output_format='{f.noext}.
             if create_outputdir:
                 if verbose:
                     print '  * created outputdir'
-                os.mkdir(outputdir)
+                os.makedirs(outputdir)
             else:
                 raise OSError('Directory does not exists: %s' % outputdir)
 

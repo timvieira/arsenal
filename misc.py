@@ -38,45 +38,6 @@ def deprecated(func):
         return func(*args, **kwargs)
     return new_func
 
-
-# Retry decorator with exponential backoff
-def retry(tries, delay=3, backoff=2):
-    """Retries a function or method until it returns True.
-    
-    delay sets the initial delay, and backoff sets how much the delay should
-    lengthen after each failure. backoff must be greater than 1, or else it
-    isn't really a backoff. tries must be at least 0, and delay greater than
-    0."""
-  
-    if backoff <= 1:
-        raise ValueError("backoff must be greater than 1")
-  
-    tries = math.floor(tries)
-    if tries < 0:
-        raise ValueError("tries must be 0 or greater")
-  
-    if delay <= 0:
-        raise ValueError("delay must be greater than 0")
-  
-    def deco_retry(f):
-        def f_retry(*args, **kwargs):
-            mtries, mdelay = tries, delay # make mutable
-      
-            rv = f(*args, **kwargs) # first attempt
-            while mtries > 0:
-                if rv == True: # Done on success
-                    return True
-      
-              mtries -= 1      # consume an attempt
-              time.sleep(mdelay) # wait...
-              mdelay *= backoff  # make future wait longer
-      
-              rv = f(*args, **kwargs) # Try again
-      
-            return False # Ran out of tries :-(
-      
-        return f_retry # true decorator -> decorated function
-      return deco_retry  # @retry(arg[, ...]) -> true decorator
   
 # TODO:
 # * I see a lot of potential in this function
@@ -346,7 +307,14 @@ class memoize_persistent(object):
             # uncachable -- for instance, passing a list as an argument.
             raise TypeError('uncachable instance passed to memoized function.')
 
+def htime(s):
+    """htime(x) -> (days, hours, min, seconds)"""
+    m, s = divmod(s, 60)
+    h, m = divmod(min, 60)
+    d, h = divmod(h, 24)
+    return int(d), int(h), int(m), s
 
+# TODO: use htime
 def print_elapsed_time():
     begin = time.clock()
     started = time.localtime()

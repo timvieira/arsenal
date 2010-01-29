@@ -15,6 +15,18 @@ from random import shuffle
 ##def interleave(*iters):
 ##    """ take several iterators and weave them together, much like roundrobin does except with different ordering. """
 
+# def iter_partition(it, weights, shuffle=None):
+#     """ partition an iterator according to weights, return an len(weights) iterators
+# 
+#     ** Do this in an ONLINE FASHION so that we don't need to know the length of the iterator **
+# 
+#     """
+#     if shuffle:
+#         it = list(it)
+#         random.shuffle(it)
+#     it = iter(it)
+
+
 def floor(stream, baseline=None):
     """Generate the stream of minimum values from the input stream.
     

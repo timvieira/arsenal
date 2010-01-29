@@ -1,4 +1,9 @@
+
+import sys, time
+
+from operator import getitem, sub, mul
 from itertools import *
+from random import shuffle
 
 # IDEAS:
 # * progress_meter: updates based on how much work was dones, e.g.,
@@ -6,6 +11,115 @@ from itertools import *
 #     0.0%
 #     >> p.update(10)
 #     10.0%
+
+##def interleave(*iters):
+##    """ take several iterators and weave them together, much like roundrobin does except with different ordering. """
+
+def floor(stream, baseline=None):
+    """Generate the stream of minimum values from the input stream.
+    
+    The baseline, if supplied, is an upper limit for the floor.
+    >>> ff = floor((1, 2, -2, 3))
+    >>> assert list(ff) == [1, 1, -2, -2]
+    >>> ff = floor((1, 2, -2, 3), 0)
+    >>> assert list(ff) == [0, 0, -2, -2]    
+    """
+    stream = iter(stream)
+    m = baseline
+    if m is None:
+        try:
+            m = stream.next()
+            yield m
+        except StopIteration:
+            pass
+    for s in stream:
+        m = min(m, s)
+        yield m
+
+def ceil(stream):
+    """Generate the stream of maximum values from the input stream.
+    
+    >>> top = ceil([0, -1, 2, -2, 3])
+    >>> assert list(top) == [0, 0, 2, 2, 3]
+    """
+    stream = iter(stream)
+    try:
+        M = stream.next()
+        yield M
+    except StopIteration:
+        pass
+    for s in stream:
+        M = max(M, s)
+        yield M
+
+def accumulate(stream):
+    """Generate partial sums from the stream.
+    
+    >>> accu = accumulate([1, 2, 3, 4])
+    >>> assert list(accu) == [1, 3, 6, 10]
+    """
+    total = 0
+    for s in stream:
+        total += s
+        yield total
+
+def diff(s, t):
+    """Generate the differences between two streams
+    
+    If the streams are of unequal length, the shorter is truncated.
+    >>> dd = diff([2, 4, 6, 8], [1, 2, 3])
+    >>> assert list(dd) == [1, 2, 3]
+    """
+    return imap(sub, s, t)
+
+def last(stream, default=None):
+    """Return the last item in the stream or the default if the stream is empty.
+    
+    >>> last('abc')
+    'c'
+    >>> last([], default=-1)
+    -1
+    """
+    s = default
+    for s in stream:
+        pass
+    return s
+
+
+# TODO: can we be lazier? require fewer passes thru X?
+def k_fold_cross_validation(X, K, randomize=False):
+    """
+    Generates K (training, validation) pairs from the items in X.
+
+    Each pair is a partition of X, where validation is an iterable
+    of length len(X)/K. So each training iterable is of length (K-1)*len(X)/K.
+
+    If randomise is true, a copy of X is shuffled before partitioning,
+    otherwise its order is preserved in training and validation.
+
+
+    >>> for train, test in k_fold_cross_validation(range(3), 3):
+    ...     print 'test:', test, ' train:', list(train)
+    test: [0]  train: [1, 2]
+    test: [1]  train: [0, 2]
+    test: [2]  train: [0, 1]
+
+    """
+    if randomize:
+        X = list(X)
+        shuffle(X)
+
+    # folds = [X[i::K] for i in xrange(K)]
+
+    # run thru X once and splitting into folds
+    folds = [[] for k in xrange(K)]
+    for i, item in enumerate(X):
+        folds[i % K].append(item)
+
+    for k in xrange(K):
+        training = chain(*(fold for j, fold in enumerate(folds) if j != k))
+        yield training, folds[k]
+
 
 def xCross(sets, *more):
     """
@@ -34,11 +148,13 @@ def xCross(sets, *more):
         else:
             break 
 
+
 def cross_product(A,B):
     """ take the cartesian product of two iterables A and B. """
     for a in A:
         for b in B:
             yield (a,b)
+
 
 def unique_everseen(iterable, key=None):
     """ List unique elements, preserving order. Remember all elements ever seen. """
@@ -58,9 +174,14 @@ def unique_everseen(iterable, key=None):
                 seen_add(k)
                 yield element
 
+
+# Recipe credited to George Sakkis
 def roundrobin(*iterables):
-    """ roundrobin('ABC', 'D', 'EF') --> A D E B F C """
-    # Recipe credited to George Sakkis
+    """ roundrobin('ABC', 'D', 'EF') --> A D E B F C 
+
+    >>> list(roundrobin('ABC', 'D', 'EF'))
+    ['A', 'D', 'E', 'B', 'F', 'C']    
+    """
     pending = len(iterables)
     nexts = cycle(iter(it).next for it in iterables)
     while pending:
@@ -70,6 +191,7 @@ def roundrobin(*iterables):
         except StopIteration:
             pending -= 1
             nexts = cycle(islice(nexts, pending))
+
 
 def sliding_window(iterable, k):
     """
@@ -89,13 +211,12 @@ def sliding_window(iterable, k):
                 pass
     return izip(*iterators)
 
+
 ## TODO: add an option for changing the size
 def iterview(x, every_k=None):
    """
    iterator which prints its progress to *stderr*.
    """
-   import time
-   import sys
    WIDTH = 70
 
    def plainformat(n, lenx):
@@ -174,7 +295,7 @@ def ncycles(seq, n):
 
 def dotproduct(vec1, vec2):
     """ Return the dot product between two vectors. """
-    return sum(imap(operator.mul, vec1, vec2))
+    return sum(imap(mul, vec1, vec2))
 
 def flatten(listOfLists):
     """ (non-recursive) Flatten a list of lists. """
@@ -184,7 +305,13 @@ def flatten(listOfLists):
 def batch(iterable, batchsize=2):
     """Yield a list of (up to) batchsize items at a time.  The last
     element will be shorter if there are items left over.
-    batch(s, 2) -> [s0,s1], [s2,s3], [s4, s5], ..."""
+    batch(s, 2) -> [s0,s1], [s2,s3], [s4, s5], ...
+
+
+    >>> list(batch(range(5), 2))
+    [[0, 1], [2, 3], [4]]
+
+    """
     current = []
     for item in iterable:
         current.append(item)
@@ -194,7 +321,22 @@ def batch(iterable, batchsize=2):
     if current:
         yield current
 
-import operator
+
+def batch_extra_lazy(iterable, batchsize):
+    """ batch(s, 2) -> [s0,s1], [s2,s3], [s4, s5], ...
+
+    Yield a list of (up to) batchsize items at a time.
+
+    >>> map(tuple, batch_extra_lazy(range(5), 2))
+    [(0, 1), (2, 3), (4,)]
+    """
+
+    sourceiter = iter(iterable)
+    while True:
+        batchiter = islice(sourceiter, batchsize)
+        yield chain([batchiter.next()], batchiter)
+
+
 def iunzip(iterable, n=None):
     """Takes an iterator that yields n-tuples and returns n iterators
     which index those tuples.  This function is the reverse of izip().
@@ -211,7 +353,7 @@ def iunzip(iterable, n=None):
         iterable = chain([first], iterable)
 
     iter_tees = tee(iterable, n)
-    selector = lambda index: lambda item: operator.getitem(item, index)
+    selector = lambda index: lambda item: getitem(item, index)
     return [imap(selector(i), it) for i,it in izip(count(), iter_tees)]
 
 if __name__ == "__main__":
@@ -224,7 +366,6 @@ if __name__ == "__main__":
     recombined = zip(a, b, c)
     assert recombined == test
 
-    import time
     def example_iterview():
         for x in iterview(xrange(400), every_k=20):
             time.sleep(0.01)

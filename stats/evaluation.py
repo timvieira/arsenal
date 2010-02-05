@@ -26,47 +26,39 @@ class F1:
 
     def add_retrieved(self, label, instance):
         self.retrieved[label].add(instance)
+        return instance in self.relevant[label]
 
     def scores(self, verbose=True):
         relevant  = self.relevant
         retrieved = self.retrieved
-
         if verbose:
             #from prettytable import PrettyTable
             #t = PrettyTable(["","P","R","F"])
-
-            #x.set_field_align("City name", "l") # Left align city names
-        
+            #x.set_field_align("City name", "l") # Left align city names        
             print ' ============================================'
             print ' |          |   C   |   P   |   R   |   F   |'
             print ' |==========================================|'
-
+        tbl = []
         labels = self.relevant.keys()
         labels.sort()
         for label in labels:
             R = P = F = 0
-
+            count = len(relevant[label])
             top = relevant[label] & retrieved[label]
-
             if len(relevant[label]) != 0:
                 R = len(top) / len(relevant[label])
-
             if len(retrieved[label]) != 0:
                 P = len(top) / len(retrieved[label])
-
             if P + R != 0:
                 F = 2*P*R / (P + R)
-
             if verbose:
-                print ' | %8s | %5d | %5.1f | %5.1f | %5.1f |' % (label, len(relevant[label]), P*100, R*100, F*100)
+                print ' | %8s | %5d | %5.1f | %5.1f | %5.1f |' % (label, count, P*100, R*100, F*100)
                 #t.add_row([label, P*100, R*100, F*100])
-
-            yield (label, (P,R,F))
-
+            tbl.append((label,count,P,R,F))
         if verbose:
             print ' ============================================'
             #print t
-
+        return tbl
 
     def confusion(self):
         assert self.confusion_matrix is not None

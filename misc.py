@@ -1,31 +1,30 @@
 from __future__ import with_statement, nested_scopes, generators
 
-import re
-import os
-import gc
-import sys
-import pdb
-import time
-import atexit
-import inspect
-import weakref
-import threading
-import cPickle as pickle
+import re, os, gc, sys, pdb, time, atexit, inspect, weakref, threading, cPickle as pickle, warnings
+
 from functools import wraps, partial
-from itertools import *
 from StringIO import StringIO
 from contextlib import contextmanager
 
 
-import warnings
-import functools
+## class defaultdict2(dict):
+##     """
+##     Example of the __missing__ method of the dictionary class
+##     """
+##     def __init__(self, factory, factArgs=(), dictArgs=()):
+##         dict.__init__(self, *dictArgs)
+##         self.factory = factory
+##         self.factArgs = factArgs
+##     def __missing__(self, key):
+##         self[key] = self.factory(*self.factArgs)
+
 
 def deprecated(func):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
     when the function is used."""
 
-    @functools.wraps(func)
+    @wraps(func)
     def new_func(*args, **kwargs):
         warnings.warn_explicit(
             "Call to deprecated function %(funcname)s." % {
@@ -277,9 +276,9 @@ class memoize_persistent(object):
     def save(self):
         if self.cache and self.dirty:
             pickle.dump((self.cache, self.key), file(self.filename,'wb'))
-            print '[atexit] saved persistent cache for {self.func.__name__} to file "{self.filename}"'.format(self=self)
+            print '[ATEXIT] saved persistent cache for {self.func.__name__} to file "{self.filename}"'.format(self=self)
         else:
-            print "[atexit] found nothing to save in {self.func.__name__}'s cache.".format(self=self)
+            print "[ATEXIT] found nothing to save in {self.func.__name__}'s cache.".format(self=self)
 
     def load(self):
         loaded_key = None
@@ -313,6 +312,33 @@ def htime(s):
     h, m = divmod(min, 60)
     d, h = divmod(h, 24)
     return int(d), int(h), int(m), s
+
+def sec2prettytime(diff, show_seconds=True):
+    """Given a number of seconds, returns a string attempting to represent
+    it as shortly as possible.
+    
+    >>> sec2prettytime(100000)
+    '1d3h46m40s'
+    """
+    diff = int(diff)
+    days, diff = divmod(diff, 86400)
+    hours, diff = divmod(diff, 3600)
+    minutes, seconds = divmod(diff, 60)
+    x = []
+    if days: 
+        x.append('%sd' % days)
+    if hours: 
+        x.append('%sh' % hours)
+    if minutes: 
+        x.append('%sm' % minutes)
+    if show_seconds and seconds: 
+        x.append('%ss' % seconds)
+    if not x:
+        if show_seconds: 
+            x = ['%ss' % seconds]
+        else:
+            x = ['0m']
+    return ''.join(x)
 
 # TODO: use htime
 def print_elapsed_time():
@@ -406,7 +432,7 @@ def assert_throws(exc):
             except exc, e:
                 pass
             except Exception, e:
-                print 'function raised a different Exception than required:'
+                print 'raised a different Exception than required:'
                 raise
             else:
                 if exc is not None:
@@ -416,6 +442,52 @@ def assert_throws(exc):
                     pass
         return wrap2
     return wrap1
+
+@contextmanager
+def assert_throws_ctx(*exc):
+    """
+    Contextmanager for asserting that a certain exception or no exception will
+    arise with it's context.
+
+    >>> with assert_throws_ctx(ZeroDivisionError):
+    ...     1 / 0
+
+    >>> with assert_throws_ctx(None):
+    ...     pass
+    
+    >>> with assert_throws_ctx(ZeroDivisionError):
+    ...     pass
+    Traceback (most recent call last):
+        ...
+    Exception: did not raise required ZeroDivisionError. got None instead.
+
+    >>> with assert_throws_ctx(AssertionError, ZeroDivisionError):
+    ...     pass
+    Traceback (most recent call last):
+        ...
+    Exception: did not raise required AssertionError or ZeroDivisionError. got None instead.
+
+    >>> with assert_throws_ctx(None, ZeroDivisionError):
+    ...     pass
+
+    """
+
+    passed = False
+    got = None
+    try:
+        yield
+    except exc:
+        passed = True
+    except Exception, e:
+        got = e
+    else:
+        # since None isn't realy an exception, we have to special case it.
+        if None in exc:
+            passed = True
+    finally:
+        if not passed:
+            msg = ' or '.join(e.__name__ if e is not None else 'None' for e in exc)
+            raise Exception('did not raise required %s. got %s instead.' % (msg, got))
 
 
 class ondemand(property):
@@ -494,6 +566,8 @@ def marquee(txt='',width=78,mark='*'):
 
 if __name__ == '__main__':
 
+    import doctest
+
     def run_tests():
 
         def test_cwd_ctx_manager():
@@ -555,14 +629,32 @@ if __name__ == '__main__':
         assert str(foo.io_target.getvalue().strip()) == msg
 
 
-if __name__ == '__main__':
+        x = 15
+        debug_expr('x')
+    
+        debugx(x)
+        debugx(x**2 + 2*x + 3)
+        f = lambda x: x**2
+        debugx(f(x))
+        
+
+        print '-----------------------------------------------'
+        doctest.run_docstring_examples("""
+        >>> sec2prettytime(1)
+        '1s'
+        >>> sec2prettytime(10)
+        '10s'
+        >>> sec2prettytime(100)
+        '1m40s'
+        >>> sec2prettytime(60)
+        '1m'
+        >>> sec2prettytime(1000)
+        '16m40s'
+        >>> sec2prettytime(10000)
+        '2h46m40s'
+        """, globals(), verbose=True)
+    
+
     run_tests()
-    import doctest; doctest.testmod()
+    doctest.testmod(verbose=True)
 
-    x = 15
-    debug_expr('x')
-
-    debugx(x)
-    debugx(x**2 + 2*x + 3)
-    f = lambda x: x**2
-    debugx(f(x))

@@ -19,6 +19,11 @@ def wordsplit_sentence(sentence):
     # in this function.
     sentence = re.sub('\-\-*', '-', sentence)
 
+    ###########################################
+    # fix escape codes
+    sentence = re.sub('%u2013', '-', sentence)
+    ###########################################
+
     before = ''
     while before != sentence:
         before = sentence

@@ -22,12 +22,13 @@ class file_specifier(object):
 
 
 ## TODO:
+##   take a list of files and globs
 ##   recursive option
 ##   timeout option
 ##   maybe a hook for pre/post-processing, useful for logging and zipping
 ##   check for success / failure
 def pdf2image(input_files, outputdir_fmt='{f.name}.d', output_format='{f.noext}.page.%d.png',
-              resolution=200, create_outputdir=True, testing=0, verbose=0):
+              resolution=100, create_outputdir=True, testing=0, verbose=0):
     """
     Wraps a system call to ghostscript, which takes a pdf or postscript file
     and renders it to a series of images.
@@ -110,8 +111,11 @@ def pdf2image(input_files, outputdir_fmt='{f.name}.d', output_format='{f.noext}.
 
 
 if __name__ == '__main__':
-    pdf2image('C:/papers/*.pdf', outputdir_fmt='papers/{f.noext}.d', verbose=1, testing=0)
-    pass
+    import sys
+    if len(sys.argv) == 2:
+        pdf2image(sys.argv[1], outputdir_fmt='{f.noext}.d', verbose=1, testing=0)
+    else:
+        print 'usage: <file>'
 
 
 

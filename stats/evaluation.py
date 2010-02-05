@@ -37,9 +37,9 @@ class F1:
 
             #x.set_field_align("City name", "l") # Left align city names
         
-            print ' ===================================='
-            print ' |          |   P   |   R   |   F   |'
-            print ' |==================================|'
+            print ' ============================================'
+            print ' |          |   C   |   P   |   R   |   F   |'
+            print ' |==========================================|'
 
         labels = self.relevant.keys()
         labels.sort()
@@ -58,13 +58,13 @@ class F1:
                 F = 2*P*R / (P + R)
 
             if verbose:
-                print ' | %8s | %5.1f | %5.1f | %5.1f |' % (label, P*100, R*100, F*100)
+                print ' | %8s | %5d | %5.1f | %5.1f | %5.1f |' % (label, len(relevant[label]), P*100, R*100, F*100)
                 #t.add_row([label, P*100, R*100, F*100])
 
             yield (label, (P,R,F))
 
         if verbose:
-            print ' ===================================='
+            print ' ============================================'
             #print t
 
 

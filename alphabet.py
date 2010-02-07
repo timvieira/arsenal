@@ -1,8 +1,5 @@
-import re, sys, cPickle
+import re, sys, cPickle as pickle
 
-## TODO:
-##   add support for serializing the "alphabet" i.e. a bijective mapping from
-##   feature names to unique indicies.
 from flipdict import Flipdict
 class Alphabet(object):
     def __init__(self, serialized=None):
@@ -25,7 +22,7 @@ class Alphabet(object):
             self.i += 1
             return self.mapping[k]
     def save(self, f):
-        cPickle.dump(self, file(f, 'wb'))
+        pickle.dump(self, file(f, 'wb'))
     def load(self, f):
-        pkl = cPickle.load(file(f,'rb'))
+        pkl = pickle.load(file(f,'rb'))
         self.__dict__.update(pkl.__dict__)

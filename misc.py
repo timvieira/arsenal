@@ -7,6 +7,12 @@ from StringIO import StringIO
 from contextlib import contextmanager
 
 
+def enable_debug_hook():
+    def debug_hook(*args):
+        sys.__excepthook__(*args)
+        pdb.pm()
+    sys.excepthook = debug_hook
+
 ## class defaultdict2(dict):
 ##     """
 ##     Example of the __missing__ method of the dictionary class
@@ -355,6 +361,7 @@ def print_elapsed_time():
         print 'Total time: %02d:%02d:%02d' % (hrs, mins, secs)
         print
     atexit.register(handler)
+
 
 class Dispatch(threading.Thread):
     def __init__(self, f, *args, **kwargs):

@@ -337,7 +337,6 @@ def full_batches(iterable, batchsize=2):
 
     >>> list(full_batches(range(5), 2))
     [(0, 1), (2, 3)]
-
     """
     return izip(*repeat(iter(iterable), batchsize))
 

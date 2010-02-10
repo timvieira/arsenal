@@ -16,8 +16,6 @@ class F1:
         if self.confusion_matrix is not None:
             self.confusion_matrix[target][prediction] += 1
         self.n_examples += 1
-        #self.relevant[target].add(instance)
-        #self.retrieved[prediction].add(instance)
         self.add_relevant(target, instance)
         self.add_retrieved(prediction, instance)
 

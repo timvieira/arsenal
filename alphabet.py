@@ -2,11 +2,9 @@ import re, sys, cPickle as pickle
 
 from flipdict import Flipdict
 class Alphabet(object):
-    def __init__(self, serialized=None):
+    def __init__(self):
         self.mapping = Flipdict()
         self.i = 1
-        if serialized is not None:
-            self.load(serialized)
         self.frozen = False
     def freeze(self):
         self.frozen = True
@@ -21,8 +19,5 @@ class Alphabet(object):
             self.mapping[k] = self.i
             self.i += 1
             return self.mapping[k]
-    def save(self, f):
-        pickle.dump(self, file(f, 'wb'))
-    def load(self, f):
-        pkl = pickle.load(file(f,'rb'))
-        self.__dict__.update(pkl.__dict__)
+    def __iter__(self):
+        return iter(self.mapping)

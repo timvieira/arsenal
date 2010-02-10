@@ -13,6 +13,49 @@ def enable_debug_hook():
         pdb.pm()
     sys.excepthook = debug_hook
 
+
+'''
+import os
+import sys
+import rlcompleter
+#import readline
+#readline.parse_and_bind("tab: complete") 
+
+def pdb_completer():
+    # refresh the terminal
+    #os.system("stty sane")
+
+    def complete(self, text, state):
+        """return the next possible completion for text, using the current frame's
+           local namespace
+    
+           This is called successively with state == 0, 1, 2, ... until it
+           returns None.  The completion should begin with 'text'.
+        """
+
+        print 'called complter...'
+
+        # keep a completer class, and make sure that it uses the current local scope 
+        if not hasattr(self, 'completer'):
+            self.completer = rlcompleter.Completer(self.curframe.f_locals)
+        else:
+            self.completer.namespace = self.curframe.f_locals
+        return self.completer.complete(text, state)
+
+
+    # replace the Pdb class's complete method with ours
+    Pdb = sys._getframe(2).f_globals['Pdb']
+    Pdb.complete = complete.__get__(Pdb)
+
+
+    Pdb.complete = complete.__get__(Pdb)
+
+    # set use_rawinput to 1 as tab completion relies on rawinput being used
+    self = sys._getframe(2).f_locals['self']
+    self.use_rawinput = 1
+'''
+
+
 ## class defaultdict2(dict):
 ##     """
 ##     Example of the __missing__ method of the dictionary class

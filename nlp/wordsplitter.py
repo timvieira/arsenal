@@ -1,5 +1,7 @@
 import re, sys
 
+# -*- encoding: utf-8 -*-
+
 ###
 # IDEAS/TODO:
 #    Nets' => Net 's
@@ -13,7 +15,28 @@ def numbers_words(m):
     else:
         return '%s %s' % (a,b)
 
+
+from unicode_annoyances import LATIN2ASCII
+
 def wordsplit_sentence(sentence):
+    # Convert some special characters to ASCII to ensure they aren't lost later.
+    sentence = re.sub('(\xe2\x82\xac|%u20AC)', 'Euros', sentence)
+    sentence = re.sub('(\xc3\x82\xc2\xa3|\xc2\xa3|\xc2\xa31m|GBP)', 'GBP', sentence)
+
+    # take a look at python-extras/unicode_annoyances.py
+
+    # remove these...
+    #sentence = re.sub('(\xc3\xab|\xc3\xa3)','', sentence)
+    sentence = re.sub('[^\x20-\x7E]', '', sentence)   ####### <<<< KILL non-nice chars.
+
+    # ASCII HACKS!
+    #for hexcode, ascii in LATIN2ASCII.iteritems():
+    #    try:
+    #        sentence = sentence.replace(unichr(hexcode), ascii)
+    #    except UnicodeDecodeError:
+    #        pass
+    #sentence = str(sentence)
+
     # Replace repeated punctuation marks with something equivalent.  These
     # replacements also make simplifying assumptions that will become useful later
     # in this function.
@@ -21,7 +44,7 @@ def wordsplit_sentence(sentence):
 
     ###########################################
     # fix escape codes
-    sentence = re.sub('%u2013', '-', sentence)
+    sentence = re.sub('%u2013', '-', sentence)    
     ###########################################
 
     before = ''
@@ -107,6 +130,9 @@ def wordsplit_sentence(sentence):
     #  * tighten-up to bracketed tags too.
     sentence = re.sub('\[\s*([A-z]+?)\s', r'[\1 ', sentence)
     #######
+
+    ## fixed escapes
+    sentence = re.sub('x\d\d \s \\ x\d\d', r'\1\2', sentence, re.VERBOSE|re.IGNORECASE)
 
     return sentence
 

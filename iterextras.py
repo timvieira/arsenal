@@ -1,4 +1,3 @@
-
 import sys, time
 
 from operator import getitem, sub, mul
@@ -17,9 +16,9 @@ from random import shuffle
 
 # def iter_partition(it, weights, shuffle=None):
 #     """ partition an iterator according to weights, return an len(weights) iterators
-# 
+#
 #     ** Do this in an ONLINE FASHION so that we don't need to know the length of the iterator **
-# 
+#
 #     """
 #     if shuffle:
 #         it = list(it)
@@ -29,12 +28,12 @@ from random import shuffle
 
 def floor(stream, baseline=None):
     """Generate the stream of minimum values from the input stream.
-    
+
     The baseline, if supplied, is an upper limit for the floor.
     >>> ff = floor((1, 2, -2, 3))
     >>> assert list(ff) == [1, 1, -2, -2]
     >>> ff = floor((1, 2, -2, 3), 0)
-    >>> assert list(ff) == [0, 0, -2, -2]    
+    >>> assert list(ff) == [0, 0, -2, -2]
     """
     stream = iter(stream)
     m = baseline
@@ -50,7 +49,7 @@ def floor(stream, baseline=None):
 
 def ceil(stream):
     """Generate the stream of maximum values from the input stream.
-    
+
     >>> top = ceil([0, -1, 2, -2, 3])
     >>> assert list(top) == [0, 0, 2, 2, 3]
     """
@@ -66,7 +65,7 @@ def ceil(stream):
 
 def accumulate(stream):
     """Generate partial sums from the stream.
-    
+
     >>> accu = accumulate([1, 2, 3, 4])
     >>> assert list(accu) == [1, 3, 6, 10]
     """
@@ -77,7 +76,7 @@ def accumulate(stream):
 
 def diff(s, t):
     """Generate the differences between two streams
-    
+
     If the streams are of unequal length, the shorter is truncated.
     >>> dd = diff([2, 4, 6, 8], [1, 2, 3])
     >>> assert list(dd) == [1, 2, 3]
@@ -86,7 +85,7 @@ def diff(s, t):
 
 def last(stream, default=None):
     """Return the last item in the stream or the default if the stream is empty.
-    
+
     >>> last('abc')
     'c'
     >>> last([], default=-1)
@@ -136,7 +135,7 @@ def k_fold_cross_validation(X, K, randomize=False):
 def xCross(sets, *more):
     """
     Take the cartesian product of two or more iterables.
-    The input can be either one argument, a collection of iterables xCross([it1,it2,...]), 
+    The input can be either one argument, a collection of iterables xCross([it1,it2,...]),
     or several arguments, each one an iterable xCross(it1, itb, ...).
 
     >>> [(x,y,z) for x,y,z in xCross([1,2], 'AB', [5])]
@@ -158,7 +157,7 @@ def xCross(sets, *more):
                 wheels[i] = iter(sets[i])
                 digits[i] = wheels[i].next()
         else:
-            break 
+            break
 
 
 def cross_product(A,B):
@@ -189,10 +188,10 @@ def unique_everseen(iterable, key=None):
 
 # Recipe credited to George Sakkis
 def roundrobin(*iterables):
-    """ roundrobin('ABC', 'D', 'EF') --> A D E B F C 
+    """ roundrobin('ABC', 'D', 'EF') --> A D E B F C
 
     >>> list(roundrobin('ABC', 'D', 'EF'))
-    ['A', 'D', 'E', 'B', 'F', 'C']    
+    ['A', 'D', 'E', 'B', 'F', 'C']
     """
     pending = len(iterables)
     nexts = cycle(iter(it).next for it in iterables)
@@ -285,8 +284,8 @@ def nth(iterable, n):
     return list(islice(iterable, n, n+1))
 
 def no(seq, pred=None):
-    """" 
-    the opposite of all, returns True if pred(x) is false for every element 
+    """"
+    the opposite of all, returns True if pred(x) is false for every element
     in the iterable.
     """
     for elem in ifilter(pred, seq):
@@ -333,6 +332,14 @@ def batch(iterable, batchsize=2):
     if current:
         yield current
 
+def full_batches(iterable, batchsize=2):
+    """ Differs from batch in that it returns only batchs of size equal to batchsize, no less.
+
+    >>> list(full_batches(range(5), 2))
+    [(0, 1), (2, 3)]
+
+    """
+    return izip(*repeat(iter(iterable), batchsize))
 
 def batch_extra_lazy(iterable, batchsize):
     """ batch(s, 2) -> [s0,s1], [s2,s3], [s4, s5], ...
@@ -342,7 +349,6 @@ def batch_extra_lazy(iterable, batchsize):
     >>> map(tuple, batch_extra_lazy(range(5), 2))
     [(0, 1), (2, 3), (4,)]
     """
-
     sourceiter = iter(iterable)
     while True:
         batchiter = islice(sourceiter, batchsize)

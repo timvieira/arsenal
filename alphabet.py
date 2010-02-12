@@ -4,7 +4,7 @@ from flipdict import Flipdict
 class Alphabet(object):
     def __init__(self):
         self.mapping = Flipdict()
-        self.i = 1
+        self.i = 0
         self.frozen = False
     def freeze(self):
         self.frozen = True
@@ -21,3 +21,5 @@ class Alphabet(object):
             return self.mapping[k]
     def __iter__(self):
         return iter(self.mapping)
+    def __len__(self):
+        return len(self.mapping)

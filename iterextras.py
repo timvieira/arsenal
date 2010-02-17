@@ -261,52 +261,53 @@ def sliding_window(iterable, k):
 
 ## TODO: add an option for changing the size
 def iterview(x, every_k=None):
-   """
-   iterator which prints its progress to *stderr*.
-   """
-   WIDTH = 70
-
-   def plainformat(n, lenx):
-       return '%5.1f%% (%*d/%d)' % ((float(n)/lenx)*100, len(str(lenx)), n, lenx)
-
-   def bars(size, n, lenx):
-       val = int((float(n)*size)/lenx + 0.5)
-       if size - val:
-           spacing = ">" + (" "*(size-val))[1:]
-       else:
-           spacing = ""
-       return "[%s%s]" % ("="*val, spacing)
-
-   def eta(elapsed, n, lenx):
-       if n == 0:
-           return '--:--:--'
-       if n == lenx:
-           secs = int(elapsed)
-       else:
-           secs = int((elapsed/n) * (lenx-n))
-       mins, secs = divmod(secs, 60)
-       hrs, mins = divmod(mins, 60)
-       return '%02d:%02d:%02d' % (hrs, mins, secs)
-
-   def format(starttime, n, lenx):
-       out = plainformat(n, lenx) + ' '
-       if n == lenx:
-           end = '     '
-       else:
-           end = ' ETA '
-       end += eta(time.time() - starttime, n, lenx)
-       out += bars(WIDTH - len(out) - len(end), n, lenx)
-       out += end
-       return out
-
-   starttime = time.time()
-   lenx = len(x)
-   for n, y in enumerate(x):
-       if every_k is None or n % every_k == 0:
-           sys.stderr.write('\r' + format(starttime, n, lenx))
-       yield y
-   sys.stderr.write('\r' + format(starttime, n+1, lenx) + '\n')
-
+    """
+    iterator which prints its progress to *stderr*.
+    """
+    WIDTH = 70
+ 
+    def plainformat(n, lenx):
+        return '%5.1f%% (%*d/%d)' % ((float(n)/lenx)*100, len(str(lenx)), n, lenx)
+ 
+    def bars(size, n, lenx):
+        val = int((float(n)*size)/lenx + 0.5)
+        if size - val:
+            spacing = ">" + (" "*(size-val))[1:]
+        else:
+            spacing = ""
+        return "[%s%s]" % ("="*val, spacing)
+ 
+    def eta(elapsed, n, lenx):
+        if n == 0:
+            return '--:--:--'
+        if n == lenx:
+            secs = int(elapsed)
+        else:
+            secs = int((elapsed/n) * (lenx-n))
+        mins, secs = divmod(secs, 60)
+        hrs, mins = divmod(mins, 60)
+        return '%02d:%02d:%02d' % (hrs, mins, secs)
+ 
+    def fmt(starttime, n, lenx):
+        out = plainformat(n, lenx) + ' '
+        if n == lenx:
+            end = '     '
+        else:
+            end = ' ETA '
+        end += eta(time.time() - starttime, n, lenx)
+        out += bars(WIDTH - len(out) - len(end), n, lenx)
+        out += end
+        return out
+ 
+    starttime = time.time()
+    lenx = len(x)
+    n = lenx
+    for n, y in enumerate(x):
+        if every_k is None or n % every_k == 0:
+            sys.stderr.write('\r' + fmt(starttime, n, lenx))
+        yield y
+    sys.stderr.write('\r' + fmt(starttime, n+1, lenx) + '\n')
+ 
 
 #_______________________________________________________________________________
 #

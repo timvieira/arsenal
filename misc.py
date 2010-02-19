@@ -14,28 +14,32 @@ def enable_debug_hook():
     sys.excepthook = debug_hook
 
 
+# the interpreter periodically does some stuff that slows you
+# down if you aren't using threads.
+#sys.setcheckinterval(10000)
+
 '''
 import os
 import sys
 import rlcompleter
 #import readline
-#readline.parse_and_bind("tab: complete") 
+#readline.parse_and_bind("tab: complete")
 
 def pdb_completer():
     # refresh the terminal
     #os.system("stty sane")
 
     def complete(self, text, state):
-        """return the next possible completion for text, using the current frame's
-           local namespace
-    
+        """return the next possible completion for text, using the current
+           frame's local namespace
+
            This is called successively with state == 0, 1, 2, ... until it
            returns None.  The completion should begin with 'text'.
         """
 
         print 'called complter...'
 
-        # keep a completer class, and make sure that it uses the current local scope 
+        # keep a completer class, make sure that it uses the current local scope
         if not hasattr(self, 'completer'):
             self.completer = rlcompleter.Completer(self.curframe.f_locals)
         else:
@@ -81,19 +85,18 @@ def deprecated(func):
             },
             category=DeprecationWarning,
             filename=func.func_code.co_filename,
-            lineno=func.func_code.co_firstlineno + 1
-        )
+            lineno=func.func_code.co_firstlineno + 1)
         return func(*args, **kwargs)
     return new_func
 
-  
+
 # TODO:
 # * I see a lot of potential in this function
 #   it might be a good place for code generation and other interesting things
 # * borrow ideas form the "decorator" module
 def decorator(d):
-    """ automatically preserves the-functions-being-decorated's signature 
-    
+    """ automatically preserves the-functions-being-decorated's signature
+
     Example:
     >>> def goo(f): return lambda *args, **kw: f(*args,**kw)
     >>> def foo(): pass
@@ -114,10 +117,6 @@ def decorator(d):
         return f2
     return f1
 
-
-# the interpreter periodically does some stuff that slows you
-# down if you aren't using threads.
-#sys.setcheckinterval(10000)
 
 @contextmanager
 def preserve_cwd():
@@ -167,16 +166,6 @@ def dumpobj(o, double_underscores=0):
         except:
             pass
     print ""
-
-def into_debugger(f):
-    """ hops into the pdb (debugger) if the decorated function dies via uncaught exception. """
-    @wraps(f)
-    def f1(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except:
-            pdb.post_mortem()
-    return wrap
 
 #_________________________________________________________________________
 #
@@ -246,9 +235,37 @@ def threaded(callback=lambda *args, **kwargs: None, daemonic=False):
         return inner
     return innerDecorator
 
+def dump_garbage():
+    """
+    show us what's the garbage about
+
+      # make a leak
+      l = []
+      l.append(l)
+      del l
+
+      # show the dirt ;-)
+      dump_garbage()
+
+    """
+    import gc
+    gc.enable()
+    gc.set_debug(gc.DEBUG_LEAK)
+
+    # force collection
+    print "GARBAGE:"
+    gc.collect()
+
+    print "\nGARBAGE OBJECTS:"
+    for x in gc.garbage:
+        s = str(x)
+        if len(s) > 80:
+            s = s[:80] + '.........'
+        print type(x),"\n    ", s
+
+
 def garbagecollect(f):
-    """ Decorate a function to invoke the garbage collecter after each
-    execution. """
+    """ Decorate a function to invoke the garbage collecter after each execution. """
     @wraps(f)
     def inner(*args, **kwargs):
         result = f(*args, **kwargs)
@@ -306,7 +323,7 @@ class memoize(object):
 ## TODO: automatically make a back-up of the pickle
 class memoize_persistent(object):
     """
-    cache a function's return value to avoid recalulation and save the 
+    cache a function's return value to avoid recalulation and save the
     cache (via pickle) at system exit so that it persists.
 
     WARNING: retrieves cache for functions which might not be equivalent
@@ -365,7 +382,7 @@ def htime(s):
 def sec2prettytime(diff, show_seconds=True):
     """Given a number of seconds, returns a string attempting to represent
     it as shortly as possible.
-    
+
     >>> sec2prettytime(100000)
     '1d3h46m40s'
     """
@@ -374,16 +391,16 @@ def sec2prettytime(diff, show_seconds=True):
     hours, diff = divmod(diff, 3600)
     minutes, seconds = divmod(diff, 60)
     x = []
-    if days: 
+    if days:
         x.append('%sd' % days)
-    if hours: 
+    if hours:
         x.append('%sh' % hours)
-    if minutes: 
+    if minutes:
         x.append('%sm' % minutes)
-    if show_seconds and seconds: 
+    if show_seconds and seconds:
         x.append('%ss' % seconds)
     if not x:
-        if show_seconds: 
+        if show_seconds:
             x = ['%ss' % seconds]
         else:
             x = ['0m']
@@ -396,7 +413,7 @@ def print_elapsed_time():
     def handler():
         secs = time.clock() - begin
         mins, secs = divmod(secs, 60)
-        hrs, mins = divmod(mins, 60)       
+        hrs, mins = divmod(mins, 60)
         print
         print '======================================================================'
         print 'Started on', time.strftime("%B %d, %Y at %I:%M:%S %p", started)
@@ -504,7 +521,7 @@ def assert_throws_ctx(*exc):
 
     >>> with assert_throws_ctx(None):
     ...     pass
-    
+
     >>> with assert_throws_ctx(ZeroDivisionError):
     ...     pass
     Traceback (most recent call last):
@@ -586,7 +603,7 @@ def debugx(obj):
       >>> debugx(somevar)
       somevar: somevalue
 
-    Warning: this should only be used for debugging because ir relies on 
+    Warning: this should only be used for debugging because ir relies on
     introspection, which can be really slow and sometimes even buggy.
     """
 
@@ -596,9 +613,9 @@ def debugx(obj):
 
     code = re.sub('debugx\((.*)\)', r'\1', code)
     print code + ':', obj
-    
 
-def marquee(txt='',width=78,mark='*'):
+
+def marquee(txt='', width=78, mark='*'):
     """
     Return the input string centered in a 'marquee'.
 
@@ -611,7 +628,7 @@ def marquee(txt='',width=78,mark='*'):
     nmark = (width-len(txt)-2)/len(mark)/2
     if nmark < 0: nmark =0
     marks = mark*nmark
-    return '%s %s %s' % (marks,txt,marks)
+    return '%s %s %s' % (marks, txt, marks)
 
 
 if __name__ == '__main__':
@@ -681,12 +698,12 @@ if __name__ == '__main__':
 
         x = 15
         debug_expr('x')
-    
+
         debugx(x)
         debugx(x**2 + 2*x + 3)
         f = lambda x: x**2
         debugx(f(x))
-        
+
 
         print '-----------------------------------------------'
         doctest.run_docstring_examples("""
@@ -702,9 +719,8 @@ if __name__ == '__main__':
         '16m40s'
         >>> sec2prettytime(10000)
         '2h46m40s'
-        """, globals(), verbose=True)
-    
+        """, globals(), verbose=1)
+
 
     run_tests()
     doctest.testmod(verbose=True)
-

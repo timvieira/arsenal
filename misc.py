@@ -1,6 +1,9 @@
 from __future__ import with_statement, nested_scopes, generators
 
-import re, os, gc, sys, pdb, time, atexit, inspect, weakref, threading, cPickle as pickle, warnings
+import re, os, gc, sys, pdb, time, atexit, inspect, weakref, threading, warnings
+
+import cPickle as pickle
+import subprocess, tempfile
 
 from functools import wraps, partial
 from StringIO import StringIO
@@ -17,6 +20,28 @@ def enable_debug_hook():
 # the interpreter periodically does some stuff that slows you
 # down if you aren't using threads.
 #sys.setcheckinterval(10000)
+
+
+def use_pager(s, pager=None):
+    """Use the pager passed in and send string s through it."""
+    pager = os.environ.get('PAGER', 'less')  # default pager is less
+    p = subprocess.Popen([pager], stdin=subprocess.PIPE)
+    p.communicate(s)
+
+
+def edit_with_editor(s=None):
+    """
+    Open os.environ['EDITOR'] and load in text s.
+
+    Returns the text typed in the editor, after running strip().
+    """
+    # This is the first time I've used with!
+    with tempfile.NamedTemporaryFile() as t:
+        if s:
+            t.write(str(s))
+            t.seek(0)
+        subprocess.call([os.environ.get('EDITOR', 'vi'), t.name])
+        return t.read().strip()
 
 '''
 import os

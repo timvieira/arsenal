@@ -70,3 +70,5 @@ if __name__ == '__main__':
     print 'c.y:', c.y
     
     import inheritance_diagram
+    inheritance_diagram.MROgraph(D)
+    

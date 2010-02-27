@@ -99,17 +99,6 @@ def ceil(stream):
         M = max(M, s)
         yield M
 
-def accumulate(stream):
-    """Generate partial sums from the stream.
-
-    >>> accu = accumulate([1, 2, 3, 4])
-    >>> assert list(accu) == [1, 3, 6, 10]
-    """
-    total = 0
-    for s in stream:
-        total += s
-        yield total
-
 def diff(s, t):
     """Generate the differences between two streams
 
@@ -131,6 +120,48 @@ def last(stream, default=None):
     for s in stream:
         pass
     return s
+
+def accumulate(stream):
+    """Generate partial sums from the stream.
+
+    >>> accu = accumulate([1, 2, 3, 4])
+    >>> assert list(accu) == [1, 3, 6, 10]
+    """
+    total = 0
+    for s in stream:
+        total += s
+        yield total
+
+
+def rolling_average_reccurence(stream):
+    """General the rolling average of a stream using
+    the recurrence:
+
+        a[i] = (x[i] + i*a) / (i+1)
+
+    >>> list(rolling_average_reccurence(range(5)))
+    [0, 0.5, 1.0, 1.5, 2.0]
+    """
+    stream = enumerate(stream)
+    a = stream.next()[1]
+    yield a
+    for i, x in stream:
+        a = (x + i*a) * 1.0 / (i+1)
+        yield a
+
+
+def rolling_average(stream):
+    """General the rolling average of a stream.
+
+    >>> list(rolling_average(range(5)))
+    [0.0, 0.5, 1.0, 1.5, 2.0]
+    """
+    acc = 0
+    N = 0
+    for x in stream:
+        acc += x
+        N += 1
+        yield acc * 1.0 / N
 
 
 # TODO: can we be lazier? require fewer passes thru X?
@@ -410,6 +441,7 @@ def iunzip(iterable, n=None):
     selector = lambda index: lambda item: getitem(item, index)
     return [imap(selector(i), it) for i,it in izip(count(), iter_tees)]
 
+
 if __name__ == "__main__":
 
     a0,b0,c0 = range(1, 10), range(21, 30), range(81, 90)
@@ -425,4 +457,13 @@ if __name__ == "__main__":
             time.sleep(0.01)
     #example_iterview()
 
-    import doctest; doctest.testmod(verbose=True)
+
+    import numpy as np
+    d = (np.random.rand(20, 3) - 0.5) * 100
+    A = np.average(d, axis=0)
+    a = last(rolling_average(d))
+    assert np.linalg.norm(A - a) < 1e-10  # roughly zero difference
+
+
+    import doctest; doctest.testmod(verbose=0)
+

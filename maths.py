@@ -6,11 +6,15 @@ from operator import itemgetter
 
 INF = 1.0e40
 
+infinity = float('infinity')
+negative_infinity = float('-infinity')
+
+
 def exp(x):
     try:
         return math_exp(x)
     except OverflowError:
-        return INF
+        return infinity
 
 def log(x):
     if x < 1e-10:
@@ -40,6 +44,10 @@ def argmin2(f, seq):
 
 
 log_of_2 = math.log(2)
+
+def entropy(p):
+    """Calculate entropy of a discrete random variable with given probabilities."""
+    return -sum(pi*log(pi) for pi in p if p > 0) / log_of_2
 
 def kl_divergence(p, q):
     """ Compute KL divergence of two vectors, K(p || q).
@@ -121,14 +129,10 @@ def normalize_log_prob_inplace(a):
 
 def logsumexp(x):
     """
-    The Log-sum-exp trick:
+    The log-sum-exp trick:
       log(sum(exp(xi) for xi in X)) <=> log(sum(exp(xi-B) for xi in X)) + B   for any B
 
-    picking B = max(X), can improve the numerical stability of this 
-    computation dramatically.
-
-    This computation is common enough to where its something you might want
-    to have handy.
+    picking B = max(X), can help prevent problems with numerical overflow. 
     """
     B = max(x)
     return log(sum(x-B for x in x)) + B
@@ -170,7 +174,7 @@ def sum_log_prob(vals):
     """
     LOGTOLERANCE = 30.0
     N = len(vals)
-    M = -INF
+    M = -infinity
     maxidx = 0
     for i in xrange(N):
         if vals[i] > M:
@@ -189,5 +193,12 @@ def sum_log_prob(vals):
             intermediate += exp(vals[i] - M)
     return M + log(1.0 + intermediate) if anyAdded else M
 
+
+
+
 if __name__ == '__main__':
     import doctest; doctest.testmod()
+
+    assert entropy((0.5, 0.5)) == 1.0
+    assert abs(entropy((0.75, 0.25)) - 0.8112781244) < 1e-10
+    assert abs(entropy((0.1, 0.1, 0.8)) == 0.9219280948) < 1e-10

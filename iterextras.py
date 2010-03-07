@@ -11,6 +11,22 @@ from random import shuffle
 #     >> p.update(10)
 #     10.0%
 
+
+
+def grouper(n, iterable, fillvalue=None):
+    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+    args = [iter(iterable)] * n
+    return izip_longest(fillvalue=fillvalue, *args)
+
+
+def compress(data, selectors):
+    "compress('ABCDEF', [1,0,1,0,1,1]) --> A C E F"
+    return (d for d, s in izip(data, selectors) if s)
+
+
+
+
+
 import heapq
 
 def imerge(*iterables):
@@ -342,6 +358,19 @@ def iterview(x, every_k=None):
 
 #_______________________________________________________________________________
 #
+
+def enumerate2(iterable, start=0):
+    return izip(count(start), iterable)
+
+def consume(iterator, n):
+    "Advance the iterator n-steps ahead. If n is none, consume entirely."
+    # The technique uses objects that consume iterators at C speed.
+    if n is None:
+        # feed the entire iterator into a zero-length deque
+        collections.deque(iterator, maxlen=0)
+    else:
+        # advance to the emtpy slice starting at position n
+        next(islice(iterator, n, n), None)
 
 def take(n, seq):
     """ Return the first n items in a sequence. """

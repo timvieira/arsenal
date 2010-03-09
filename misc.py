@@ -2,6 +2,9 @@ from __future__ import with_statement, nested_scopes, generators
 
 import re, os, gc, sys, pdb, time, atexit, inspect, weakref, threading, warnings
 
+import BaseHTTPServer
+import webbrowser
+
 import cPickle as pickle
 import subprocess, tempfile
 
@@ -20,6 +23,23 @@ def enable_debug_hook():
 # the interpreter periodically does some stuff that slows you
 # down if you aren't using threads.
 #sys.setcheckinterval(10000)
+
+def LoadInBrowser(html):
+    """Display html in the default web browser without creating a temp file.
+
+    Instantiates a trivial http server and calls webbrowser.open with a URL
+    to retrieve html from that server.
+    """
+
+    class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+        def do_GET(self):
+            bufferSize = 1024*1024
+            for i in xrange(0, len(html), bufferSize):
+                self.wfile.write(html[i:i+bufferSize])
+
+    server = BaseHTTPServer.HTTPServer(('127.0.0.1', 0), RequestHandler)
+    webbrowser.open('http://127.0.0.1:%s' % server.server_port)
+    server.handle_request()
 
 
 def use_pager(s, pager=None):

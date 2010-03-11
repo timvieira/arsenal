@@ -60,7 +60,7 @@ def edit_with_editor(s=None):
         if s:
             t.write(str(s))
             t.seek(0)
-        subprocess.call([os.environ.get('EDITOR', 'vi'), t.name])
+        subprocess.call([os.environ.get('EDITOR', 'nano'), t.name])
         return t.read().strip()
 
 '''
@@ -124,14 +124,12 @@ def deprecated(func):
 
     @wraps(func)
     def new_func(*args, **kwargs):
-        warnings.warn_explicit(
-            "Call to deprecated function %(funcname)s." % {
-                'funcname': func.__name__,
-            },
+        warnings.warn_explicit("Call to deprecated function %s." % func.__name__,
             category=DeprecationWarning,
             filename=func.func_code.co_filename,
             lineno=func.func_code.co_firstlineno + 1)
         return func(*args, **kwargs)
+
     return new_func
 
 
@@ -163,38 +161,70 @@ def decorator(d):
     return f1
 
 
-@contextmanager
-def preserve_cwd():
-    """ context manager to preserve current working directory
+## def preserve_cwd_dec(f):
+##     """ decorator to preserve current working directory
+## 
+##     Usage example:
+##         >>> before = os.getcwd()
+##         >>> @preserve_cwd_dec
+##         ... def foo():
+##         ...     os.chdir('..')
+##         >>> before == os.getcwd()
+##         True
+##     """
+##     @wraps(f)
+##     def wrap(*args, **kwargs):
+##         with preserve_cwd():
+##             return f(*args, **kwargs)
+##     return wrap
+## 
+## 
+## @contextmanager
+## def preserve_cwd():
+##     """ context manager to preserve current working directory
+## 
+##     Usage example:
+##     """
+##     cwd = os.getcwd()
+##     yield
+##     os.chdir(cwd)
+
+class preserve_cwd(object):
+    """
+    context-manager which doubles as a decorator that preserve current 
+    working directory.
 
     Usage example:
+
+    As a decorator:
+        >>> before = os.getcwd()
+        >>> @preserve_cwd
+        ... def foo():
+        ...     os.chdir('..')
+        >>> before == os.getcwd()
+        True
+
+    As a context-manager:
         >>> before = os.getcwd()
         >>> with preserve_cwd():
         ...     os.chdir('..')
         >>> before == os.getcwd()
         True
+
     """
-    cwd = os.getcwd()
-    yield
-    os.chdir(cwd)
 
+    def __init__(self, f=None):
+        self.f = f
 
-def preserve_cwd_dec(f):
-    """ decorator to preserve current working directory
+    def __enter__(self):
+        self._cwd = os.getcwd()
 
-    Usage example:
-        >>> before = os.getcwd()
-        >>> @preserve_cwd_dec
-        ... def foo():
-        ...     os.chdir('..')
-        >>> before == os.getcwd()
-        True
-    """
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        with preserve_cwd():
-            return f(*args, **kwargs)
-    return wrap
+    def __exit__(self, *args):
+        os.chdir(self._cwd)        
+
+    def __call__(self, *args, **kwargs):
+        with self:
+            return self.f(*args, **kwargs)
 
 #______________________________________________________________________________
 # Debugging utils
@@ -378,10 +408,9 @@ class memoize_persistent(object):
         self.func = func
         self.filename = '{self.func.__name__}.cache.pkl~'.format(self=self)
         self.dirty = False
-
         self.key = 0
-        self.load()
-
+        self.cache = {}
+        self.loaded = False
         atexit.register(self.save)
 
     def save(self):
@@ -392,6 +421,7 @@ class memoize_persistent(object):
             print "[ATEXIT] found nothing to save in {self.func.__name__}'s cache.".format(self=self)
 
     def load(self):
+        self.loaded = True
         loaded_key = None
         try:
             (cache, loaded_key) = pickle.load(file(self.filename,'r'))
@@ -406,6 +436,10 @@ class memoize_persistent(object):
                 print 'failed to load cache for {self.func.__name__}'.format(self=self)
 
     def __call__(self, *args):
+        # wait until you call the function to un-pickle
+        if not self.loaded:
+            self.load()
+
         try:
             if args in self.cache:
                 return self.cache[args]
@@ -693,7 +727,7 @@ if __name__ == '__main__':
 
         def test_preserve_cwd_dec():
             print 'test_preserve_cwd_dec:'
-            @preserve_cwd_dec
+            @preserve_cwd
             def foo():
                 os.chdir('..')
                 os.chdir('..')

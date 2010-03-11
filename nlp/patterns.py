@@ -150,3 +150,4 @@ if __name__ == '__main__':
     test_sentence('Mon. 3rd of February, 1990 , ',         'Mon. 3rd of February , 1990')
     test_sentence('Mon. 30th of February 1990 ',           'Mon. 30th of February 1990')
     test_sentence('th February 1990 , ',                   'February 1990')
+

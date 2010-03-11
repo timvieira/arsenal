@@ -415,10 +415,8 @@ def batch(iterable, batchsize=2):
     element will be shorter if there are items left over.
     batch(s, 2) -> [s0,s1], [s2,s3], [s4, s5], ...
 
-
     >>> list(batch(range(5), 2))
     [[0, 1], [2, 3], [4]]
-
     """
     current = []
     for item in iterable:

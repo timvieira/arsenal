@@ -13,12 +13,61 @@ from StringIO import StringIO
 from contextlib import contextmanager
 
 
+#def trace(f):
+#    def wrap(*args, **kw):
+#        print 'calling function: {f} with args: {args} kwargs: {kw}'.format(f=f, args=args, kw=kw)
+#        y = f(*args, **kw)
+#        print ' ->', y
+#        return y
+#    return wrap
+
+
 def enable_debug_hook():
     def debug_hook(*args):
         sys.__excepthook__(*args)
         pdb.pm()
     sys.excepthook = debug_hook
 
+from bsddb.db import DBPageNotFoundError
+import shelve
+class ShelfBasedCache(object):
+    """ cache a function's return value to avoid recalulation and save cache in a shelve. """
+    def __init__(self, func, key):
+        self.func = func
+        self.filename = '{self.func.__name__}.shelf~'.format(self=self)
+        self.cache = shelve.open(self.filename) #, writeback=True)
+        self.key = key
+        self.__name__ = 'ShelfBasedCache(%s)' % func.__name__
+    def __call__(self, *args):
+        p_args = self.key(args)
+
+        if self.cache.has_key(p_args):
+            return self.cache[p_args]
+        else:
+            self.cache[p_args] = value = self.func(*args)
+            self.cache.sync()
+            return value
+    def __del__(self):
+        self.cache.close()
+
+def persistent_cache(key):
+    def wrap(f):
+        return ShelfBasedCache(f, key)
+    return wrap
+
+
+'''
+@contextmanager
+def atomic():
+    """ hack for executing blocks of code atomically. """
+    try:
+        sys.setcheckinterval(sys.maxint)
+        # statements in this block are
+        # assured to run atomically
+        yield
+    finally:
+        sys.setcheckinterval(100)
+'''    
 
 # the interpreter periodically does some stuff that slows you
 # down if you aren't using threads.
@@ -348,6 +397,8 @@ def garbagecollect(f):
         return result
     return inner
 
+
+
 ## TODO: add option to suppress a some user-defined list of Exceptions
 def try_k_times(fn, args, k, pause=0.1):
     """ attempt to call fn up to k times with the args as arguments.
@@ -365,13 +416,14 @@ def try_k_times(fn, args, k, pause=0.1):
     return output
 
 def try_k_times_decorator(k, pause=0.1):
-    @wraps(fn)
     def wrap2(fn):
         @wraps(fn)
         def wrap(*args):
             return try_k_times(fn, args, k, pause=pause)
         return wrap
     return wrap2
+
+
 
 # TODO:
 #  * add option to pass a reference to another cache (maybe memcached client)
@@ -451,56 +503,6 @@ class memoize_persistent(object):
             # uncachable -- for instance, passing a list as an argument.
             raise TypeError('uncachable instance passed to memoized function.')
 
-def htime(s):
-    """htime(x) -> (days, hours, min, seconds)"""
-    m, s = divmod(s, 60)
-    h, m = divmod(min, 60)
-    d, h = divmod(h, 24)
-    return int(d), int(h), int(m), s
-
-def sec2prettytime(diff, show_seconds=True):
-    """Given a number of seconds, returns a string attempting to represent
-    it as shortly as possible.
-
-    >>> sec2prettytime(100000)
-    '1d3h46m40s'
-    """
-    diff = int(diff)
-    days, diff = divmod(diff, 86400)
-    hours, diff = divmod(diff, 3600)
-    minutes, seconds = divmod(diff, 60)
-    x = []
-    if days:
-        x.append('%sd' % days)
-    if hours:
-        x.append('%sh' % hours)
-    if minutes:
-        x.append('%sm' % minutes)
-    if show_seconds and seconds:
-        x.append('%ss' % seconds)
-    if not x:
-        if show_seconds:
-            x = ['%ss' % seconds]
-        else:
-            x = ['0m']
-    return ''.join(x)
-
-# TODO: use htime
-def print_elapsed_time():
-    begin = time.clock()
-    started = time.localtime()
-    def handler():
-        secs = time.clock() - begin
-        mins, secs = divmod(secs, 60)
-        hrs, mins = divmod(mins, 60)
-        print
-        print '======================================================================'
-        print 'Started on', time.strftime("%B %d, %Y at %I:%M:%S %p", started)
-        print 'Finished on', time.strftime("%B %d, %Y at %I:%M:%S %p", time.localtime())
-        print 'Total time: %02d:%02d:%02d' % (hrs, mins, secs)
-        print
-    atexit.register(handler)
-
 
 class Dispatch(threading.Thread):
     def __init__(self, f, *args, **kwargs):
@@ -552,7 +554,7 @@ def timelimit(timeout):
             if c.isAlive():
                 raise TimeoutError('took too long')
             if c.error:
-                raise c.error[0], c.error[1]
+                raise c.error[1]
             return c.result
         return _2
     return _1
@@ -694,13 +696,49 @@ def debugx(obj):
     print code + ':', obj
 
 
+
+
+
+def htime(s):
+    """htime(x) -> (days, hours, min, seconds)"""
+    m, s = divmod(s, 60)
+    h, m = divmod(min, 60)
+    d, h = divmod(h, 24)
+    return int(d), int(h), int(m), s
+
+def sec2prettytime(diff, show_seconds=True):
+    """Given a number of seconds, returns a string attempting to represent
+    it as shortly as possible.
+
+    >>> sec2prettytime(100000)
+    '1d3h46m40s'
+    """
+    diff = int(diff)
+    days, diff = divmod(diff, 86400)
+    hours, diff = divmod(diff, 3600)
+    minutes, seconds = divmod(diff, 60)
+    x = []
+    if days:
+        x.append('%sd' % days)
+    if hours:
+        x.append('%sh' % hours)
+    if minutes:
+        x.append('%sm' % minutes)
+    if show_seconds and seconds:
+        x.append('%ss' % seconds)
+    if not x:
+        if show_seconds:
+            x = ['%ss' % seconds]
+        else:
+            x = ['0m']
+    return ''.join(x)
+
 def marquee(txt='', width=78, mark='*'):
     """
     Return the input string centered in a 'marquee'.
 
     >>> marquee('hello', width=50)
     '********************* hello *********************'
-
     """
     if not txt:
         return (mark*width)[:width]
@@ -708,6 +746,23 @@ def marquee(txt='', width=78, mark='*'):
     if nmark < 0: nmark =0
     marks = mark*nmark
     return '%s %s %s' % (marks, txt, marks)
+
+
+# TODO: use htime and marquee
+def print_elapsed_time():
+    begin = time.clock()
+    started = time.localtime()
+    def handler():
+        secs = time.clock() - begin
+        mins, secs = divmod(secs, 60)
+        hrs, mins = divmod(mins, 60)
+        print
+        print '======================================================================'
+        print 'Started on', time.strftime("%B %d, %Y at %I:%M:%S %p", started)
+        print 'Finished on', time.strftime("%B %d, %Y at %I:%M:%S %p", time.localtime())
+        print 'Total time: %02d:%02d:%02d' % (hrs, mins, secs)
+        print
+    atexit.register(handler)
 
 
 if __name__ == '__main__':
@@ -755,13 +810,24 @@ if __name__ == '__main__':
 
         #---
 
-        @assert_throws(TimeoutError)
         def test_timed():
             print 'test_timed'
+
             @timelimit(1.0)
-            def sleepy_function(x):
-                time.sleep(x)
-            sleepy_function(3.0)
+            def sleepy_function(x): time.sleep(x)
+
+            with assert_throws_ctx(TimeoutError):
+                sleepy_function(3.0)
+            print 'sleepy_function(3.0): pass'
+
+            sleepy_function(0.2)
+            print 'sleepy_function(0.2): pass'
+
+            @timelimit(1)
+            def raises_errors(): 1/0
+            with assert_throws_ctx(ZeroDivisionError):
+                raises_errors()
+            print 'raises_errors(): pass'
 
         test_timed()
 
@@ -798,8 +864,8 @@ if __name__ == '__main__':
         '16m40s'
         >>> sec2prettytime(10000)
         '2h46m40s'
-        """, globals(), verbose=1)
+        """, globals(), verbose=0)
 
 
     run_tests()
-    doctest.testmod(verbose=True)
+    doctest.testmod(verbose=0)

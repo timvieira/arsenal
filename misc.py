@@ -1,17 +1,19 @@
-from __future__ import with_statement, nested_scopes, generators
+#from __future__ import with_statement, generators
 
-import re, os, gc, sys, pdb, time, atexit, inspect, weakref, threading, warnings
-
+import re, os, sys, time
+import gc
+import inspect
+import pdb
+import atexit
+import weakref
+import threading
+import warnings
 import BaseHTTPServer
 import webbrowser
-
-import cPickle as pickle
 import subprocess, tempfile
-
-from functools import wraps, partial
+from functools import wraps
 from StringIO import StringIO
 from contextlib import contextmanager
-
 
 #def trace(f):
 #    def wrap(*args, **kw):
@@ -21,53 +23,38 @@ from contextlib import contextmanager
 #        return y
 #    return wrap
 
+def deprecated(f):
+    """This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emitted
+    when the function is used."""
+
+    @wraps(f)
+    def new_func(*args, **kwargs):
+        warnings.warn_explicit("Call to deprecated function %s." % f.__name__,
+            category=DeprecationWarning,
+            filename=f.func_code.co_filename,
+            lineno=f.func_code.co_firstlineno + 1)
+        return f(*args, **kwargs)
+
+    return new_func
+
+
+import memoize as MEMOIZE
+for f in dir(MEMOIZE):
+    f = getattr(MEMOIZE, f)
+    try:
+        if f.__module__ == MEMOIZE.__name__:
+            exec '{f.__name__} = deprecated(MEMOIZE.{f.__name__})'.format(f=f)
+    except AttributeError:
+        pass
+del f, MEMOIZE
+
 
 def enable_debug_hook():
     def debug_hook(*args):
         sys.__excepthook__(*args)
         pdb.pm()
     sys.excepthook = debug_hook
-
-from bsddb.db import DBPageNotFoundError
-import shelve
-class ShelfBasedCache(object):
-    """ cache a function's return value to avoid recalulation and save cache in a shelve. """
-    def __init__(self, func, key):
-        self.func = func
-        self.filename = '{self.func.__name__}.shelf~'.format(self=self)
-        self.cache = shelve.open(self.filename) #, writeback=True)
-        self.key = key
-        self.__name__ = 'ShelfBasedCache(%s)' % func.__name__
-    def __call__(self, *args):
-        p_args = self.key(args)
-
-        if self.cache.has_key(p_args):
-            return self.cache[p_args]
-        else:
-            self.cache[p_args] = value = self.func(*args)
-            self.cache.sync()
-            return value
-    def __del__(self):
-        self.cache.close()
-
-def persistent_cache(key):
-    def wrap(f):
-        return ShelfBasedCache(f, key)
-    return wrap
-
-
-'''
-@contextmanager
-def atomic():
-    """ hack for executing blocks of code atomically. """
-    try:
-        sys.setcheckinterval(sys.maxint)
-        # statements in this block are
-        # assured to run atomically
-        yield
-    finally:
-        sys.setcheckinterval(100)
-'''    
 
 # the interpreter periodically does some stuff that slows you
 # down if you aren't using threads.
@@ -130,8 +117,7 @@ def pdb_completer():
            This is called successively with state == 0, 1, 2, ... until it
            returns None.  The completion should begin with 'text'.
         """
-
-        print 'called complter...'
+        print 'called completer...'
 
         # keep a completer class, make sure that it uses the current local scope
         if not hasattr(self, 'completer'):
@@ -140,12 +126,8 @@ def pdb_completer():
             self.completer.namespace = self.curframe.f_locals
         return self.completer.complete(text, state)
 
-
     # replace the Pdb class's complete method with ours
     Pdb = sys._getframe(2).f_globals['Pdb']
-    Pdb.complete = complete.__get__(Pdb)
-
-
     Pdb.complete = complete.__get__(Pdb)
 
     # set use_rawinput to 1 as tab completion relies on rawinput being used
@@ -164,22 +146,6 @@ def pdb_completer():
 ##         self.factArgs = factArgs
 ##     def __missing__(self, key):
 ##         self[key] = self.factory(*self.factArgs)
-
-
-def deprecated(func):
-    """This is a decorator which can be used to mark functions
-    as deprecated. It will result in a warning being emitted
-    when the function is used."""
-
-    @wraps(func)
-    def new_func(*args, **kwargs):
-        warnings.warn_explicit("Call to deprecated function %s." % func.__name__,
-            category=DeprecationWarning,
-            filename=func.func_code.co_filename,
-            lineno=func.func_code.co_firstlineno + 1)
-        return func(*args, **kwargs)
-
-    return new_func
 
 
 # TODO:
@@ -210,37 +176,64 @@ def decorator(d):
     return f1
 
 
-## def preserve_cwd_dec(f):
-##     """ decorator to preserve current working directory
-## 
-##     Usage example:
-##         >>> before = os.getcwd()
-##         >>> @preserve_cwd_dec
-##         ... def foo():
-##         ...     os.chdir('..')
-##         >>> before == os.getcwd()
-##         True
-##     """
-##     @wraps(f)
-##     def wrap(*args, **kwargs):
-##         with preserve_cwd():
-##             return f(*args, **kwargs)
-##     return wrap
-## 
-## 
-## @contextmanager
-## def preserve_cwd():
-##     """ context manager to preserve current working directory
-## 
-##     Usage example:
-##     """
-##     cwd = os.getcwd()
-##     yield
-##     os.chdir(cwd)
-
 class preserve_cwd(object):
     """
-    context-manager which doubles as a decorator that preserve current 
+    context-manager which doubles as a decorator that preserve current
+    working directory.
+
+    Usage example:
+
+    As a decorator:
+        >>> before = os.getcwd()
+        >>> @preserve_cwd
+        ... def foo():
+        ...     os.chdir('..')
+        >>> foo()
+        >>> before == os.getcwd()
+        True
+
+    As a context-manager:
+        >>> before = os.getcwd()
+        >>> with preserve_cwd():
+        ...     os.chdir('..')
+        >>> before == os.getcwd()
+        True
+    """
+    def __init__(self, f=None):
+        self.f = f
+
+    def __enter__(self):
+        self._cwd = os.getcwd()
+
+    def __exit__(self, *args):
+        os.chdir(self._cwd)
+
+    def __call__(self, *args, **kwargs):
+        with self:
+            return self.f(*args, **kwargs)
+
+'''
+from contextlib import GeneratorContextManager
+
+def contextmanager2(f):
+
+    @wraps(f)
+    def helper(decorated_f=None):
+
+        class xx(GeneratorContextManager):
+            def __call__(self, *args, **kw):
+                with self:
+                    return decorated_f(*args, **kw)
+
+        return xx(f())
+
+    return helper
+
+
+@contextmanager2
+def preserve_cwd():
+    """
+    context-manager which doubles as a decorator that preserve current
     working directory.
 
     Usage example:
@@ -259,37 +252,11 @@ class preserve_cwd(object):
         ...     os.chdir('..')
         >>> before == os.getcwd()
         True
-
     """
-
-    def __init__(self, f=None):
-        self.f = f
-
-    def __enter__(self):
-        self._cwd = os.getcwd()
-
-    def __exit__(self, *args):
-        os.chdir(self._cwd)        
-
-    def __call__(self, *args, **kwargs):
-        with self:
-            return self.f(*args, **kwargs)
-
-#______________________________________________________________________________
-# Debugging utils
-
-def dumpobj(o, double_underscores=0):
-    """Prints all the object's non-callable attributes.  If double_underscores
-    is false, it will skip attributes that begin with double underscores."""
-    print repr(o)
-    for a in [x for x in dir(o) if not callable(getattr(o, x))]:
-        if not double_underscores and a.startswith("__"):
-            continue
-        try:
-            print "  %20s: %s " % (a, getattr(o, a))
-        except:
-            pass
-    print ""
+    cwd = os.getcwd()
+    yield
+    os.chdir(cwd)
+'''
 
 #_________________________________________________________________________
 #
@@ -321,6 +288,7 @@ def ctx_redirect_io():
     sys.stdout = original_stdout
 
 
+
 def redirect_io(f):
     """
     redirect all of the output to standard out to a StringIO instance,
@@ -341,7 +309,6 @@ def redirect_io(f):
             wrap.io_target = io_target
             return f(*args, **kwargs)
     return wrap
-
 
 #______________________________________________________________________________
 # Function decorators
@@ -372,7 +339,6 @@ def dump_garbage():
       dump_garbage()
 
     """
-    import gc
     gc.enable()
     gc.set_debug(gc.DEBUG_LEAK)
 
@@ -422,86 +388,6 @@ def try_k_times_decorator(k, pause=0.1):
             return try_k_times(fn, args, k, pause=pause)
         return wrap
     return wrap2
-
-
-
-# TODO:
-#  * add option to pass a reference to another cache (maybe memcached client)
-class memoize(object):
-    """ cache a function's return value to avoid recalulation """
-    def __init__(self, func):
-        self.func = func
-        self.cache = {}
-    def __call__(self, *args):
-        try:
-            if args in self.cache:
-                return self.cache[args]
-            else:
-                self.cache[args] = value = self.func(*args)
-                return value
-        except TypeError:
-            # uncachable -- for instance, passing a list as an argument.
-            # Better to not cache than to blow up entirely.
-            return self.func(*args)
-    def __repr__(self):
-        """ Return the function's docstring. """
-        return self.func.__doc__
-
-## TODO: automatically make a back-up of the pickle
-class memoize_persistent(object):
-    """
-    cache a function's return value to avoid recalulation and save the
-    cache (via pickle) at system exit so that it persists.
-
-    WARNING: retrieves cache for functions which might not be equivalent
-             if a revision is made to the code which is used to compute it.
-    """
-    def __init__(self, func):
-        self.func = func
-        self.filename = '{self.func.__name__}.cache.pkl~'.format(self=self)
-        self.dirty = False
-        self.key = 0
-        self.cache = {}
-        self.loaded = False
-        atexit.register(self.save)
-
-    def save(self):
-        if self.cache and self.dirty:
-            pickle.dump((self.cache, self.key), file(self.filename,'wb'))
-            print '[ATEXIT] saved persistent cache for {self.func.__name__} to file "{self.filename}"'.format(self=self)
-        else:
-            print "[ATEXIT] found nothing to save in {self.func.__name__}'s cache.".format(self=self)
-
-    def load(self):
-        self.loaded = True
-        loaded_key = None
-        try:
-            (cache, loaded_key) = pickle.load(file(self.filename,'r'))
-        except IOError:
-            pass
-        finally:
-            if self.key == loaded_key:
-                self.cache = cache
-                print 'loaded cache for {self.func.__name__}'.format(self=self)
-            else:
-                self.cache = {}
-                print 'failed to load cache for {self.func.__name__}'.format(self=self)
-
-    def __call__(self, *args):
-        # wait until you call the function to un-pickle
-        if not self.loaded:
-            self.load()
-
-        try:
-            if args in self.cache:
-                return self.cache[args]
-            else:
-                self.dirty = True
-                self.cache[args] = value = self.func(*args)
-                return value
-        except TypeError:
-            # uncachable -- for instance, passing a list as an argument.
-            raise TypeError('uncachable instance passed to memoized function.')
 
 
 class Dispatch(threading.Thread):
@@ -570,26 +456,15 @@ def assert_throws(exc):
     >>> foo()
     Traceback (most recent call last):
         ...
-    Exception: TEST: foo did not raise required ZeroDivisionError.
+    AssertionError: did not raise required ZeroDivisionError. Got None instead.
     """
-    def wrap1(f):
+    def wrap(f):
         @wraps(f)
-        def wrap2(*args, **kwargs):
-            try:
-                f(*args, **kwargs)
-            except exc, e:
-                pass
-            except Exception, e:
-                print 'raised a different Exception than required:'
-                raise
-            else:
-                if exc is not None:
-                    raise Exception('TEST: %s did not raise required %s.' \
-                                        % (f.__name__, exc.__name__))
-                else:
-                    pass
+        def wrap2(*args,**kw):
+            with assert_throws_ctx(exc):
+                return f(*args,**kw)
         return wrap2
-    return wrap1
+    return wrap
 
 @contextmanager
 def assert_throws_ctx(*exc):
@@ -598,25 +473,25 @@ def assert_throws_ctx(*exc):
     arise with it's context.
 
     >>> with assert_throws_ctx(ZeroDivisionError):
-    ...     1 / 0
+    ...     1/0
 
     >>> with assert_throws_ctx(None):
+    ...     pass
+
+    >>> with assert_throws_ctx(None, ZeroDivisionError):
     ...     pass
 
     >>> with assert_throws_ctx(ZeroDivisionError):
     ...     pass
     Traceback (most recent call last):
         ...
-    Exception: did not raise required ZeroDivisionError. got None instead.
+    AssertionError: did not raise required ZeroDivisionError. Got None instead.
 
     >>> with assert_throws_ctx(AssertionError, ZeroDivisionError):
     ...     pass
     Traceback (most recent call last):
         ...
-    Exception: did not raise required AssertionError or ZeroDivisionError. got None instead.
-
-    >>> with assert_throws_ctx(None, ZeroDivisionError):
-    ...     pass
+    AssertionError: did not raise required AssertionError or ZeroDivisionError. Got None instead.
 
     """
 
@@ -626,7 +501,7 @@ def assert_throws_ctx(*exc):
         yield
     except exc:
         passed = True
-    except Exception, e:
+    except Exception as e:
         got = e
     else:
         # since None isn't realy an exception, we have to special case it.
@@ -635,28 +510,24 @@ def assert_throws_ctx(*exc):
     finally:
         if not passed:
             msg = ' or '.join(e.__name__ if e is not None else 'None' for e in exc)
-            raise Exception('did not raise required %s. got %s instead.' % (msg, got))
+            raise AssertionError('did not raise required %s. Got %s instead.' % (msg, got))
 
 
-class ondemand(property):
-    """A property that is loaded once from a function."""
-    def __init__(self, fget, doc=None):
-        property.__init__(self, fget=self.get, fdel=self.delete, doc=doc)
-        self.loadfunc = fget
-        self.values = weakref.WeakKeyDictionary()
-    def get(self, obj):
-        if obj not in self.values:
-            self.load(obj)
-        return self.values[obj]
-    def load(self, obj):
-        self.values[obj] = self.loadfunc(obj)
-    def delete(self, obj):
-        # XXX this may not be needed any more
+#______________________________________________________________________________
+# Debugging utils
+
+def dumpobj(o, double_underscores=0):
+    """Prints all the object's non-callable attributes.  If double_underscores
+    is false, it will skip attributes that begin with double underscores."""
+    print repr(o)
+    for a in [x for x in dir(o) if not callable(getattr(o, x))]:
+        if not double_underscores and a.startswith("__"):
+            continue
         try:
-            del self.values[obj]
+            print "  %20s: %s " % (a, getattr(o, a))
         except:
             pass
-
+    print ""
 
 # borrowed from IPython
 def debug_expr(expr, msg=''):
@@ -672,7 +543,6 @@ def debug_expr(expr, msg=''):
     val = eval(expr, cf.f_globals, cf.f_locals)
     print '[DEBUG:%s] %s%s -> %r' % (cf.f_code.co_name, msg, expr, val)
 
-
 def debugx(obj):
     """
     I often write debugging print statements which look like
@@ -687,17 +557,67 @@ def debugx(obj):
     Warning: this should only be used for debugging because ir relies on
     introspection, which can be really slow and sometimes even buggy.
     """
-
     cf = sys._getframe(1)
     ctx_lines = inspect.getframeinfo(cf).code_context
     code = ''.join(map(str.strip, ctx_lines))
-
     code = re.sub('debugx\((.*)\)', r'\1', code)
     print code + ':', obj
 
 
 
+#_______________________________________________________________________________
+#
 
+class ondemand(property):
+    """A property that is loaded once from a function."""
+    def __init__(self, fget, doc=None):
+        property.__init__(self, fget=self.get, fdel=self.delete, doc=doc)
+        self.loadfunc = fget
+        self.values = weakref.WeakKeyDictionary()
+    def get(self, obj):
+        if obj not in self.values:
+            self.load(obj)
+        return self.values[obj]
+    def load(self, obj):
+        self.values[obj] = self.loadfunc(obj)
+    def delete(self, obj):
+        try:
+            del self.values[obj]
+        except:
+            pass
+
+
+class cached_property(object):
+    """
+    Lazy-loading read/write property descriptor.
+    Value is stored locally in descriptor object. If value is not set when
+    accessed, value is computed using given function. Value can be cleared
+    by calling 'del'.
+    """
+
+    def __init__(self, func):
+        self._func = func
+        self._values = {}
+        self.__name__ = func.__name__
+        self.__doc__ = func.__doc__
+
+    def __get__(self, obj, obj_class):
+        if obj is None:
+            return obj
+        if obj not in self._values or self._values[obj] is None:
+            self._values[obj] = self._func(obj)
+        return self._values[obj]
+
+    def __set__(self, obj, value):
+        self._values[obj] = value
+
+    def __delete__(self, obj):
+        if self.__name__ in obj.__dict__:
+            del obj.__dict__[self.__name__]
+        self._values[obj] = None
+
+#_______________________________________________________________________________
+#
 
 def htime(s):
     """htime(x) -> (days, hours, min, seconds)"""
@@ -867,5 +787,48 @@ if __name__ == '__main__':
         """, globals(), verbose=0)
 
 
+        def test_lazy():
+            import pickle
+
+            global Foo
+            # class Foo needs to be in __main__ scope for pickling to work.
+            class Foo(object):
+                def __init__(self, x):
+                    self.x = x
+                @ondemand
+                def my_ondemand(self):
+                    print '\033[31mcomputing ondemand property\033[0m'
+                    return 'ON DEMAND'
+                @cached_property
+                def my_cached(self):
+                    print '\033[31mcomputing cached property\033[0m'
+                    return 'CACHED PROPERTY'
+
+            foo = Foo('XXX')
+            debugx(foo.my_ondemand)
+            debugx(foo.my_cached)
+            print '....'
+            debugx(foo.my_ondemand)
+            debugx(foo.my_cached)
+
+            print marquee('begin pickle')
+            foo_pkl = pickle.dumps(foo)
+            foo2 = pickle.loads(foo_pkl)
+            print foo_pkl
+            print marquee('end pickle')
+
+            debugx(foo2.my_ondemand)
+            debugx(foo2.my_cached)
+            print '....'
+            debugx(foo2.my_ondemand)
+            debugx(foo2.my_cached)
+
+        test_lazy()
+
     run_tests()
+
+
+
+
+
     doctest.testmod(verbose=0)

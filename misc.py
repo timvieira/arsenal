@@ -691,17 +691,13 @@ if __name__ == '__main__':
 
     def run_tests():
 
-        def test_cwd_ctx_manager():
-            print 'test_cwd_ctx_manager:'
+        def test_preserve_cwd():
             before = os.getcwd()
             with preserve_cwd():
                 os.chdir('..')
                 os.chdir('..')
             assert before == os.getcwd()
-            print 'pass.'
 
-        def test_preserve_cwd_dec():
-            print 'test_preserve_cwd_dec:'
             @preserve_cwd
             def foo():
                 os.chdir('..')
@@ -709,26 +705,20 @@ if __name__ == '__main__':
             cwd_before = os.getcwd()
             foo()
             assert os.getcwd() == cwd_before
-            print 'pass.'
 
-        test_cwd_ctx_manager()
-        test_preserve_cwd_dec()
+        test_preserve_cwd()
 
-        #---
 
         @assert_throws(ZeroDivisionError)
         def test_assert_throws1():
-            print 'test_assert_throws1'
-            0/0
+            1/0
         test_assert_throws1()
 
         @assert_throws(None)
         def test_assert_throws1():
-            print 'test_assert_throws1'
             return 2 + 2
         test_assert_throws1()
 
-        #---
 
         def test_timed():
             print 'test_timed'
@@ -751,24 +741,25 @@ if __name__ == '__main__':
 
         test_timed()
 
-        #---
+        def test_redirect_io():
+            @redirect_io
+            def foo(x):
+                print x
+            msg = 'hello there?'
+            foo(msg)
+            assert str(foo.io_target.getvalue().strip()) == msg
 
-        @redirect_io
-        def foo(x):
-            print x
-        msg = 'hello there?'
-        foo(msg)
-        assert str(foo.io_target.getvalue().strip()) == msg
+        test_redirect_io()
 
-
-        x = 15
-        debug_expr('x')
-
-        debugx(x)
-        debugx(x**2 + 2*x + 3)
-        f = lambda x: x**2
-        debugx(f(x))
-
+        def test_debug_expressions():
+            x = 15
+            debug_expr('x')
+    
+            debugx(x)
+            debugx(x**2 + 2*x + 3)
+            f = lambda x: x**2
+            debugx(f(x))
+        test_debug_expressions()
 
         print '-----------------------------------------------'
         doctest.run_docstring_examples("""
@@ -826,9 +817,6 @@ if __name__ == '__main__':
         test_lazy()
 
     run_tests()
-
-
-
 
 
     doctest.testmod(verbose=0)

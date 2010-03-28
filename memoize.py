@@ -1,3 +1,4 @@
+import atexit
 import shelve
 import cPickle as pickle
 from functools import wraps
@@ -5,27 +6,36 @@ from functools import wraps
 
 class ShelfBasedCache(object):
     """ cache a function's return value to avoid recalulation and save cache in a shelve. """
-    def __init__(self, func, key):
+    def __init__(self, func, key, None_is_bad=False):
         self.func = func
         self.filename = '{self.func.__name__}.shelf~'.format(self=self)
         self.cache = shelve.open(self.filename) #, writeback=True)
         self.key = key
+        self.None_is_bad = None_is_bad
         self.__name__ = 'ShelfBasedCache(%s)' % func.__name__
     def __call__(self, *args):
         p_args = self.key(args)
 
+        value = None
+        recompute = True
         if self.cache.has_key(p_args):
-            return self.cache[p_args]
-        else:
+            recompute = False
+            value = self.cache[p_args]
+            if value is None and self.None_is_bad:
+                recompute = True
+
+        if recompute:
             self.cache[p_args] = value = self.func(*args)
             self.cache.sync()
-            return value
+
+        return value
+
     def __del__(self):
         self.cache.close()
 
-def persistent_cache(key):
+def persistent_cache(key, None_is_bad=False):
     def wrap(f):
-        return ShelfBasedCache(f, key)
+        return ShelfBasedCache(f, key, None_is_bad=None_is_bad)
     return wrap
 
 

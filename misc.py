@@ -23,6 +23,19 @@ from contextlib import contextmanager
 #        return y
 #    return wrap
 
+## I'm not sure about this function yet..
+## def deep_import(name):
+##     """
+##     A version of __import__ that works as expected when using the form 
+##     'module.name' (returns the object corresponding to 'name', instead of 
+##     'module').
+##     """
+##     mod = __import__(name)
+##     components = name.split('.')
+##     for comp in components[1:]:
+##         mod = getattr(mod, comp)
+##     return mod
+
 def deprecated(f):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
@@ -30,15 +43,22 @@ def deprecated(f):
 
     @wraps(f)
     def new_func(*args, **kwargs):
+        try:
+            filename = f.func_code.co_filename
+            lineno = f.func_code.co_firstlineno + 1
+        except AttributeError:
+            filename = ''
+            lineno = 0
+
         warnings.warn_explicit("Call to deprecated function %s." % f.__name__,
-            category=DeprecationWarning,
-            filename=f.func_code.co_filename,
-            lineno=f.func_code.co_firstlineno + 1)
+                               category=DeprecationWarning,
+                               filename=filename,
+                               lineno=lineno)
         return f(*args, **kwargs)
 
     return new_func
 
-
+'''
 import memoize as MEMOIZE
 for f in dir(MEMOIZE):
     f = getattr(MEMOIZE, f)
@@ -48,7 +68,7 @@ for f in dir(MEMOIZE):
     except AttributeError:
         pass
 del f, MEMOIZE
-
+'''
 
 def enable_debug_hook():
     def debug_hook(*args):
@@ -516,18 +536,21 @@ def assert_throws_ctx(*exc):
 #______________________________________________________________________________
 # Debugging utils
 
-def dumpobj(o, double_underscores=0):
-    """Prints all the object's non-callable attributes.  If double_underscores
-    is false, it will skip attributes that begin with double underscores."""
+
+def dumpobj(o, callables=0, dbl_under=0):
     print repr(o)
-    for a in [x for x in dir(o) if not callable(getattr(o, x))]:
-        if not double_underscores and a.startswith("__"):
+    print 'instance of:', type(o).__name__
+    for a in dir(o):
+        if not callables and callable(getattr(o, a)):
+            continue
+        if not dbl_under and a.startswith('__'):
             continue
         try:
-            print "  %20s: %s " % (a, getattr(o, a))
+            print '  %20s: %s ' % (a, type(getattr(o,a)).__name__)
         except:
             pass
-    print ""
+    print
+
 
 # borrowed from IPython
 def debug_expr(expr, msg=''):
@@ -815,6 +838,18 @@ if __name__ == '__main__':
             debugx(foo2.my_cached)
 
         test_lazy()
+
+        class FooBurger(object):
+            x = 10
+            def __init__(self, y):
+                self.y = y
+            def span(self):
+                print 'spam:', y
+
+        dumpobj(FooBurger('WHY'))
+        dumpobj(FooBurger('WHY'), 1, 0)
+        dumpobj(FooBurger('WHY'), 0, 1)
+
 
     run_tests()
 

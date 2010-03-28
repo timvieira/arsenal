@@ -101,10 +101,14 @@ class Term:
 
 # IPython's own modules
 # Modified pdb which doesn't damage IPython's readline handling
-#from IPython import Debugger, ipapi
+try:
+    from IPython import Debugger, ipapi
+except ImportError:
+    #print "IPython's debugger is not available"
+    pass
 
 import PyColorize
-#from IPython.genutils import Term,error,info
+#from IPython.genutils import Term, error, info
 
 
 from ColorANSI import ColorSchemeTable, TermColors, ColorScheme
@@ -671,10 +675,15 @@ class ListTB(TBTools):
 #----------------------------------------------------------------------------
 
 # @author timv
-def enable():
+def enable(color_scheme='LightBG', tb_offset=0, long_header=0, call_pdb=0, include_vars=1):
     """ register VerboseTB as the system exception handler """
-    h = VerboseTB()
+    h = VerboseTB(color_scheme=color_scheme, 
+                  tb_offset=tb_offset,
+                  long_header=long_header,
+                  call_pdb=call_pdb,
+                  include_vars=include_vars)
     c = ColorTB()
+
     def exception_handler(exc_type, value, tb):
         if exc_type is not KeyboardInterrupt:
             h(exc_type, value, tb)
@@ -692,7 +701,7 @@ class VerboseTB(TBTools):
     traceback, to be used with alternate interpreters (because their own code
     would appear in the traceback)."""
 
-    def __init__(self,color_scheme='LightBG', tb_offset=0, long_header=0,
+    def __init__(self, color_scheme='LightBG', tb_offset=0, long_header=0,
                  call_pdb = 0, include_vars=1):
         """Specify traceback offset, headers and color scheme.
 
@@ -1193,8 +1202,8 @@ class AutoFormattedTB(FormattedTB):
 # A simple class to preserve Nathan's original functionality.
 class ColorTB(FormattedTB):
     """Shorthand to initialize a FormattedTB in Linux colors mode."""
-    def __init__(self, color_scheme='LightBG', call_pdb=0):
-        FormattedTB.__init__(self, color_scheme=color_scheme, call_pdb=call_pdb)
+    def __init__(self, color_scheme='LightBG', call_pdb=0, include_vars=True):
+        FormattedTB.__init__(self, color_scheme=color_scheme, call_pdb=call_pdb, include_vars=include_vars)
 
 #----------------------------------------------------------------------------
 # module testing (minimal)
@@ -1229,6 +1238,15 @@ if __name__ == "__main__":
     print ''
 
     handler = VerboseTB()
+    print '*** VerboseTB ***'
+    try:
+        print spam(1, (2, 3))
+    except:
+        apply(handler, sys.exc_info() )
+    print ''
+
+
+    handler = VerboseTB(include_vars=0)
     print '*** VerboseTB ***'
     try:
         print spam(1, (2, 3))

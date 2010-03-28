@@ -4,11 +4,15 @@ import math
 from math import exp as math_exp, log as math_log
 from operator import itemgetter
 
-INF = 1.0e40
+try:
+    INF = float('infinity')
+except:
+    INF = 1.0e40
 
-infinity = float('infinity')
-negative_infinity = float('-infinity')
-
+try:
+    NEG_INF = float('-infinity')
+except:
+    NEG_INF = 1.0e40
 
 def exp(x):
     try:
@@ -135,7 +139,8 @@ def logsumexp(x):
     picking B = max(X), can help prevent problems with numerical overflow. 
     """
     B = max(x)
-    return log(sum(x-B for x in x)) + B
+    return log(sum(x-B for x in x if x > NEG_INF)) + B
+
 
 def sum_two_log_probs(a, b):
     """

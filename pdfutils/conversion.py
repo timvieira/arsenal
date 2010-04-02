@@ -28,7 +28,7 @@ class file_specifier(object):
 ##   maybe a hook for pre/post-processing, useful for logging and zipping
 ##   check for success / failure
 def pdf2image(input_files, outputdir_fmt='{f.name}.d', output_format='{f.noext}.page.%d.png',
-              resolution=100, create_outputdir=True, testing=0, verbose=0):
+              resolution=200, create_outputdir=True, testing=0, verbose=0):
     """
     Wraps a system call to ghostscript, which takes a pdf or postscript file
     and renders it to a series of images.

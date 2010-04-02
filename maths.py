@@ -4,21 +4,14 @@ import math
 from math import exp as math_exp, log as math_log
 from operator import itemgetter
 
-try:
-    INF = float('infinity')
-except:
-    INF = 1.0e40
-
-try:
-    NEG_INF = float('-infinity')
-except:
-    NEG_INF = 1.0e40
+INF = float('infinity')
+NEG_INF = float('-infinity')
 
 def exp(x):
     try:
         return math_exp(x)
     except OverflowError:
-        return infinity
+        return INF
 
 def log(x):
     if x < 1e-10:
@@ -179,7 +172,7 @@ def sum_log_prob(vals):
     """
     LOGTOLERANCE = 30.0
     N = len(vals)
-    M = -infinity
+    M = -INF
     maxidx = 0
     for i in xrange(N):
         if vals[i] > M:
@@ -189,15 +182,14 @@ def sum_log_prob(vals):
     intermediate = 0.0
     cutoff = M - LOGTOLERANCE
     for i in xrange(maxidx):
-         if vals[i] >= cutoff:
-              anyAdded = True
-              intermediate += exp(vals[i] - M)
+        if vals[i] >= cutoff:
+            anyAdded = True
+            intermediate += exp(vals[i] - M)
     for i in xrange(maxidx + 1, N):
         if vals[i] >= cutoff:
             anyAdded = True
             intermediate += exp(vals[i] - M)
     return M + log(1.0 + intermediate) if anyAdded else M
-
 
 
 

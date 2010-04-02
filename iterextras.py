@@ -24,8 +24,45 @@ def compress(data, selectors):
     return (d for d, s in izip(data, selectors) if s)
 
 
+def cross_lower_triangle(it):
+    """
+    generate pairs of examples which are symmetric and not reflexive
+
+    cross_lower_triangle('abcd')
+        | a  b  c  d
+     ---|-----------
+      a | 0  0  0  0
+      b | 1  0  0  0
+      c | 2  3  0  0
+      d | 4  5  6  0
+    """
+    buf = []
+    for x in it:
+        for y in buf:
+            yield (x,y)
+        buf.append(x)
+
+def cross_triangle(it):
+    """
+    generate pairs of examples which are symmetric and reflexive
+    """
+    buf = []
+    for x in it:
+        buf.append(x)
+        for y in buf:
+            yield (x,y)
 
 
+
+if __name__ == '__main__':
+    X = [[0 for i in xrange(4)] for j in xrange(4)]
+    for (k,(i,j)) in enumerate(cross_lower_triangle(range(4))):
+        X[i][j] = k+1
+    target = [[0, 0, 0, 0],
+              [1, 0, 0, 0],
+              [2, 3, 0, 0],
+              [4, 5, 6, 0]]
+    assert X == target
 
 import heapq
 
@@ -312,10 +349,10 @@ def iterview(x, every_k=None):
     iterator which prints its progress to *stderr*.
     """
     WIDTH = 70
- 
+
     def plainformat(n, lenx):
         return '%5.1f%% (%*d/%d)' % ((float(n)/lenx)*100, len(str(lenx)), n, lenx)
- 
+
     def bars(size, n, lenx):
         val = int((float(n)*size)/lenx + 0.5)
         if size - val:
@@ -323,7 +360,7 @@ def iterview(x, every_k=None):
         else:
             spacing = ""
         return "[%s%s]" % ("="*val, spacing)
- 
+
     def eta(elapsed, n, lenx):
         if n == 0:
             return '--:--:--'
@@ -334,7 +371,7 @@ def iterview(x, every_k=None):
         mins, secs = divmod(secs, 60)
         hrs, mins = divmod(mins, 60)
         return '%02d:%02d:%02d' % (hrs, mins, secs)
- 
+
     def fmt(starttime, n, lenx):
         out = plainformat(n, lenx) + ' '
         if n == lenx:
@@ -345,7 +382,7 @@ def iterview(x, every_k=None):
         out += bars(WIDTH - len(out) - len(end), n, lenx)
         out += end
         return out
- 
+
     starttime = time.time()
     lenx = len(x)
     n = lenx
@@ -354,7 +391,7 @@ def iterview(x, every_k=None):
             sys.stderr.write('\r' + fmt(starttime, n, lenx))
         yield y
     sys.stderr.write('\r' + fmt(starttime, n+1, lenx) + '\n')
- 
+
 
 #_______________________________________________________________________________
 #
@@ -493,4 +530,3 @@ if __name__ == "__main__":
 
 
     import doctest; doctest.testmod(verbose=0)
-

@@ -15,7 +15,6 @@ class ShelfBasedCache(object):
         self.__name__ = 'ShelfBasedCache(%s)' % func.__name__
     def __call__(self, *args):
         p_args = self.key(args)
-
         value = None
         recompute = True
         if self.cache.has_key(p_args):
@@ -23,15 +22,15 @@ class ShelfBasedCache(object):
             value = self.cache[p_args]
             if value is None and self.None_is_bad:
                 recompute = True
-
         if recompute:
             self.cache[p_args] = value = self.func(*args)
             self.cache.sync()
-
         return value
-
-    def __del__(self):
-        self.cache.close()
+#    def __del__(self):
+#        try:
+#            self.cache.close()
+#        except:
+#            pass
 
 def persistent_cache(key, None_is_bad=False):
     def wrap(f):

@@ -287,7 +287,7 @@ def cross_product(A,B):
             yield (a,b)
 
 
-def unique_everseen(iterable, key=None):
+def unique(iterable, key=None):
     """ List unique elements, preserving order. Remember all elements ever seen. """
     # unique_everseen('AAAABBBCCDAABBB') --> A B C D
     # unique_everseen('ABBCcAD', str.lower) --> A B C D

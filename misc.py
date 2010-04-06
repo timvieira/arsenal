@@ -36,6 +36,7 @@ from contextlib import contextmanager
 ##         mod = getattr(mod, comp)
 ##     return mod
 
+
 def deprecated(f):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
@@ -58,23 +59,6 @@ def deprecated(f):
 
     return new_func
 
-'''
-import memoize as MEMOIZE
-for f in dir(MEMOIZE):
-    f = getattr(MEMOIZE, f)
-    try:
-        if f.__module__ == MEMOIZE.__name__:
-            exec '{f.__name__} = deprecated(MEMOIZE.{f.__name__})'.format(f=f)
-    except AttributeError:
-        pass
-del f, MEMOIZE
-'''
-
-def enable_debug_hook():
-    def debug_hook(*args):
-        sys.__excepthook__(*args)
-        pdb.pm()
-    sys.excepthook = debug_hook
 
 # the interpreter periodically does some stuff that slows you
 # down if you aren't using threads.
@@ -536,6 +520,11 @@ def assert_throws_ctx(*exc):
 #______________________________________________________________________________
 # Debugging utils
 
+def enable_debug_hook():
+    def debug_hook(*args):
+        sys.__excepthook__(*args)
+        pdb.pm()
+    sys.excepthook = debug_hook
 
 def dumpobj(o, callables=0, dbl_under=0):
     print repr(o)
@@ -550,7 +539,6 @@ def dumpobj(o, callables=0, dbl_under=0):
         except:
             pass
     print
-
 
 # borrowed from IPython
 def debug_expr(expr, msg=''):
@@ -585,8 +573,6 @@ def debugx(obj):
     code = ''.join(map(str.strip, ctx_lines))
     code = re.sub('debugx\((.*)\)', r'\1', code)
     print code + ':', obj
-
-
 
 #_______________________________________________________________________________
 #
@@ -693,9 +679,10 @@ def marquee(txt='', width=78, mark='*'):
 
 # TODO: use htime and marquee
 def print_elapsed_time():
+    "register an exit hook which prints the start, finish, and elapsed times of a script."
     begin = time.clock()
     started = time.localtime()
-    def handler():
+    def hook():
         secs = time.clock() - begin
         mins, secs = divmod(secs, 60)
         hrs, mins = divmod(mins, 60)
@@ -705,7 +692,7 @@ def print_elapsed_time():
         print 'Finished on', time.strftime("%B %d, %Y at %I:%M:%S %p", time.localtime())
         print 'Total time: %02d:%02d:%02d' % (hrs, mins, secs)
         print
-    atexit.register(handler)
+    atexit.register(hook)
 
 
 if __name__ == '__main__':

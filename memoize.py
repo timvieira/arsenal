@@ -40,6 +40,7 @@ def persistent_cache(key, None_is_bad=False):
 
 # TODO:
 #  * add option to pass a reference to another cache (maybe memcached client)
+#  * allow keyword args
 class memoize(object):
     """ cache a function's return value to avoid recalulation """
     def __init__(self, func):

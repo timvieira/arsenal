@@ -36,7 +36,6 @@ from contextlib import contextmanager
 ##         mod = getattr(mod, comp)
 ##     return mod
 
-
 def deprecated(f):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
@@ -58,6 +57,7 @@ def deprecated(f):
         return f(*args, **kwargs)
 
     return new_func
+
 
 
 # the interpreter periodically does some stuff that slows you
@@ -82,10 +82,9 @@ def LoadInBrowser(html):
     server.handle_request()
 
 
-def use_pager(s, pager=None):
+def use_pager(s, pager='less'):
     """Use the pager passed in and send string s through it."""
-    pager = os.environ.get('PAGER', 'less')  # default pager is less
-    p = subprocess.Popen([pager], stdin=subprocess.PIPE)
+    p = subprocess.Popen(pager, stdin=subprocess.PIPE)
     p.communicate(s)
 
 

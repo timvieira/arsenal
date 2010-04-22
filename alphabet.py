@@ -10,6 +10,13 @@ class Alphabet(object):
         self.frozen = True
     def unfreeze(self):
         self.frozen = False
+    @classmethod
+    def from_iterable(cls, it):
+        inst = cls()
+        for x in it:
+            inst[x]
+        inst.freeze()
+        return inst
     def __getitem__(self, k):
         try:
             return self.mapping[k]

@@ -94,11 +94,6 @@ class ShelfBasedCache(object):
             self.cache[p_args] = value = self.func(*args)
             self.cache.sync()
         return value
-#    def __del__(self):
-#        try:
-#            self.cache.close()
-#        except:
-#            pass
 
 def persistent_cache(key, None_is_bad=False):
     def wrap(f):

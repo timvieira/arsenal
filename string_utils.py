@@ -89,8 +89,6 @@ def remove_ligatures(text):
         text = text.replace(funny, plain)
     return text
 
-
-
 def convert_special_html_escapes(text):
     for plain, funny in (('ä','&auml;'), ('ö','&ouml;'), ('ü','&uuml;'), ('Ä','&Auml;'), ('Ö','&Ouml;'),
                          ('Ü','&Uuml;'), ('ß','&szlig;')):

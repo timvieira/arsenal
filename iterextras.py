@@ -12,17 +12,29 @@ from random import shuffle
 #     10.0%
 
 
+##def interleave(*iters):
+##    """ take several iterators and weave them together, much like roundrobin does except with different ordering. """
+
+# def iter_partition(it, weights, shuffle=None):
+#     """ partition an iterator according to weights, return an len(weights) iterators
+#
+#     ** Do this in an ONLINE FASHION so that we don't need to know the length of the iterator **
+#
+#     """
+#     if shuffle:
+#         it = list(it)
+#         random.shuffle(it)
+#     it = iter(it)
+
 
 def grouper(n, iterable, fillvalue=None):
     "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
     args = [iter(iterable)] * n
     return izip_longest(fillvalue=fillvalue, *args)
 
-
 def compress(data, selectors):
     "compress('ABCDEF', [1,0,1,0,1,1]) --> A C E F"
     return (d for d, s in izip(data, selectors) if s)
-
 
 def cross_lower_triangle(it):
     """
@@ -31,10 +43,10 @@ def cross_lower_triangle(it):
     cross_lower_triangle('abcd')
         | a  b  c  d
      ---|-----------
-      a | 0  0  0  0
-      b | 1  0  0  0
-      c | 2  3  0  0
-      d | 4  5  6  0
+      a | .  .  .  .
+      b | 1  .  .  .
+      c | 2  3  .  .
+      d | 4  5  6  .
     """
     buf = []
     for x in it:
@@ -43,16 +55,12 @@ def cross_lower_triangle(it):
         buf.append(x)
 
 def cross_triangle(it):
-    """
-    generate pairs of examples which are symmetric and reflexive
-    """
+    'generate pairs of examples which are symmetric and reflexive'
     buf = []
     for x in it:
         buf.append(x)
         for y in buf:
             yield (x,y)
-
-
 
 if __name__ == '__main__':
     X = [[0 for i in xrange(4)] for j in xrange(4)]
@@ -64,17 +72,18 @@ if __name__ == '__main__':
               [4, 5, 6, 0]]
     assert X == target
 
+
 import heapq
 
 def imerge(*iterables):
-    '''Merge multiple sorted inputs into a single sorted output.
+    """
+    Merge multiple sorted inputs into a single sorted output.
 
     Equivalent to:  sorted(itertools.chain(*iterables))
 
     >>> list(imerge([1,3,5,7], [0,2,4,8], [5,10,15,20], [], [25]))
     [0, 1, 2, 3, 4, 5, 5, 7, 8, 10, 15, 20, 25]
-
-    '''
+    """
     heappop, siftup, _StopIteration = heapq.heappop, heapq._siftup, StopIteration
 
     h = []
@@ -98,21 +107,6 @@ def imerge(*iterables):
             heappop(h)                  # remove empty iterator
         except IndexError:
             return
-
-
-##def interleave(*iters):
-##    """ take several iterators and weave them together, much like roundrobin does except with different ordering. """
-
-# def iter_partition(it, weights, shuffle=None):
-#     """ partition an iterator according to weights, return an len(weights) iterators
-#
-#     ** Do this in an ONLINE FASHION so that we don't need to know the length of the iterator **
-#
-#     """
-#     if shuffle:
-#         it = list(it)
-#         random.shuffle(it)
-#     it = iter(it)
 
 
 def floor(stream, baseline=None):
@@ -521,12 +515,10 @@ if __name__ == "__main__":
             time.sleep(0.01)
     #example_iterview()
 
-
     import numpy as np
     d = (np.random.rand(20, 3) - 0.5) * 100
     A = np.average(d, axis=0)
     a = last(rolling_average(d))
     assert np.linalg.norm(A - a) < 1e-10  # roughly zero difference
 
-
-    import doctest; doctest.testmod(verbose=0)
+    import doctest; doctest.testmod()

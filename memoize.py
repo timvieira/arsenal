@@ -109,6 +109,11 @@ class memoize(object):
     def __init__(self, func):
         self.func = func
         self.cache = {}
+        try:
+            self.__name__ = func.__name__
+            self.__doc__ = func.__doc__
+        except AttributeError:
+            pass
     def __call__(self, *args):
         try:
             if args in self.cache:
@@ -121,8 +126,7 @@ class memoize(object):
             # Better to not cache than to blow up entirely.
             return self.func(*args)
     def __repr__(self):
-        """ Return the function's docstring. """
-        return self.func.__doc__
+        return '<memoize(%r)>' % self.func
 
 
 ## TODO: automatically make a back-up of the pickle

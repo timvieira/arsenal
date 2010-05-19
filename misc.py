@@ -41,7 +41,8 @@ from contextlib import contextmanager
 def print_time():
     b4 = time.clock()
     yield
-    print sec2prettytime(time.clock() - b4)
+    #print sec2prettytime(time.clock() - b4)
+    print time.clock() - b4
 
 def deprecated(f):
     """This is a decorator which can be used to mark functions

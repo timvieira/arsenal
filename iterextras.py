@@ -338,7 +338,7 @@ def sliding_window(iterable, k):
 
 
 ## TODO: add an option for changing the size
-def iterview(x, every_k=None):
+def iterview(x, every_k=10):
     """
     iterator which prints its progress to *stderr*.
     """

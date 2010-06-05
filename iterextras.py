@@ -11,6 +11,38 @@ from random import shuffle
 #     >> p.update(10)
 #     10.0%
 
+def breadth_first(tree, children=iter, depth=-1, queue=None):
+    """Traverse the nodes of a tree in breadth-first order.
+    (No need to check for cycles.)
+    The first argument should be the tree root;
+    children should be a function taking as argument a tree node
+    and returning an iterator of the node's children.
+    """
+    if queue is None:
+        queue = []
+    queue.append(tree)
+    while queue:
+        node = queue.pop(0)
+        yield node
+        if depth != 0:
+            try:
+                queue += children(node)
+                depth -= 1
+            except (StopIteration, TypeError, IndexError):
+                pass
+
+def iterative_deepening(T, children, callback):
+    def visit(node,i):
+        if i == 0:
+            callback(node)
+        else:
+            for c in children(node):
+                visit(c,i-1)
+    i = 0
+    while 1:
+        visit(T,i)
+        i += 1
+
 
 ##def interleave(*iters):
 ##    """ take several iterators and weave them together, much like roundrobin does except with different ordering. """
@@ -412,7 +444,7 @@ def nth(iterable, n):
     return list(islice(iterable, n, n+1))
 
 def no(seq, pred=None):
-    """"
+    """
     the opposite of all, returns True if pred(x) is false for every element
     in the iterable.
     """
@@ -440,7 +472,6 @@ def flatten(listOfLists):
     """ (non-recursive) Flatten a list of lists. """
     return list(chain(*listOfLists))
 
-# the following are written by dmcc -- not in the real iterextras
 def batch(iterable, batchsize=2):
     """Yield a list of (up to) batchsize items at a time.  The last
     element will be shorter if there are items left over.

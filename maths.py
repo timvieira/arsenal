@@ -7,6 +7,43 @@ from operator import itemgetter
 INF = float('infinity')
 NEG_INF = float('-infinity')
 
+'''
+from math import sqrt
+
+def naive_hypot(x,y):
+    return sqrt(x*x + y*y)
+
+@deprecated("use numpy.hypot")
+def robust_hypot(x,y):
+    """
+    Compute sqrt(x*x + y*y) without risking overflow.
+
+    Lets pick a pick number:
+      >>> big = 1e300
+      >>> big            # still representable
+      1e300
+      >>> big*big        # but not "squarable"
+      inf
+
+    Obviously, naive `hypot` can't handle this one:
+      >>> hypot(1e300, 1.0e300)
+      inf
+
+    But what about `robust_hypot`:
+      >>> c = robust_hypot(big, big)
+      >>> c
+      1.4142135623730952e+300
+      >>> c == big*sqrt(2)    # 2*b*b == c*2  =>  c = sqrt(2)*b
+      True
+
+    Success!
+    """
+    M = max(abs(x), abs(y))
+    m = min(abs(x), abs(y))
+    r = m / M
+    return M*sqrt(1 + r*r)
+'''
+
 def exp(x):
     try:
         return math_exp(x)

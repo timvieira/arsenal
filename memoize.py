@@ -138,9 +138,9 @@ class memoize_persistent(object):
     WARNING: retrieves cache for functions which might not be equivalent
              if a revision is made to the code which is used to compute it.
     """
-    def __init__(self, func):
+    def __init__(self, func, filename=None):
         self.func = func
-        self.filename = '{self.func.__name__}.cache.pkl~'.format(self=self)
+        self.filename = filename or '{self.func.__name__}.cache.pkl~'.format(self=self)
         self.dirty = False
         self.key = 0
         self.cache = {}

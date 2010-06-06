@@ -98,16 +98,18 @@ class MROgraph(object):
         return self.textrepr
 
 
-def testHierarchy(**options):
-    class M(type): pass # metaclass
-    class F(object): pass
-    class E(object): pass
-    class D(object): pass
-    class G(object): __metaclass__ = M
-    class C(F,D,G): pass
-    class B(E,D): pass
-    class A(B,C): pass
-    return MROgraph(A,M,**options)
 
 if __name__ == "__main__":
-    testHierarchy() # generates a postscript diagram of A and M hierarchies
+
+    def example():
+        class M(type): pass # metaclass
+        class F(object): pass
+        class E(object): pass
+        class D(object): pass
+        class G(object): __metaclass__ = M
+        class C(F,D,G): pass
+        class B(E,D): pass
+        class A(B,C): pass
+        print MROgraph(A,M)
+
+    example()

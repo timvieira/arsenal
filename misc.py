@@ -67,7 +67,6 @@ def deprecated(f):
     return new_func
 
 
-
 # the interpreter periodically does some stuff that slows you
 # down if you aren't using threads.
 #sys.setcheckinterval(10000)

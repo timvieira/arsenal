@@ -11147,7 +11147,6 @@ Sweatman
 Studebaker
 Streets
 Stennett
-States
 Starrett
 Stannard
 Stalvey
@@ -21502,7 +21501,6 @@ Ishikawa
 Irey
 Ingerson
 Indelicato
-In
 Huntzinger
 Huisman
 Huett
@@ -69520,7 +69518,6 @@ Oger
 Ogarro
 Ofsak
 Oflynn
-Off
 Ofer
 Oelze
 Oehm
@@ -69581,7 +69578,6 @@ Nowosielski
 Novickis
 Novi
 Novencido
-Novel
 Novad
 Noujaim
 Notoma

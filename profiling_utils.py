@@ -5,6 +5,17 @@ from cStringIO import StringIO
 # TODO: this will be a good module to include an easy api for the visualization
 # stuff like gprof2dot.py, pyprof2calltree.py
 
+import os, pstats, cProfile
+def profile_viz(cmd, globalz, localz):
+    out = 'profile.tmp~'    
+    cProfile.runctx(cmd, globalz, localz, out)
+    stats = pstats.Stats(out)
+    stats.strip_dirs()               # Clean up filenames for the report
+    stats.sort_stats('cumulative')   # sort by the cumulative time
+    stats.print_stats()
+    # for more on the viz check out: http://code.google.com/p/jrfonseca/wiki/Gprof2Dot
+    os.system('gprof2dot.py -f pstats %s | dot -Tpng -o profile.png && eog profile.png &' % out)
+
 def profile(f, *args, **kw):
     """
     Profiles function `f` and returns a tuple containing its output

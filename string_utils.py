@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 
 # native, HTML, default Unicode (Code page 850), Unicode combined Character, Windows-1250
 """

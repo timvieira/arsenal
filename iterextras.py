@@ -178,6 +178,16 @@ def ceil(stream):
         M = max(M, s)
         yield M
 
+def iter_length(it):
+    """
+    Calculate the length or an iterator
+    >>> iter_length(xrange(100))
+    100
+    >>> iter_length(None for _ in xrange(100))
+    100
+    """
+    return sum(1 for _ in it)
+
 def diff(s, t):
     """Generate the differences between two streams
 
@@ -412,6 +422,8 @@ def iterview(x, every_k=10):
     starttime = time.time()
     lenx = len(x)
     n = lenx
+    if lenx == 0:
+        raise StopIteration
     for n, y in enumerate(x):
         if every_k is None or n % every_k == 0:
             sys.stderr.write('\r' + fmt(starttime, n, lenx))

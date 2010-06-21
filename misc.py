@@ -58,7 +58,7 @@ def deprecated(f):
             filename = ''
             lineno = 0
 
-        warnings.warn_explicit("Call to deprecated function %s." % f.__name__,
+        warnings.warn_explicit("function %s is deprecated." % f.__name__,
                                category=DeprecationWarning,
                                filename=filename,
                                lineno=lineno)
@@ -609,7 +609,6 @@ class cached_property(object):
     accessed, value is computed using given function. Value can be cleared
     by calling 'del'.
     """
-
     def __init__(self, func):
         self._func = func
         self._values = {}
@@ -649,9 +648,7 @@ def nthstr(n):
     ['91st', '92nd', '93rd', '94th', '99th', '100th', '101st', '102nd']
     >>> [nthstr(x) for x in [111, 112, 113, 114, 115]]
     ['111th', '112th', '113th', '114th', '115th']
-
-    """
-    
+    """    
     assert n >= 0
     if n % 100 in [11, 12, 13]: return '%sth' % n
     return {1: '%sst', 2: '%snd', 3: '%srd'}.get(n % 10, '%sth') % n

@@ -1,7 +1,9 @@
 from numpy import array, log, dot, abs as np_abs
 
-from scipy.maxentropy import logsumexp
-
+try:
+    from scipy.maxentropy import logsumexp
+except ImportError:
+    pass
 
 log_of_2 = log(2)
 

@@ -4,6 +4,15 @@ import math
 from math import exp as math_exp, log as math_log
 from operator import itemgetter
 
+
+def deprecated(msg):
+    def wrapper2(f):
+        def wrapper(*args, **kw):
+            raise DeprecationWarning('function %s is deprecated %s' % (f.__name__, msg))
+        return wrapper
+    return wrapper2
+
+
 INF = float('infinity')
 NEG_INF = float('-infinity')
 
@@ -50,6 +59,7 @@ def exp(x):
     except OverflowError:
         return INF
 
+# should use scipy.maxentropy.robustlog
 def log(x):
     if x < 1e-10:
         return 0.0
@@ -81,7 +91,7 @@ log_of_2 = math.log(2)
 
 def entropy(p):
     """Calculate entropy of a discrete random variable with given probabilities."""
-    return -sum(pi*log(pi) for pi in p if p > 0) / log_of_2
+    return -sum(pi*log(pi) for pi in p if pi > 0) / log_of_2
 
 def kl_divergence(p, q):
     """ Compute KL divergence of two vectors, K(p || q).
@@ -172,6 +182,7 @@ def logsumexp(x):
     return log(sum(x-B for x in x if x > NEG_INF)) + B
 
 
+@deprecated("use numpy.logaddexp instead.")
 def sum_two_log_probs(a, b):
     """
     Returns the sum of two doubles expressed in log space
@@ -187,6 +198,7 @@ def sum_two_log_probs(a, b):
     else:
         return b + log(1 + exp(a-b))
 
+@deprecated("use numpy.logaddexp *with NEGATIVE numbers* instead.")
 def subtract_log_prob(a, b):
     """ Returns the difference of two doubles expressed in log space """
     return a + log(1 - exp(b-a))
@@ -227,7 +239,6 @@ def sum_log_prob(vals):
             anyAdded = True
             intermediate += exp(vals[i] - M)
     return M + log(1.0 + intermediate) if anyAdded else M
-
 
 
 if __name__ == '__main__':

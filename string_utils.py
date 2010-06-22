@@ -2,6 +2,10 @@
 
 import re
 
+def PRE(x):
+    return '<pre>' +  x.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;') + '</pre>'
+
+
 # native, HTML, default Unicode (Code page 850), Unicode combined Character, Windows-1250
 """
 _recodings = {'ae': ['ä', u'ä', '&auml;', '\u00E4', u'\u00E4', '\u0308a', '\xc3\xa4'],

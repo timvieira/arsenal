@@ -3,7 +3,7 @@
 import re
 
 def PRE(x):
-    return '<pre>' +  x.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;') + '</pre>'
+    return '<pre>' +  x.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;') + '</pre>'
 
 
 # native, HTML, default Unicode (Code page 850), Unicode combined Character, Windows-1250

@@ -211,6 +211,7 @@ class preserve_cwd(object):
     """
     def __init__(self, f=None):
         self.f = f
+        self._cwd = None
 
     def __enter__(self):
         self._cwd = os.getcwd()

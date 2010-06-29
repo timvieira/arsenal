@@ -69,15 +69,16 @@ DATE_RE = re.compile("""
             |satu?r?
             |sun
         )(?:day|\.?)
-    )?
 
-    \s* ,? \s*?
+        \s* ,? \s*?
+
+    )?
 
     (?:
         (?:the\s+)?
         [0-3]?[0-9]
         (?:st|nd|rd|th|)
-        ( \s*? of )?
+        (?: \s*? of )?
         \s*?
     )?
 
@@ -97,14 +98,14 @@ DATE_RE = re.compile("""
         |dec(?:ember)?
     )
 
-    (?: \. | , |) \s+
+    (?: \. | , | ) \s+
 
-    ( [0-3][0-9] | [0-9] )?  (?:st|nd|rd|th|\s|$)   # the word splitter will always keep numbers ord-suffix together
+    (?: [0-3][0-9] | [0-9] )?  (?:st|nd|rd|th|\s|$)   # the word splitter will always keep numbers ord-suffix together
 
     \s*
     (?: of | , | ) \s+
     
-    (  [0-9][0-9][0-9][0-9] | [0-9][0-9] )?
+    (?:  [0-9][0-9][0-9][0-9] | [0-9][0-9] )? (?:\s|$)
 
 )
 """, re.VERBOSE|re.IGNORECASE)
@@ -112,7 +113,7 @@ DATE_RE = re.compile("""
 
 if __name__ == '__main__':
 
-    from wordsplitter import wordsplit_sentence
+    from nlp.wordsplitter import wordsplit_sentence
 
     def parse_text(text):
         return wordsplit_sentence(text).split()

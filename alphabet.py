@@ -1,6 +1,7 @@
-import re, sys, cPickle as pickle
-
 from flipdict import Flipdict
+
+# TODO:
+#  * use an array for the int->str mapping and dict for str->int
 class Alphabet(object):
     def __init__(self):
         self.mapping = Flipdict()

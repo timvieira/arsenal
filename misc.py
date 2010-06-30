@@ -44,27 +44,25 @@ def print_time():
     #print sec2prettytime(time.clock() - b4)
     print time.clock() - b4
 
-def deprecated(f):
+
+def deprecated(use_instead=None):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
     when the function is used."""
 
-    @wraps(f)
-    def new_func(*args, **kwargs):
-        try:
-            filename = f.func_code.co_filename
-            lineno = f.func_code.co_firstlineno + 1
-        except AttributeError:
-            filename = ''
-            lineno = 0
+    assert not use_instead or isinstance(use_instead, str)
 
-        warnings.warn_explicit("function %s is deprecated." % f.__name__,
-                               category=DeprecationWarning,
-                               filename=filename,
-                               lineno=lineno)
-        return f(*args, **kwargs)
+    def wrapped(func):
+        @wraps(func)
+        def new_func(*args, **kwargs):
+            message = "Call to deprecated function %s." % func.__name__
+            if use_instead:
+                message += " Use %s instead." % use_instead
+            warnings.warn(message, category=DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return new_func
 
-    return new_func
+    return wrapped
 
 
 # the interpreter periodically does some stuff that slows you
@@ -224,51 +222,6 @@ class preserve_cwd(object):
         with self:
             return self.f(*args, **kwargs)
 
-'''
-from contextlib import GeneratorContextManager
-
-def contextmanager2(f):
-
-    @wraps(f)
-    def helper(decorated_f=None):
-
-        class xx(GeneratorContextManager):
-            def __call__(self, *args, **kw):
-                with self:
-                    return decorated_f(*args, **kw)
-
-        return xx(f())
-
-    return helper
-
-
-@contextmanager2
-def preserve_cwd():
-    """
-    context-manager which doubles as a decorator that preserve current
-    working directory.
-
-    Usage example:
-
-    As a decorator:
-        >>> before = os.getcwd()
-        >>> @preserve_cwd
-        ... def foo():
-        ...     os.chdir('..')
-        >>> before == os.getcwd()
-        True
-
-    As a context-manager:
-        >>> before = os.getcwd()
-        >>> with preserve_cwd():
-        ...     os.chdir('..')
-        >>> before == os.getcwd()
-        True
-    """
-    cwd = os.getcwd()
-    yield
-    os.chdir(cwd)
-'''
 
 #_________________________________________________________________________
 #

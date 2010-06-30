@@ -158,6 +158,7 @@ def pdb_completer():
 ##         self[key] = self.factory(*self.factArgs)
 
 
+'''
 # TODO:
 # * I see a lot of potential in this function
 #   it might be a good place for code generation and other interesting things
@@ -184,7 +185,7 @@ def decorator(d):
             return f3(*args, **kw)
         return f2
     return f1
-
+'''
 
 class preserve_cwd(object):
     """
@@ -381,11 +382,11 @@ def try_k_times(fn, args, k, pause=0.1):
     """ attempt to call fn up to k times with the args as arguments.
         All exceptions up to the kth will be ignored. """
     exception = None
-    for i in xrange(k):
+    for _ in xrange(k):
         try:
             output = fn(*args)
             break
-        except Exception, e:
+        except Exception as e:
             exception = e
         time.sleep(pause)
     else:

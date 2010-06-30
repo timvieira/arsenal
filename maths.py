@@ -4,14 +4,7 @@ import math
 from math import exp as math_exp, log as math_log
 from operator import itemgetter
 
-
-def deprecated(msg):
-    def wrapper2(f):
-        def wrapper(*args, **kw):
-            raise DeprecationWarning('function %s is deprecated %s' % (f.__name__, msg))
-        return wrapper
-    return wrapper2
-
+from misc import deprecated
 
 INF = float('infinity')
 NEG_INF = float('-infinity')
@@ -22,7 +15,7 @@ from math import sqrt
 def naive_hypot(x,y):
     return sqrt(x*x + y*y)
 
-@deprecated("use numpy.hypot")
+@deprecated("numpy.hypot")
 def robust_hypot(x,y):
     """
     Compute sqrt(x*x + y*y) without risking overflow.
@@ -182,7 +175,7 @@ def logsumexp(x):
     return log(sum(x-B for x in x if x > NEG_INF)) + B
 
 
-@deprecated("use numpy.logaddexp instead.")
+@deprecated("numpy.logaddexp.")
 def sum_two_log_probs(a, b):
     """
     Returns the sum of two doubles expressed in log space
@@ -198,7 +191,7 @@ def sum_two_log_probs(a, b):
     else:
         return b + log(1 + exp(a-b))
 
-@deprecated("use numpy.logaddexp *with NEGATIVE numbers* instead.")
+@deprecated("numpy.logaddexp *with NEGATIVE numbers* instead.")
 def subtract_log_prob(a, b):
     """ Returns the difference of two doubles expressed in log space """
     return a + log(1 - exp(b-a))

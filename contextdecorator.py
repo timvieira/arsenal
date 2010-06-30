@@ -1,10 +1,51 @@
-# This implementation of ContextDecorator is based on Michael Foord's
-# I've made several tweak to fit my liking
-#
-# Original copyright / license:
-#   Copyright (C) 2007-2010 Michael Foord
-#   E-mail: michael AT voidspace DOT org DOT uk
-#   http://pypi.python.org/pypi/contextdecorator
+
+
+## IDEA: Maybe we can extend the awesome contextlib.contextmanager decorator:
+## 
+## from contextlib import GeneratorContextManager
+## 
+## This is a broken first attempt:
+## def contextmanager2(f):
+## 
+##     @wraps(f)
+##     def helper(decorated_f=None):
+## 
+##         class xx(GeneratorContextManager):
+##             def __call__(self, *args, **kw):
+##                 with self:
+##                     return decorated_f(*args, **kw)
+## 
+##         return xx(f())
+## 
+##     return helper
+## 
+## @contextmanager2
+## def preserve_cwd():
+##     """
+##     context-manager which doubles as a decorator that preserve current
+##     working directory.
+## 
+##     Usage example:
+## 
+##     As a decorator:
+##         >>> before = os.getcwd()
+##         >>> @preserve_cwd
+##         ... def foo():
+##         ...     os.chdir('..')
+##         >>> before == os.getcwd()
+##         True
+## 
+##     As a context-manager:
+##         >>> before = os.getcwd()
+##         >>> with preserve_cwd():
+##         ...     os.chdir('..')
+##         >>> before == os.getcwd()
+##         True
+##     """
+##     cwd = os.getcwd()
+##     yield
+##     os.chdir(cwd)
+
 
 __all__ = ['ContextDecorator']
 
@@ -14,6 +55,14 @@ class ContextDecorator(object):
     """
     Create objects that act as both context managers *and* as decorators, and
     behave the same in both cases.
+
+    This implementation of ContextDecorator is based on Michael Foord's
+    http://pypi.python.org/pypi/contextdecorator.
+
+    Original copyright / license:
+      # Copyright (C) 2007-2010 Michael Foord
+      # E-mail: michael AT voidspace DOT org DOT uk
+      # http://pypi.python.org/pypi/contextdecorator
     """
 
     def before(self):
@@ -52,6 +101,9 @@ class ContextDecorator(object):
         return self.after(exc_type, exc_value, traceback)
 
 
+
+#______________________________________________________________________________
+# Unit tests
 
 import unittest
 
@@ -147,3 +199,5 @@ class TestContext(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+    import doctest
+    doctest.testmod()

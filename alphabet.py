@@ -22,6 +22,8 @@ class Alphabet(object):
         try:
             return self.mapping[k]
         except KeyError:
+            if not isinstance(k, str):
+                raise InvalidKeyException("Invalid key (%s): only strings allowed." % k)
             if self.frozen:
                 raise AssertionError('Alphabet is frozen and key (%s) was not found.' % k)
             self.mapping[k] = self.i
@@ -31,3 +33,6 @@ class Alphabet(object):
         return iter(self.mapping)
     def __len__(self):
         return len(self.mapping)
+
+class InvalidKeyException(Exception):
+    pass

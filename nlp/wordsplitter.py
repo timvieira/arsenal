@@ -16,12 +16,12 @@ def numbers_words(m):
         return '%s %s' % (a,b)
 
 
-from unicode_annoyances import LATIN2ASCII
+#from unicode_annoyances import LATIN2ASCII
 
 def wordsplit_sentence(sentence):
     # Convert some special characters to ASCII to ensure they aren't lost later.
     sentence = re.sub('(\xe2\x82\xac|%u20AC)', 'Euros', sentence)
-    sentence = re.sub('(\xc3\x82\xc2\xa3|\xc2\xa3|\xc2\xa31m|GBP)', 'GBP', sentence)
+    sentence = re.sub('(\xc3\x82\xc2\xa3|\xc2\xa3|\xa31|\xc2\xa3|GBP)', ' GBP ', sentence)
 
     # take a look at python-extras/unicode_annoyances.py
 
@@ -133,6 +133,9 @@ def wordsplit_sentence(sentence):
 
     ## fixed escapes
     sentence = re.sub('x\d\d \s \\ x\d\d', r'\1\2', sentence, re.VERBOSE|re.IGNORECASE)
+
+    # tighten up possible space explosion
+    sentence = re.sub('[ ]+', ' ', sentence)
 
     return sentence
 

@@ -3,9 +3,9 @@
 >>> class C(object):
 ...     pass
 ...
->>> id(C()) == id(C())    # weird!
+>>> id(C()) == id(C())    # weird! garbage collection must have happend!
 True
->>> C() is C()            # expected, call to "is" has references
+>>> C() is C()            # expected, call to "is" has references to each argument
 False
 
 

@@ -1,5 +1,3 @@
-#from __future__ import with_statement, generators
-
 import re, os, sys, time
 import datetime
 import gc
@@ -38,11 +36,10 @@ from contextlib import contextmanager
 ##     return mod
 
 @contextmanager
-def print_time():
-    b4 = time.clock()
+def print_time(msg="%.4f seconds"):
+    b4 = time.time()
     yield
-    #print sec2prettytime(time.clock() - b4)
-    print time.clock() - b4
+    print msg % (time.time() - b4)
 
 
 def deprecated(use_instead=None):

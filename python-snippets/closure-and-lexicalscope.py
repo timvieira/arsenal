@@ -2,8 +2,10 @@
 # fs=[f0,...,f9] where fi(n)=i+n.
 
 # First attempt:
-fs = [(lambda n: i + n) for i in range(10)]
-print 'fs[3](4) =', fs[3](4)
+fs = ((lambda n: i + n) for i in range(10))
+#print 'fs[3](4) =', fs[3](4)
+
+fs = list(fs)
 
 print [f(4) for f in fs]
 
@@ -17,9 +19,12 @@ for i in xrange(10):
 # environments are handled.
 
 i = 1000
+print
 print 'setting i in lexical scope'
 print [f(4) for f in fs]
 
+
+print
 #--
 def xxx():
     fs = []
@@ -32,6 +37,8 @@ print 'Inside a function:'
 print [f(4) for f in xxx()]
 print '...at least lexical scope doesn\'t cause problems'
 
+
+print
 #--
 def xxx():
     fs = []
@@ -42,6 +49,8 @@ def xxx():
 print 'with yield :', [f(4) for f in xxx()]
 print 'yield-part2:', [f(4) for f in list(xxx())]
 
+
+print
 #--
 print 'default parameter trick:'
 fs = []
@@ -51,6 +60,8 @@ for i in xrange(10):
     fs.append(f)
 print [f(4) for f in fs]
 
+
+print
 #--
 print 'function attribute trick:'
 fs = []
@@ -62,6 +73,7 @@ for i in xrange(10):
 print [f(4) for f in fs]
 
 
+print
 #--
 print 'closure on i after it exists a function:'
 def make_f(i):
@@ -79,6 +91,7 @@ for f in fs:
     print f.func_closure[0].cell_contents,
 print
 
+print
 #--
 print 'class version (similar to function attribute):'
 fs = []
@@ -91,6 +104,8 @@ for i in xrange(10):
 print [f(4) for f in fs]
 
 
+"""
+print
 #--
 def closure(**env):  # DOESN'T WORK...
     def h(f):
@@ -114,7 +129,7 @@ def x100():
 fs = x100()
 j = 10
 print [f(4) for f in fs]
-
+"""
 
 
 

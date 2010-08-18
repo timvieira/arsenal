@@ -528,3 +528,5 @@ WELL 	     WELL 	       WL
 WELLS 	     WELLS 	       WLS
 WELLS 	     WLS 	       WLS
 """
+
+postal_suffixes = set(postal_abbrev.lower().strip().split())

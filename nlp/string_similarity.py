@@ -1,72 +1,38 @@
 from itertools import repeat
 from array import array
 
-def LCS(x1s, x2s, costfn, just_length=0):
+def LCS(a, b, costfn=lambda a,b: a != b, empty=None, just_length=0):
     """
-    calculate the minimum cost for aligning the elements in the sequence x1s
-    with the elements in the sequence x2s with respect to costfn.
+    Calculate the minimum cost for aligning the elements in the sequence a
+    with the elements in the sequence b with respect to costfn.
 
     usage:
-
-        1) Define a token edit distance function AND an empty token.
-           For example:
-
-               def token_dist(s1,s2):        
-                   if s1 == s2:
-                       return 0
-                   elif s1 == token_dist.empty and s2 != token_dist.empty: # GAP penalty
-                       return 1.25
-                   elif s1 != token_dist.empty and s2 == token_dist.empty: # GAP penalty
-                       return 1.25
-                   else:
-                       return 1        # you can make this the levenstein distance
-
-               token_dist.empty = None
-
-        2) Tokenize strings: by default a string can be iterated and indexed, but
-           often, this is not the desired tokenization. You can call LCS with any iterable
-           of strings.
-
-        3) Call LCS:
-
-               a = '121'
-               b = '212'
-               print LCS(a, b, token_dist)
-               print
-
-               a = 'The man saw small dog with the telescope.'.split()
-               b = 'The man saw smelly dog with the telescope.'.split()
-               print LCS(a, b, token_dist)
-    
+        >>> LCS('121', '212')
+        (2.0, [('1', None), ('2', '2'), ('1', '1'), (None, '2')])
     """
 
-    n1 = len(x1s)
-    n2 = len(x2s)
-    n21 = n2+1
+    N = len(a)
+    M = len(b)
+    M1 = M+1
 
     # allocated some space
     c = array('f')
-    c.extend(repeat(0, (n1+1)*(n2+1)))
+    c.extend(repeat(0, (N+1)*(M+1)))
 
     # intialize for all empty matches
-    for i1 in reversed(xrange(n1)):
-        c[i1*n21+n2] = costfn(x1s[i1], costfn.empty)+ c[(i1+1)*n21+n2]
+    for i in xrange(N):
+        c[i*M1+M] = costfn(a[i], empty)+ c[(i+1)*M1+M]
 
     # intialize for all empty matches
-    for i2 in reversed(xrange(n2)):
-        c[n1*n21+i2] = costfn(costfn.empty, x2s[i2])+c[n1*n21+(i2+1)]
+    for j in xrange(M):
+        c[N*M1+j] = costfn(empty, b[j])+c[N*M1+(j+1)]
 
     # fill in table
-    for i1 in reversed(xrange(n1)):
-        for i2 in reversed(xrange(n2)):
-            # ** remember you're working backwards in the table **
-
-            no_gap      = costfn(x1s[i1], x2s[i2])      + c[(i1+1)*n21 + (i2+1)]
-            insert_gap1 = costfn(x1s[i1], costfn.empty) + c[(i1+1)*n21 + ( i2 )]
-            insert_gap2 = costfn(costfn.empty, x2s[i2]) + c[( i1 )*n21 + (i2+1)]
-
-            c[i1*n21+i2] = min(no_gap, insert_gap1, insert_gap2)
-            
+    for i in reversed(xrange(N)):
+        for j in reversed(xrange(M)):
+            c[i*M1+j] = min(costfn( a[i],  b[j]) + c[(i+1)*M1 + (j+1)],  # no_gap
+                            costfn( a[i], empty) + c[(i+1)*M1 + ( j )],  # insert_gap1
+                            costfn(empty,  b[j]) + c[( i )*M1 + (j+1)])  # insert_gap2
 
     if just_length:
         return c[0]
@@ -74,56 +40,63 @@ def LCS(x1s, x2s, costfn, just_length=0):
     # backtrace to find an optimal alignment
     y1s = []
     y2s = []
-    
-    i1 = 0
-    i2 = 0
-    while (i1 < n1 or i2 < n2):
-        c12 = c[i1*n21+i2]
-        if i1 < n1 and i2 < n2 and c12 == costfn(x1s[i1], x2s[i2]) + c[(i1+1)*n21+(i2+1)]:
-            y1s.append(x1s[i1])
-            y2s.append(x2s[i2])
-            i1 += 1
-            i2 += 1
-        elif i1 < n1 and c12 == costfn(x1s[i1], costfn.empty) + c[(i1+1)*n21+i2]:
-            y1s.append(x1s[i1])
-            i1 += 1
-            y2s.append(costfn.empty)
+
+    i = 0
+    j = 0
+    while (i < N or j < M):
+        c12 = c[i*M1+j]
+        if i < N and j < M and c12 == costfn(a[i], b[j]) + c[(i+1)*M1+(j+1)]:
+            y1s.append(a[i])
+            y2s.append(b[j])
+            i += 1
+            j += 1
+        elif i < N and c12 == costfn(a[i], empty) + c[(i+1)*M1+j]:
+            y1s.append(a[i])
+            i += 1
+            y2s.append(empty)
         else:
-            y1s.append(costfn.empty)
-            y2s.append(x2s[i2])
-            i2 += 1
+            y1s.append(empty)
+            y2s.append(b[j])
+            j += 1
 
     return (c[0], zip(y1s, y2s))
 
 
 def pprint_alignment(A):
-    print '\n'.join(map('%s -> %s'.__mod__, A))
+    print '\n'.join(map('%18r -> %r'.__mod__, A))
 
 
 if __name__ == '__main__':
 
-    def token_dist(s1,s2):        
-        if s1 == s2:
-            return 0
-        elif s1 == token_dist.empty and s2 != token_dist.empty: # GAP penalty
-            return 1.25
-        elif s1 != token_dist.empty and s2 == token_dist.empty: # GAP penalty
-            return 1.25
-        else:
-            return 1        # you can make this the levenstein distance
+    def test():
+        costfn = lambda a,b: 1.5 if (a is None or b is None) else float(a != b)
 
-    token_dist.empty = None
+        cost, _ = LCS('121', '212', costfn=costfn)
+        assert cost == 3.0
 
-    a = '121'
-    b = '212'
-    print LCS(a, b, token_dist)
-    print
+        a = 'The man saw a small dog with the telescope.'.split()
+        b = 'The man saw the smelly dog with the telescope.'.split()
+        cost, alignment = LCS(a, b, costfn=costfn)
+        assert cost == 2.0
+        assert len(alignment) == len(a)
 
-    a = 'The man saw a small dog with the telescope.'
-    b = 'The man saw the smelly dog with the telescope.'
-    print LCS(a.split(), b.split(), token_dist)
+        import doctest
+        locals()['pprint_alignment'] = pprint_alignment
+        doctest.run_docstring_examples("""
+        >>> pprint_alignment(alignment)
+                     'The' -> 'The'
+                     'man' -> 'man'
+                     'saw' -> 'saw'
+                       'a' -> 'the'
+                   'small' -> 'smelly'
+                     'dog' -> 'dog'
+                    'with' -> 'with'
+                     'the' -> 'the'
+              'telescope.' -> 'telescope.'
+        """, locals(), verbose=0)
 
+        doctest.testmod()
 
+        print 'passed tests.'
 
-
-
+    test()

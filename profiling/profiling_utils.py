@@ -1,9 +1,12 @@
+"""
+TIMV: this will be a good module to include an easy api for the visualization
+stuff like gprof2dot.py, pyprof2calltree.py
+"""
+
 import hotshot, hotshot.stats, tempfile
 import time
 from cStringIO import StringIO
 
-# TODO: this will be a good module to include an easy api for the visualization
-# stuff like gprof2dot.py, pyprof2calltree.py
 
 import os, pstats, cProfile
 def profile_viz(cmd, globalz, localz):
@@ -46,7 +49,5 @@ def profile(f, *args, **kw):
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-
-    out, info = profile(time.sleep, 0.01)
-    print info
+    print profile(time.sleep, 0.01)[1]
 

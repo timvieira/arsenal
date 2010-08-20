@@ -18,6 +18,9 @@ class Alphabet(object):
             inst[x]
         inst.freeze()
         return inst
+    def lookup(self, i):
+        assert isinstance(i, int)
+        return self.mapping.flip[i]
     def __getitem__(self, k):
         try:
             return self.mapping[k]

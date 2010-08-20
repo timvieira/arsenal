@@ -51,7 +51,27 @@ RFC2822_RE = re.compile("""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=
 # EMAIL_I = re.compile("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", re.IGNORECASE)
 
 # refinment of EMAIL-I, it limits country code to 2 letters
-EMAIL_RE = re.compile("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)", re.IGNORECASE)
+EMAIL_RE = re.compile("""
+(mailto://)?
+
+[a-z0-9\{\(]                   # startswith alphanum or { or (
+
+[\.a-z0-9\-_/|,]+
+
+[\}\)]?                        # can end with } or )
+
+@                              # crucial!
+
+(?:[a-z0-9]                    # startswith alphanum
+   (?:[a-z0-9-]*[a-z0-9])?     # endswith alphanum
+   \.                          # the dot in dot com
+)+   
+
+# the ending .com part
+(?:
+   [A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum
+)
+""", re.IGNORECASE|re.VERBOSE)
 
 # This pattern is more for validation
 EMAIL_STRICT = re.compile('[A-Z0-9._%+-]+@[A-Z0-9.-]+\.(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)', re.IGNORECASE)

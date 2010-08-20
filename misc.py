@@ -3,7 +3,6 @@ import gc
 import inspect
 import pdb
 import atexit
-import weakref
 import threading
 import warnings
 import BaseHTTPServer
@@ -121,54 +120,6 @@ def edit_with_editor(s=None):
         subprocess.call([os.environ.get('EDITOR', 'nano'), t.name])
         return t.read().strip()
 
-'''
-import os
-import sys
-import rlcompleter
-#import readline
-#readline.parse_and_bind("tab: complete")
-
-def pdb_completer():
-    # refresh the terminal
-    #os.system("stty sane")
-
-    def complete(self, text, state):
-        """return the next possible completion for text, using the current
-           frame's local namespace
-
-           This is called successively with state == 0, 1, 2, ... until it
-           returns None.  The completion should begin with 'text'.
-        """
-        print 'called completer...'
-
-        # keep a completer class, make sure that it uses the current local scope
-        if not hasattr(self, 'completer'):
-            self.completer = rlcompleter.Completer(self.curframe.f_locals)
-        else:
-            self.completer.namespace = self.curframe.f_locals
-        return self.completer.complete(text, state)
-
-    # replace the Pdb class's complete method with ours
-    Pdb = sys._getframe(2).f_globals['Pdb']
-    Pdb.complete = complete.__get__(Pdb)
-
-    # set use_rawinput to 1 as tab completion relies on rawinput being used
-    self = sys._getframe(2).f_locals['self']
-    self.use_rawinput = 1
-'''
-
-
-## class defaultdict2(dict):
-##     """
-##     Example of the __missing__ method of the dictionary class
-##     """
-##     def __init__(self, factory, factArgs=(), dictArgs=()):
-##         dict.__init__(self, *dictArgs)
-##         self.factory = factory
-##         self.factArgs = factArgs
-##     def __missing__(self, key):
-##         self[key] = self.factory(*self.factArgs)
-
 
 '''
 # TODO:
@@ -177,7 +128,6 @@ def pdb_completer():
 # * borrow ideas form the "decorator" module
 def decorator(d):
     """ automatically preserves the-functions-being-decorated's signature
-
     Example:
     >>> def goo(f): return lambda *args, **kw: f(*args,**kw)
     >>> def foo(): pass
@@ -307,16 +257,15 @@ def threaded(callback=lambda *args, **kwargs: None, daemonic=False):
 
 def dump_garbage():
     """
-    show us what's the garbage about
+    Show us what's in the garbage!
 
-      # make a leak
+    Make a leak:
       l = []
       l.append(l)
       del l
 
-      # show the dirt ;-)
+    Show the dirt:
       dump_garbage()
-
     """
     gc.enable()
     gc.set_debug(gc.DEBUG_LEAK)
@@ -399,76 +348,6 @@ def timelimit(timeout):
     return _1
 
 
-#________________________________________________________________________________
-# Assert Utils
-
-## XXX: This is more of a job for a context manager...
-def assert_throws(exc):
-    """
-    >>> @assert_throws(ZeroDivisionError)
-    ... def foo():
-    ...     1 + 1   # should not raise ZeroDivisionError
-    ...
-    >>> foo()
-    Traceback (most recent call last):
-        ...
-    AssertionError: did not raise required ZeroDivisionError. Got None instead.
-    """
-    def wrap(f):
-        @wraps(f)
-        def wrap2(*args,**kw):
-            with assert_throws_ctx(exc):
-                return f(*args,**kw)
-        return wrap2
-    return wrap
-
-@contextmanager
-def assert_throws_ctx(*exc):
-    """
-    Contextmanager for asserting that a certain exception or no exception will
-    arise with it's context.
-
-    >>> with assert_throws_ctx(ZeroDivisionError):
-    ...     1/0
-
-    >>> with assert_throws_ctx(None):
-    ...     pass
-
-    >>> with assert_throws_ctx(None, ZeroDivisionError):
-    ...     pass
-
-    >>> with assert_throws_ctx(ZeroDivisionError):
-    ...     pass
-    Traceback (most recent call last):
-        ...
-    AssertionError: did not raise required ZeroDivisionError. Got None instead.
-
-    >>> with assert_throws_ctx(AssertionError, ZeroDivisionError):
-    ...     pass
-    Traceback (most recent call last):
-        ...
-    AssertionError: did not raise required AssertionError or ZeroDivisionError. Got None instead.
-
-    """
-
-    passed = False
-    got = None
-    try:
-        yield
-    except exc:
-        passed = True
-    except Exception as e:
-        got = e
-    else:
-        # since None isn't realy an exception, we have to special case it.
-        if None in exc:
-            passed = True
-    finally:
-        if not passed:
-            msg = ' or '.join(e.__name__ if e is not None else 'None' for e in exc)
-            raise AssertionError('did not raise required %s. Got %s instead.' % (msg, got))
-
-
 #______________________________________________________________________________
 # Debugging utils
 
@@ -536,24 +415,6 @@ def debugx(obj):
 #_______________________________________________________________________________
 #
 
-'''
-## TODO: add option to suppress a some user-defined list of Exceptions
-def try_k_times(fn, args, k, pause=0.1):
-    """ attempt to call fn up to k times with the args as arguments.
-        All exceptions up to the kth will be ignored. """
-    exception = None
-    for _ in xrange(k):
-        try:
-            output = fn(*args)
-            break
-        except Exception as e:
-            exception = e
-        time.sleep(pause)
-    else:
-        raise Exception(str(exception))
-    return output
-'''
-
 def try_k_times(fn, args, k, pause=0.1, suppress=(Exception,)):
     """ attempt to call fn up to k times with the args as arguments.
         All exceptions up to the kth will be ignored. """
@@ -614,6 +475,7 @@ def print_elapsed_time():
 if __name__ == '__main__':
 
     import doctest
+    from assertutils import assert_throws_ctx
 
     def run_tests():
 
@@ -639,9 +501,7 @@ if __name__ == '__main__':
                 f = TroublsomeFunction()
                 print try_k_times(f, (10,), 2)
 
-
         test_try_k_times()
-
 
 
         def test_preserve_cwd():
@@ -662,17 +522,6 @@ if __name__ == '__main__':
         test_preserve_cwd()
 
 
-        @assert_throws(ZeroDivisionError)
-        def test_assert_throws1():
-            1/0
-        test_assert_throws1()
-
-        @assert_throws(None)
-        def test_assert_throws2():
-            return 2 + 2
-        test_assert_throws2()
-
-
         def test_timed():
             print 'test_timed'
 
@@ -687,7 +536,7 @@ if __name__ == '__main__':
             print 'sleepy_function(0.2): pass'
 
             @timelimit(1)
-            def raises_errors(): 1/0
+            def raises_errors(): return 1/0
             with assert_throws_ctx(ZeroDivisionError):
                 raises_errors()
             print 'raises_errors(): pass'

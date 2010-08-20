@@ -475,7 +475,7 @@ def print_elapsed_time():
 if __name__ == '__main__':
 
     import doctest
-    from assertutils import assert_throws_ctx
+    from assertutils import assert_throws
 
     def run_tests():
 
@@ -497,7 +497,7 @@ if __name__ == '__main__':
             assert try_k_times(f, (1,2,3), 5)
             assert f.tries == 5
 
-            with assert_throws_ctx(NotCalledEnough):
+            with assert_throws(NotCalledEnough):
                 f = TroublsomeFunction()
                 print try_k_times(f, (10,), 2)
 
@@ -528,7 +528,7 @@ if __name__ == '__main__':
             @timelimit(1.0)
             def sleepy_function(x): time.sleep(x)
 
-            with assert_throws_ctx(TimeoutError):
+            with assert_throws(TimeoutError):
                 sleepy_function(3.0)
             print 'sleepy_function(3.0): pass'
 
@@ -537,7 +537,7 @@ if __name__ == '__main__':
 
             @timelimit(1)
             def raises_errors(): return 1/0
-            with assert_throws_ctx(ZeroDivisionError):
+            with assert_throws(ZeroDivisionError):
                 raises_errors()
             print 'raises_errors(): pass'
 

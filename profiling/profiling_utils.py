@@ -9,8 +9,8 @@ from cStringIO import StringIO
 
 
 import os, pstats, cProfile
-def profile_viz(cmd, globalz, localz):
-    out = 'profile.tmp~'    
+def profile_viz(cmd, globalz, localz, out='profile.tmp~'):
+    "Run gprof2dot on the output for profiling."    
     cProfile.runctx(cmd, globalz, localz, out)
     stats = pstats.Stats(out)
     stats.strip_dirs()               # Clean up filenames for the report

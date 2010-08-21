@@ -32,6 +32,7 @@ class Alphabet(object):
             self.mapping[k] = self.i
             self.i += 1
             return self.mapping[k]
+    add = __getitem__                          # alias (make pylint happy)
     def __iter__(self):
         return iter(self.mapping)
     def __len__(self):

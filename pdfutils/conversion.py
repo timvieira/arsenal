@@ -1,5 +1,6 @@
 import os
 import glob
+from subprocess import Popen
 
 ## TODO:
 ##   there might be a better solution to this
@@ -7,18 +8,42 @@ class file_specifier(object):
     """ just give file_specifier the any path (absolute or relative) and let if figure out the rest. """
     def __init__(self, path):
 
-        assert os.path.exists(path), '%s does not exist.' % path
+        #assert os.path.exists(path), '%s does not exist.' % path
         self.isfile = os.path.isfile(path)
         self.isdir  = os.path.isdir(path)
         self.islink = os.path.islink(path)
 
         self.abspath = os.path.abspath(path)
         (self.dir, self.name) = os.path.split(self.abspath)
-        (self.noext, self.ext) = os.path.splitext(self.name)
+        (noext, self.ext) = os.path.splitext(self.name)
+        self.noext = os.path.join(self.dir, noext)
         self.relpath = os.path.relpath(path)
-        
+
     def __repr__(self):
         return 'file_specifier {\n%s\n}' % ('\n'.join(map('  %8s: %s'.__mod__, self.__dict__.iteritems())))
+
+
+def pdftotext(pdf, verbose=True):
+    """Wraps a system call to pdftotext. """
+    outdir = file_specifier(pdf).noext + '.d'
+    output = outdir + '/pdftotext.txt'
+    if not os.path.exists(outdir):
+        print 'need to make directory...'
+        os.makedirs(outdir)
+
+    if not os.path.exists(output):
+        if verbose:
+            print '[pdftotext] processing "%s"' % pdf
+        p = Popen(['pdftotext', pdf, output])     # TODO: error checking
+        p.wait()
+        if verbose:
+            print '[pdftotext] "%s" exited with status %s' % (pdf, p.returncode)
+    else:
+        if verbose:
+            print '[pdftotext] "%s" cached.' % pdf
+
+    with file(output, 'r') as f:
+        return f.read()
 
 
 ## TODO:
@@ -27,7 +52,7 @@ class file_specifier(object):
 ##   timeout option
 ##   maybe a hook for pre/post-processing, useful for logging and zipping
 ##   check for success / failure
-def pdf2image(input_files, outputdir_fmt='{f.name}.d', output_format='{f.noext}.page.%d.png',
+def pdf2image(input_files, outputdir_fmt='{f.noext}.d', output_format='{f.noext}.page.%d.png',
               resolution=200, create_outputdir=True, testing=0, verbose=0):
     """
     Wraps a system call to ghostscript, which takes a pdf or postscript file
@@ -73,7 +98,7 @@ def pdf2image(input_files, outputdir_fmt='{f.name}.d', output_format='{f.noext}.
         outputdir:
             outputdir_fmt after the missing slots have been filled in.
             e.g. if outputdir='{filename}.d' filename will be filled
-            in with the appropriate string.    
+            in with the appropriate string.
 
         resolution:
             resolution which ghostscript should render to
@@ -89,7 +114,7 @@ def pdf2image(input_files, outputdir_fmt='{f.name}.d', output_format='{f.noext}.
 
         if verbose:
             print 'processing:', f.abspath
-            print '  * outputdir: ', outputdir        
+            print '  * outputdir: ', outputdir
 
         if not os.path.exists(outputdir):
             if create_outputdir:
@@ -116,6 +141,3 @@ if __name__ == '__main__':
         pdf2image(sys.argv[1], outputdir_fmt='{f.noext}.d', verbose=1, testing=0)
     else:
         print 'usage: <file>'
-
-
-

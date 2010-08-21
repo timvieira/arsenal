@@ -14,10 +14,8 @@ def xml2segments(x):
     >>> x = xml2segments("<title>Cat in the Hat</title><author>Dr. Seuss</author>")
     >>> list(x)
     [('title', ['Cat', 'in', 'the', 'Hat']), ('author', ['Dr.', 'Seuss'])]
-
     """
-    x = re.sub('\n', ' %s ' % NEWLINE, x)
-    x = re.sub('(<[/]?[A-Za-z0-9]+>)', r' \1 ', x)
+    x = _preprocess(x)
     for label, tagged, close, word in re.findall('(?:(?:\s*<([A-Za-z0-9]+)>\s*([\w\W]+?)\s*</([A-Za-z0-9]+)>\s*)|([\w\W]+?)(?:\s+|$))', x):
         if close != label:
             raise ParseError('Mismatched xml tags (%s, %s)' % (close, label))
@@ -25,6 +23,10 @@ def xml2segments(x):
             yield ('O', [word])
         else:
             yield (label, tagged.split())
+
+def _preprocess(x):
+    x = re.sub('\s+', ' ', x)
+    return re.sub('(<[/]?[A-Za-z0-9]+>)', r' \1 ', x)
 
 def xml2bio(x):
     """
@@ -40,8 +42,7 @@ def xml2bio(x):
     [('B-title', 'Cat'), ('I-title', 'in'), ('I-title', 'the'), 
      ('I-title', 'Hat'), ('B-author', 'Dr.'), ('I-author', 'Seuss')]
     """
-    x = re.sub('\n', ' %s ' % NEWLINE, x)
-    x = re.sub('(<[/]?[A-Za-z0-9]+>)', r' \1 ', x)
+    x = _preprocess(x)
     for label, tagged, close, word in re.findall('(?:(?:\s*<([A-Za-z0-9]+)>\s*([\w\W]+?)\s*</([A-Za-z0-9]+)>\s*)|([\w\W]+?)(?:\s+|$))', x):
         if close != label:
             raise ParseError('Mismatched xml tags (%s, %s)' % (close, label))

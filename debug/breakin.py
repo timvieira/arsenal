@@ -63,11 +63,9 @@ def hook_to_signal(handler):
 @contextmanager
 def breakin_ctx(frame):
     import traceback
-    sys.stderr.write('** %s received, breaking in to running process\n'
-                     '** Hit %s again to quit (and possibly dump core)\n'
-                     '**\n** Traceback:\n%s' 
-                     % (_breakin_signal_name, _breakin_signal_name, 
-                        ''.join(traceback.format_stack(frame))))
+    sys.stderr.write('** Breaking in to running process **\n'
+                     'Traceback:\n%s' 
+                     % (''.join(traceback.format_stack(frame))))
 
     d = {'_frame': frame}        # Allow access to frame object.
     d.update(frame.f_globals)    # Unless shadowed by global

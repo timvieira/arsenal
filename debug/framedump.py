@@ -1,9 +1,13 @@
 import sys, traceback
 
-def frame_dump():
+# TIMV: would it be possibe to change this function to work without raising
+#       and exception?
+def framedump():
     """
     Print the usual traceback information, followed by a listing of all the
     local variables in each frame.
+
+    Note: this function does not work when there is no exception.
     """
 
     # Move to the frame where the exception occurred, which is often not the
@@ -80,6 +84,6 @@ if __name__ == '__main__':
         try:
             pad4(data)
         except:
-            frame_dump()
+            framedump()
 
     example()

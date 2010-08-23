@@ -57,3 +57,4 @@ def automain(verbose=False, breakin=False, ultraTB=False, pdb=False):
             except TypeError:
                 if out is not None:
                     print out
+

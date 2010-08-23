@@ -1,14 +1,27 @@
 import sys
 from misc import timeit
 
-def automain(verbose=False):
+def automain(verbose=False, breakin=False, ultraTB=False, pdb=False):
     """
     Automatically create a very simple command-line interface.
 
     Note: All functions must take string arguments
     """
     import __main__ as mod
+    
+    if breakin:
+        from debug import breakin
+        breakin.enable()
 
+    if ultraTB:
+        from debug import ultraTB2
+        ultraTB2.enable()
+
+    if pdb:
+        from debug.utils import enable_debug_hook
+        enable_debug_hook()
+
+    # should we print the module's docstring in the help?
     def show_help():
         print 'what do you want to do?'
         for name in dir(mod):
@@ -35,8 +48,8 @@ def automain(verbose=False):
     else:
         args = tuple(sys.argv[2:])
         kw = {}  # TODO: parse keywords
-        with timeit(msg='took %%.3f seconds to execute "%s%s".' % (action.__name__,
-                                                                   args)):
+        with timeit(msg='took %%.3f seconds to execute '
+                        '"%s%s".' % (action.__name__, args)):
             out = action(*args, **kw)
             try:
                 for x in out:

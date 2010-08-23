@@ -1,7 +1,5 @@
 import re, os, sys, time
 import gc
-import inspect
-import pdb
 import atexit
 import threading
 import warnings
@@ -53,34 +51,20 @@ def deprecated(use_instead=None):
 
     return wrapped
 
-@deprecated(use_instead='timeit')
-def print_time(msg="%.4f seconds"):
-    return timeit(msg)
 
 @contextmanager
-def timeit(msg="%.4f seconds"):
+def timeit(msg="%.4f seconds", header=None):
     """Context Manager which prints the time it took to run code block."""
+    if header is not None:
+        print header
     b4 = time.time()
     yield
     print msg % (time.time() - b4)
 
-
-def find_files(d, filterfn=lambda x: True, relpath=True):
-    """
-    Recursively walks directory `d` yielding files which satisfy `filterfn`.
-    Set option `relpath` to False to output absolute paths.
-    """
-    for dirpath, _, filenames in os.walk(d):
-        for f in filenames:
-            if relpath:
-                f = os.path.join(dirpath, f)   # TIM: should I call abspath here?
-            if filterfn(f):
-                yield f
+timesection = lambda x: timeit(header='%s...' % x,
+                               msg=' -> %s took %%.2f seconds' % x)
 
 
-# the interpreter periodically does some stuff that slows you
-# down if you aren't using threads.
-#sys.setcheckinterval(10000)
 
 def LoadInBrowser(html):
     """Display html in the default web browser without creating a temp file.
@@ -347,71 +331,6 @@ def timelimit(timeout):
         return _2
     return _1
 
-
-#______________________________________________________________________________
-# Debugging utils
-
-def enable_debug_hook():
-    def debug_hook(*args):
-        sys.__excepthook__(*args)
-        pdb.pm()
-    sys.excepthook = debug_hook
-
-def dumpobj(o, callables=0, dbl_under=0):
-    print repr(o)
-    print 'instance of:', type(o).__name__
-    for a in dir(o):
-        if not callables and callable(getattr(o, a)):
-            continue
-        if not dbl_under and a.startswith('__'):
-            continue
-        try:
-            print '  %20s: %s ' % (a, type(getattr(o,a)).__name__)
-        except:
-            pass
-    print
-
-# borrowed from IPython
-def debug_expr(expr, msg=''):
-    """
-    Print the value of an expression from the caller's frame.
-
-    Takes an expression, evaluates it in the caller's frame and prints both
-    the given expression and the resulting value (as well as a debug mark
-    indicating the name of the calling function.  The input must be of a form
-    suitable for eval().
-    """
-    cf = sys._getframe(1)
-    val = eval(expr, cf.f_globals, cf.f_locals)
-    print '[DEBUG:%s] %s%s -> %r' % (cf.f_code.co_name, msg, expr, val)
-
-def debugx(obj):
-    """
-    I often write debugging print statements which look like
-      >>> somevar = 'somevalue'
-      >>> print 'somevar:', somevar
-      somevar: somevalue
-
-    What this function attempts to do is provide a shortcut
-      >>> debugx(somevar)
-      somevar: somevalue
-
-    Warning: this should only be used for debugging because ir relies on
-    introspection, which can be really slow and sometimes even buggy.
-    """
-    cf = sys._getframe(1)
-    ctx_lines = inspect.getframeinfo(cf).code_context
-    code = ''.join(map(str.strip, ctx_lines))
-    code = re.sub('debugx\((.*)\)', r'\1', code)
-    print code + ':', obj
-
-#_______________________________________________________________________________
-#
-
-
-
-
-
 #_______________________________________________________________________________
 #
 
@@ -553,15 +472,8 @@ if __name__ == '__main__':
 
         test_redirect_io()
 
-        def test_debug_expressions():
-            x = 15
-            debug_expr('x')
-    
-            debugx(x)
-            debugx(x**2 + 2*x + 3)
-            f = lambda x: x**2
-            debugx(f(x))
-        test_debug_expressions()
+
+        from debug.utils import dumpobj
 
         print
         print 'testing dumpobj...'

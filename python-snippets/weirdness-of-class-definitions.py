@@ -5,7 +5,7 @@ class A:
     # how is it that this works:
     b = a + 10
 
-    c = (a + i for i in range(10))
+    c = (a + i for i in range(10))       # generator comprehension have function scope!
 
     # but this doesn't?
     try:

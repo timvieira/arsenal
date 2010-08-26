@@ -1,12 +1,12 @@
 import os
 import smtplib
 import mimetypes
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEBase import MIMEBase
-from email.MIMEText import MIMEText
-from email.MIMEAudio import MIMEAudio
-from email.MIMEImage import MIMEImage
-from email.Encoders import encode_base64
+import email
+from email import MIMEMultipart
+from email import MIMEBase, MIMEText
+from email import MIMEAudio
+from email import MIMEImage
+from email import encode_base64
 
 from getpass import getpass
 
@@ -34,7 +34,7 @@ def send_gmail(gmail_user=None, passwd=None, recipient=None, subject='', body=''
     s.sendmail(gmail_user, recipient, msg.as_string())
     s.close()
 
-    print('Sent email to %s' % recipient)
+    print 'Sent email to %s' % recipient
 
 
 def get_attachment(attachmentFilePath):

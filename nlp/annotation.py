@@ -24,9 +24,13 @@ def xml2segments(x):
         else:
             yield (label, tagged.split())
 
+
+from nlp.wordsplitter import wordsplit_sentence
 def _preprocess(x):
     x = re.sub('\s+', ' ', x)
+    x = wordsplit_sentence(x)
     return re.sub('(<[/]?[A-Za-z0-9]+>)', r' \1 ', x)
+
 
 def xml2bio(x):
     """

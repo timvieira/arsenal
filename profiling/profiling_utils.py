@@ -4,20 +4,24 @@ stuff like gprof2dot.py, pyprof2calltree.py
 """
 
 import hotshot, hotshot.stats, tempfile
-import time
+import sys, time
 from cStringIO import StringIO
 
 
 import os, pstats, cProfile
-def profile_viz(cmd, globalz, localz, out='profile.tmp~'):
+def profile_viz(cmd, global_dict=None, local_dict=None, img='profile.png', out='profile.tmp~'):
     "Run gprof2dot on the output for profiling."    
-    cProfile.runctx(cmd, globalz, localz, out)
+    if local_dict is None and global_dict is None:
+        call_frame = sys._getframe().f_back
+        local_dict = call_frame.f_locals
+        global_dict = call_frame.f_globals
+    cProfile.runctx(cmd, global_dict, local_dict, out)
     stats = pstats.Stats(out)
     stats.strip_dirs()               # Clean up filenames for the report
     stats.sort_stats('cumulative')   # sort by the cumulative time
     stats.print_stats()
     # for more on the viz check out: http://code.google.com/p/jrfonseca/wiki/Gprof2Dot
-    os.system('gprof2dot.py -f pstats %s | dot -Tpng -o profile.png && eog profile.png &' % out)
+    os.system('gprof2dot.py -f pstats %s | dot -Tpng -o %s && eog %s &' % (out, img, img))
 
 def profile(f, *args, **kw):
     """

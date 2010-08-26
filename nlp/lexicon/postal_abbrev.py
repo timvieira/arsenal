@@ -529,4 +529,11 @@ WELLS 	     WELLS 	       WLS
 WELLS 	     WLS 	       WLS
 """
 
-postal_suffixes = set(postal_abbrev.lower().strip().split())
+def _build():
+    for x in postal_abbrev.split():
+        x = x.strip().lower()
+        if x:
+            yield x + '.'
+            yield x
+
+postal_suffixes = frozenset(_build())

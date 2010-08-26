@@ -1,33 +1,30 @@
-import smtplib
-from datetime import datetime
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.utils import formatdate
 
 def main():
+
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    from email.utils import formatdate
 
     msg = MIMEMultipart()
     msg['From']    = 'tim.f.vieira@gmail.com'
     msg['To']      = 'tim.f.vieira@gmail.com'
     msg['Date']    = formatdate(localtime=True)
-    #msg['Date']    = 'Wed, 22 Jul 2019 22:37:56 -0500'
-    msg['Subject'] = 'URGENT: Do *not* drink the coffee'
+    msg['Subject'] = 'Experiment'
     msg.attach(MIMEText("""
 
-Do *not* drink the coffee. It is POISONED.
+    Do *not* drink the coffee -- it's POISONED.
 
-"""))
+    """))
 
-    smtpSvr = smtplib.SMTP('express-smtp.cites.uiuc.edu')
-    smtpSvr.set_debuglevel(1)
+    s = smtplib.SMTP('loki.cs.umass.edu')
+    s.set_debuglevel(1)
 
     print 'sending...'
-    smtpSvr.sendmail(msg['From'], msg['To'], msg.as_string())
-    smtpSvr.quit()
+    s.sendmail(msg['From'], msg['To'], msg.as_string())
+    s.quit()
     print 'done.'
 
 
 if __name__ == '__main__':
     main()
-    pass
-

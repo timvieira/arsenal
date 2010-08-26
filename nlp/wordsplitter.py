@@ -29,6 +29,8 @@ def wordsplit_sentence(sentence):
     #sentence = re.sub('(\xc3\xab|\xc3\xa3)','', sentence)
     sentence = re.sub('[^\x20-\x7E]', '', sentence)   ####### <<<< KILL non-nice chars.
 
+    sentence = re.sub('@', 'AAATTT', sentence)
+    
     # ASCII HACKS!
     #for hexcode, ascii in LATIN2ASCII.iteritems():
     #    try:
@@ -129,7 +131,12 @@ def wordsplit_sentence(sentence):
     sentence = re.sub('<\s*/\s*([a-zA-z_\-0-9]+?)\s*>', r'</\1>', sentence)
     #  * tighten-up to bracketed tags too.
     sentence = re.sub('\[\s*([A-z]+?)\s', r'[\1 ', sentence)
+    #  * tighten up the +L+ line break marker
+    sentence = re.sub('\+\s*L\s*\+', r'+L+', sentence)
     #######
+
+    sentence = re.sub('AAATTT', r'@', sentence)
+
 
     ## fixed escapes
     sentence = re.sub('x\d\d \s \\ x\d\d', r'\1\2', sentence, re.VERBOSE|re.IGNORECASE)

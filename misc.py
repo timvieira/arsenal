@@ -9,6 +9,7 @@ import subprocess, tempfile
 from functools import wraps
 from StringIO import StringIO
 from contextlib import contextmanager
+from terminal import colors
 
 #def trace(f):
 #    def wrap(*args, **kw):
@@ -31,6 +32,9 @@ from contextlib import contextmanager
 ##         mod = getattr(mod, comp)
 ##     return mod
 
+def highlighter(p):
+    pattern = re.compile('(\\b%s\\b)' % p)
+    return lambda x: pattern.sub(colors.bold % colors.yellow % colors.bg_red % r'\1', x)
 
 def deprecated(use_instead=None):
     """This is a decorator which can be used to mark functions
@@ -65,7 +69,6 @@ timesection = lambda x: timeit(header='%s...' % x,
                                msg=' -> %s took %%.2f seconds' % x)
 
 
-
 def LoadInBrowser(html):
     """Display html in the default web browser without creating a temp file.
 
@@ -83,12 +86,10 @@ def LoadInBrowser(html):
     webbrowser.open('http://127.0.0.1:%s' % server.server_port)
     server.handle_request()
 
-
 def use_pager(s, pager='less'):
     """Use the pager passed in and send string s through it."""
     p = subprocess.Popen(pager, stdin=subprocess.PIPE)
     p.communicate(s)
-
 
 def edit_with_editor(s=None):
     """
@@ -178,14 +179,13 @@ class preserve_cwd(object):
 def ctx_redirect_io():
     r"""
     Usage example:
-        >>> with ctx_redirect_io() as io_target:
-        ...    print 'how is this for io?'
-        >>> io_target.getvalue()
-        'how is this for io?\n'
-        >>> print io_target.getvalue()   # doctest:+NORMALIZE_WHITESPACE
-        how is this for io?
-        >>>
-
+      >>> with ctx_redirect_io() as io_target:
+      ...    print 'how is this for io?'
+      >>> io_target.getvalue()
+      'how is this for io?\n'
+      >>> print io_target.getvalue()   # doctest:+NORMALIZE_WHITESPACE
+      how is this for io?
+      >>>
     """
     target = StringIO()
 
@@ -355,8 +355,6 @@ def try_k_times_decorator(k, pause=0.1):
 
 #_______________________________________________________________________________
 #
-
-
 
 def marquee(txt='', width=78, mark='*'):
     """

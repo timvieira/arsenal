@@ -1,4 +1,4 @@
-postal_abbrev = """
+_postal_abbrev = """
 ALLEY 	     ALLEE 	       ALY
 ALLEY 	     ALLEY 	       ALY
 ALLEY 	     ALLY 	       ALY
@@ -530,10 +530,12 @@ WELLS 	     WLS 	       WLS
 """
 
 def _build():
-    for x in postal_abbrev.split():
+    for x in _postal_abbrev.split():
         x = x.strip().lower()
         if x:
             yield x + '.'
             yield x
 
-postal_suffixes = frozenset(_build())
+postal_abbrev = frozenset(_build())
+
+__all__ = ['postal_abbrev']

@@ -1,10 +1,21 @@
-honorifics = """
-A.
+honorifics = frozenset(map(str.strip, """
+Doctor Dr Dr.
+Mr Mr.
+Miss Ms Ms.
+Mrs Mrs.
+Captain Capt. Capt
+Professor Prof Prof.
+Reverend Rev Rev.
+Senator Sen Sen.
+""".split()))
+
+honorifics_all = """
+#A.
 Adj.
 Adm.
 Adv.
 Asst.
-B.
+#B.
 Bart.
 Bldg.
 Brig.

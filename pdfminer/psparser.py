@@ -537,7 +537,8 @@ class PSStackParser(PSBaseParser):
                     (pos, objs) = self.end_type('d')
                     if len(objs) % 2 != 0:
                         raise PSSyntaxError('Invalid dictionary construct: %r' % objs)
-                    d = dict( (literal_name(k), v) for (k,v) in choplist(2, objs))
+                    # construct a Python dictionary.
+                    d = dict( (literal_name(k), v) for (k,v) in choplist(2, objs) if v is not None )
                     self.push((pos, d))
                 except PSTypeError:
                     if STRICT: raise
@@ -562,24 +563,24 @@ import unittest
 class TestPSBaseParser(unittest.TestCase):
 
     TESTDATA = r'''%!PS
-  begin end
-   "  @ #
-  /a/BCD /Some_Name /foo#5f#xbaa
-  0 +1 -2 .5 1.234
-  (abc) () (abc ( def ) ghi)
-  (def\040\0\0404ghi) (bach\\slask) (foo\nbaa)
-  (this % is not a comment.)
-  (foo
-  baa)
-  (foo\
-  baa)
-  <20> < 40 4020 >
-  <abcd00
-  12345>
-  func/a/b{(c)do*}def
-  [ 1 (z) ! ]
-  << /foo (bar) >>
-  '''
+begin end
+ "  @ #
+/a/BCD /Some_Name /foo#5f#xbaa
+0 +1 -2 .5 1.234
+(abc) () (abc ( def ) ghi)
+(def\040\0\0404ghi) (bach\\slask) (foo\nbaa)
+(this % is not a comment.)
+(foo
+baa)
+(foo\
+baa)
+<20> < 40 4020 >
+<abcd00
+12345>
+func/a/b{(c)do*}def
+[ 1 (z) ! ]
+<< /foo (bar) >>
+'''
 
     TOKENS = [
       (5, KWD('begin')), (11, KWD('end')), (16, KWD('"')), (19, KWD('@')),

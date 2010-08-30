@@ -15,17 +15,17 @@ class Alphabet(object):
     def from_iterable(cls, it):
         inst = cls()
         for x in it:
-            inst[x]
+            inst.add(x)
         inst.freeze()
         return inst
     def lookup(self, i):
-#        assert isinstance(i, int)
+        assert isinstance(i, int)
         return self.mapping.flip[i]
     def __getitem__(self, k):
         try:
             return self.mapping[k]
         except KeyError:
-            if not isinstance(k, str):
+            if not isinstance(k, basestring):
                 raise InvalidKeyException("Invalid key (%s): only strings allowed." % k)
             if self.frozen:
                 raise AssertionError('Alphabet is frozen and key (%s) was not found.' % k)

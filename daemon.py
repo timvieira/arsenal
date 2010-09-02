@@ -21,8 +21,7 @@ import resource
 #   Using exit() may cause all stdio streams to be flushed twice and any
 #   temporary files may be unexpectedly removed. 
 
-
-def daemonize(workdir='/', redirect_to=os.devnull, umask=0):
+def daemonize(workdir='/', log=os.devnull, pidfile=None, umask=0):
     """
     Detach a process from the controlling terminal and run it in the
     background as a daemon.
@@ -104,12 +103,8 @@ def daemonize(workdir='/', redirect_to=os.devnull, umask=0):
         maxfd = 1024
 
     # close all file descriptors.
-    for fd in xrange(maxfd):
-        try:
-            os.close(fd)
-        except OSError:	# ERROR, fd wasn't open to begin with (ignored)
-            pass
-    
+    os.closerange(0, maxfd)
+
     # Redirect the standard I/O file descriptors to the specified file.  Since
     # the daemon has no controlling terminal, most daemons redirect stdin,
     # stdout, and stderr to /dev/null.  This is done to prevent side-effects
@@ -117,35 +112,26 @@ def daemonize(workdir='/', redirect_to=os.devnull, umask=0):
 
     # This call to open is guaranteed to return the lowest file descriptor,
     # which will be 0 (stdin), since it was closed above.
-    os.open(redirect_to, os.O_RDWR|os.O_CREAT)  # standard input (0)
+    fd = os.open(log, os.O_RDWR|os.O_CREAT)  # standard input (0)
 
-    # Duplicate standard input to standard output and standard error.
-    os.dup2(0, 1)    # standard output (1)
-    os.dup2(0, 2)    # standard error (2)
+    # Duplicate fd to stdout and stderr
+    os.dup2(fd, 1)    # standard output (1)
+    os.dup2(fd, 2)    # standard error (2)
+
+    if pidfile:
+        with file(pidfile, 'wb') as f:
+            f.write(str(os.getpid()))
 
 
 if __name__ == "__main__":
+    pid = os.getpid()
+    print 'pid:', pid
+    daemonize(None, log='daemon.out', pidfile='daemon.PID')
+    print "Hello I'm a daemon (pid=%s) and this is my standard out." % pid
 
-    from textwrap import dedent
-    print 'pid:', os.getpid()
+    print 'I am now sleeping for 20 seconds.'
+    import time
+    time.sleep(20)
 
-    daemonize(None, 'daemon.out')
-
-    # daemon can still write to files
-    with file("daemon.info", "wb") as f:
-        f.write(dedent("""\
-        process ID         = %s
-        parent process ID  = %s
-        process group ID   = %s
-        session ID         = %s
-        user ID            = %s
-        effective user ID  = %s
-        real group ID      = %s
-        effective group ID = %s
-        """ % (os.getpid(), os.getppid(), os.getpgrp(), os.getsid(0),
-               os.getuid(), os.geteuid(), os.getgid(), os.getegid())))
-        f.write('\n')
-
-    print "Hello I'm a daemon and this is my standard out."
-
+    print 'I am awake! ready or not, here I come!'
 

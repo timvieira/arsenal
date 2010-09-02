@@ -80,12 +80,14 @@ def bracket2bio(x):
                     raise ParseError('brackets can not appear within a word.')
                 yield ('I-%s' % label, w)
 
-def grouper(text, pattern):
+# TIMV: we want something like a LineGroupIterator
+# TDOD: make this
+def line_groups(text, pattern):
     """
     Very simple function for breaking up text into groups based on a 
     single pattern.
 
-    >>> list(grouper("a BB c d BB", "BB"))
+    >>> list(line_groups("a BB c d BB", "BB"))
     ['a', 'c d']
     """
     for group in re.split(pattern, text):    # TODO: make this "lazier"

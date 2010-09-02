@@ -50,6 +50,10 @@ RFC2822_RE = re.compile("""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=
 # removing obsolete bracket notation
 # EMAIL_I = re.compile("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", re.IGNORECASE)
 
+
+# TODO: add restrictions on email length 
+#   {local}@{domain}: local 64 characters, domain 255
+
 # refinment of EMAIL-I, it limits country code to 2 letters
 EMAIL_RE = re.compile("""
 (mailto://)?

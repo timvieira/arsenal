@@ -565,3 +565,8 @@ if __name__ == "__main__":
     assert np.linalg.norm(A - a) < 1e-10  # roughly zero difference
 
     import doctest; doctest.testmod()
+
+    from time import sleep
+    for _ in iterview(range(100), 1):
+        sleep(.1)
+

@@ -1,4 +1,4 @@
-from numpy import array, log, dot, abs as np_abs
+from numpy.core import array, log, dot, abs as np_abs
 
 try:
     from scipy.maxentropy import logsumexp

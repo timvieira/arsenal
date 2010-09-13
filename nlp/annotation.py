@@ -95,7 +95,70 @@ def line_groups(text, pattern):
         if group:
             yield group
 
+
+from collections import namedtuple
+Span = namedtuple('Span', 'label begins ends')
+
+# TIM: add an option for strict BIO sequences, no heuristics
+def bio2span(seq, tagger=None, include_O=True):
+    """
+    Given a sequence and a function for grabbing labels, return a list of `Spans`.
+    Note: Will interpret `None` as "O"
+
+    >>> bio2span(['O','B-NUM','B-DATE', 'I-DATE'], include_O=False)
+    [Span(label='NUM', begins=1, ends=2), Span(label='DATE', begins=2, ends=4)]
+
+    `bio2span` will apply some heuristics for bad BIO sequences.
+    For example:
+      >>> bio2span(['O','B-NUM','I-DATE'], include_O=False)
+      [Span(label='NUM', begins=1, ends=2), Span(label='DATE', begins=2, ends=3)]
+    """
+    if tagger is not None:
+        seq = [tagger(tk) for tk in seq]
+    phrase = []
+    phrases = []
+    intag = None
+    for i, lbl in enumerate(seq):
+        if lbl is None:
+            lbl = 'O'
+        if lbl.startswith('B-'):
+            if intag and len(phrase):
+                phrases.append(phrase)
+                phrase = []
+            intag = lbl[2:]
+            phrase = [intag, i]
+        elif lbl.startswith('I-'):
+            if intag == lbl[2:]:             # and youre still in the same span
+                phrase.append(i)
+            else:                            # you're in a new span (hueristic correction)
+                if len(phrase):
+                    phrases.append(phrase)
+                intag = lbl[2:]
+                phrase = [intag, i]
+        elif intag:                          # was in tag, now outiside ("O")
+            intag = None
+            phrases.append(phrase)
+            phrases.append(i)
+            phrase = []
+        else:
+            phrases.append(i)
+    if intag and len(phrase):                # close any lingering spans
+        phrases.append(phrase)
+    if include_O:
+        ret = []
+        for s in phrases:
+            if isinstance(s, list):
+                ret.append(Span(s[0], s[1], s[-1]+1))
+            else:
+                ret.append(Span('O', s, s+1))
+    else:
+        ret = [Span(s[0], s[1], s[-1]+1) for s in phrases if isinstance(s, list)]
+    return ret
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
+    from nlp.tests.bio2spantest import test_bio2span
+    test_bio2span()

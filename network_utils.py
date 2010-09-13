@@ -22,7 +22,7 @@ def whatismyip2():
 def whatismyip():
     """
     Utility function to guess the IP (as a string) where the server can be
-    reached from the outside. Quite nasty problem actually. 
+    reached from the outside. Quite nasty problem actually.
 
     Implementation of this function borrowed from:
         woof -- an ad-hoc single file webserver
@@ -32,17 +32,17 @@ def whatismyip():
     if sys.platform == "cygwin":
         ipcfg = os.popen("ipconfig").readlines()
         for l in ipcfg:
-          try:
-             candidat = l.split(":")[1].strip()
-             if candidat[0].isdigit():
-                break
-          except:
-             pass
+            try:
+                candidat = l.split(":")[1].strip()
+                if candidat[0].isdigit():
+                    break
+            except:
+                pass
         return candidat
-  
+
     os.environ["PATH"] = "/sbin:/usr/sbin:/usr/local/sbin:" + os.environ["PATH"]
-    platform = os.uname()[0];
-  
+    platform = os.uname()[0]
+
     if platform == "Linux":
         netstat = commands.getoutput("LC_MESSAGES=C netstat -rn")
         defiface = [i.split()[-1] for i in netstat.split('\n') if i.split()[0] == "0.0.0.0"]
@@ -53,21 +53,21 @@ def whatismyip():
         netstat = commands.getoutput("LC_MESSAGES=C netstat -arn")
         defiface = [i.split()[-1] for i in netstat.split('\n') if len(i) > 2 and i.split()[0] == "0.0.0.0"]
     else:
-        print >>sys.stderr, "Unsupported platform; please add support for your platform in find_ip().";
+        print >>sys.stderr, "Unsupported platform: please add support for your platform in find_ip()."
         return None
- 
+
     if not defiface:
         return None
- 
+
     if platform == "Linux":
         ifcfg = commands.getoutput("LC_MESSAGES=C ifconfig " + defiface[0]).split("inet addr:")
     elif platform in ("Darwin", "FreeBSD", "SunOS", "NetBSD"):
         ifcfg = commands.getoutput("LC_MESSAGES=C ifconfig " + defiface[0]).split("inet ")
- 
+
     if len(ifcfg) != 2:
         return None
     ip_addr = ifcfg[1].split()[0]
- 
+
     # sanity check
     try:
         ints = [i for i in ip_addr.split(".") if 0 <= int(i) <= 255]
@@ -75,9 +75,9 @@ def whatismyip():
             return None
     except ValueError:
         return None
- 
+
     return ip_addr
-  
+
 
 if __name__ == '__main__':
     print 'whatismyip: ', whatismyip()

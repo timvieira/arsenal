@@ -4,16 +4,30 @@ Debugging utilities
 
 import re
 import sys
-import pdb
 import inspect
 import traceback
+
+# try to use IPython's fancy debugger if available
+try:
+    from IPython.Debugger import Pdb
+    from IPython.Shell import IPShellEmbed
+    ip = __IPYTHON__ = IPShellEmbed([])
+    def set_trace():
+        callerframe = sys._getframe().f_back
+        Pdb().set_trace(callerframe)
+    def pm():    
+        p = Pdb()
+        p.reset()
+        p.interaction(None, sys.last_traceback)    
+except ImportError:
+    from pdb import set_trace, pm, Pdb
 
 
 def enable_debug_hook():
     "Register pdb's post-mortem debugger as the handler for uncaught exceptions."
     def debug_hook(*args):
         sys.__excepthook__(*args)
-        pdb.pm()
+        pm()
     sys.excepthook = debug_hook
 
 
@@ -185,4 +199,3 @@ if __name__ == '__main__':
             framedump()
 
     example()
-

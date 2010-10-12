@@ -379,7 +379,7 @@ def sliding_window(iterable, k):
     return izip(*iterators)
 
 
-## TODO: add an option for changing the size
+## TODO: add an option for providing the size
 def iterview(x, every_k=10):
     """
     iterator which prints its progress to *stderr*.
@@ -449,7 +449,7 @@ def consume(iterator, n):
 
 def take(n, seq):
     """ Return the first n items in a sequence. """
-    return list(islice(seq, n))
+    return list(islice(seq, None, n))
 
 def nth(iterable, n):
     """ Returns a list containing the nth item. """

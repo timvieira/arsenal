@@ -32,6 +32,12 @@ from terminal import colors
 ##         mod = getattr(mod, comp)
 ##     return mod
 
+
+def piped():
+    """Returns piped input via stdin, else False"""
+    with sys.stdin as stdin:
+        return stdin.read() if not stdin.isatty() else None
+
 def highlighter(p):
     pattern = re.compile('(\\b%s\\b)' % p)
     return lambda x: pattern.sub(colors.bold % colors.yellow % colors.bg_red % r'\1', x)

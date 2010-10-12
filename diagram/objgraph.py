@@ -1,48 +1,70 @@
 """
 Ad-hoc tools for drawing Python object reference graphs with graphviz.
 
+This module is more useful as a repository of sample code and ideas, than
+as a finished product.  For documentation and background, read
 
-Python Object Graphs
-====================
+  http://mg.pov.lt/blog/hunting-python-memleaks.html
+  http://mg.pov.lt/blog/python-object-graphs.html
+  http://mg.pov.lt/blog/object-graphs-with-graphviz.html
 
-``objgraph`` is a module that lets you visually explore Python object graphs.
-I've used it in the past to go hunt for memory leaks in Python programs as
-described by this series of blog posts:
+in that order.  Then use pydoc to read the docstrings, as there were
+improvements made since those blog posts.
 
-  * http://mg.pov.lt/blog/hunting-python-memleaks.html
-  * http://mg.pov.lt/blog/python-object-graphs.html
-  * http://mg.pov.lt/blog/object-graphs-with-graphviz.html
+Copyright (c) 2008-2010 Marius Gedminas <marius@pov.lt>
 
-You'll need `graphviz <http://www.graphviz.org/>`_ if you want to draw
-pretty graphs.
+Released under the MIT licence.
 
 
-Examples
---------
+Changes
+=======
 
-Try this in a Python shell:
+1.3.1 (2010-07-17)
+------------------
 
-  >>> x = []
-  >>> y = [x, [x], dict(x=x)]
-  >>> import objgraph
-  >>> objgraph.show_refs([y])
+Rebuild an sdist with no missing files (fixes LP#606604)
 
-You should see a graph like this:
+Added MANIFEST.in and a Makefile to check that setup.py sdist generates
+source distributions with no files missing.
 
-.. image:: sample-graph.png
-    :alt: [graph of objects reachable from y]
 
-Now try
+1.3 (2010-07-13)
+----------------
 
-    >>> objgraph.show_backrefs([x])
+Highlight objects with a __del__ method.
 
-and you'll see
+Fixes LP#483411, LP#514422, 
 
-.. image:: sample-backref-graph.png
-    :alt: [graph of objects from which y is reachable]
+show_refs, show_backrefs don't create files in the current working
+directory any more.  Instead they accept a filename argument.  It can be a
+.dot file or a .png file.  If None or not specified, those functions will try
+to spawn xdot as before.  Fixes LP#514422.
 
+New extra_info argument to graph-generating functions (patch by Thouis Jones,
+LP#558914).
+
+setup.py should work with distutils now (LP#604430, thanks to Randy Heydon).
+
+
+1.2 (2009-03-25)
+----------------
+
+Project website, public source repository, uploaded to PyPI.
+
+No code changes.
+
+
+1.1dev (2008-09-05)
+-------------------
+
+New function: show_refs() for showing forward references.
+
+New functions: typestats() and show_most_common_types().
+
+Object boxes are less crammed with useless information (such as IDs).
+
+Spawns xdot if it is available.
 """
-
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
 # to deal in the Software without restriction, including without limitation
@@ -61,11 +83,11 @@ and you'll see
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__author__    = "Marius Gedminas (marius@gedmin.as)"
-__copyright__ = "Copyright (c) 2008, 2009 Marius Gedminas"
-__license__   = "MIT"
-__version__   = "1.2"
-__date__      = "2009-04-25"
+__author__ = "Marius Gedminas (marius@gedmin.as)"
+__copyright__ = "Copyright (c) 2008-2010 Marius Gedminas"
+__license__ = "MIT"
+__version__ = "1.3.1"
+__date__ = "2010-07-17"
 
 
 import gc
@@ -74,6 +96,8 @@ import types
 import weakref
 import operator
 import os
+import subprocess
+from tempfile import NamedTemporaryFile
 
 
 def count(typename):
@@ -203,13 +227,14 @@ def find_backref_chain(obj, predicate, max_depth=20, extra_ignore=()):
 
 
 def show_backrefs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
-                  highlight=None):
+                  highlight=None, filename=None, extra_info=(lambda _: '')):
     """Generate an object reference graph ending at ``objs``
 
     The graph will show you what objects refer to ``objs``, directly and
     indirectly.
 
-    ``objs`` can be a single object, or it can be a list of objects.
+    ``objs`` can be a single object, or it can be a list of objects.  If
+    unsure, wrap the single object in a new list.
 
     Produces a Graphviz .dot file and spawns a viewer (xdot) if one is
     installed, otherwise converts the graph to a .png image.
@@ -221,6 +246,9 @@ def show_backrefs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
     remove undesired objects from the graph.
 
     Use ``highlight`` (a predicate) to highlight certain graph nodes in blue.
+
+    Use ``extra_info`` (a function returning a string) to report extra
+    information for objects.
 
     Examples:
 
@@ -234,17 +262,19 @@ def show_backrefs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
     """
     show_graph(objs, max_depth=max_depth, extra_ignore=extra_ignore,
                filter=filter, too_many=too_many, highlight=highlight,
-               edge_func=gc.get_referrers, swap_source_target=False)
+               edge_func=gc.get_referrers, swap_source_target=False,
+               filename=filename, extra_info=extra_info)
 
 
 def show_refs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
-              highlight=None):
+              highlight=None, filename=None, extra_info=(lambda _: '')):
     """Generate an object reference graph starting at ``objs``
 
     The graph will show you what objects are reachable from ``objs``, directly
     and indirectly.
 
-    ``objs`` can be a single object, or it can be a list of objects.
+    ``objs`` can be a single object, or it can be a list of objects.  If
+    unsure, wrap the single object in a new list.
 
     Produces a Graphviz .dot file and spawns a viewer (xdot) if one is
     installed, otherwise converts the graph to a .png image.
@@ -256,6 +286,9 @@ def show_refs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
     remove undesired objects from the graph.
 
     Use ``highlight`` (a predicate) to highlight certain graph nodes in blue.
+
+    Use ``extra_info`` (a function returning a string) to report extra
+    information for objects.
 
     Examples:
 
@@ -269,7 +302,8 @@ def show_refs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
     """
     show_graph(objs, max_depth=max_depth, extra_ignore=extra_ignore,
                filter=filter, too_many=too_many, highlight=highlight,
-               edge_func=gc.get_referents, swap_source_target=True)
+               edge_func=gc.get_referents, swap_source_target=True,
+               filename=filename, extra_info=extra_info)
 
 #
 # Internal helpers
@@ -277,10 +311,15 @@ def show_refs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
 
 def show_graph(objs, edge_func, swap_source_target,
                max_depth=3, extra_ignore=(), filter=None, too_many=10,
-               highlight=None):
+               highlight=None, filename=None, extra_info=(lambda _: '')):
     if not isinstance(objs, (list, tuple)):
         objs = [objs]
-    f = file('objects.dot', 'w')
+    if filename and filename.endswith('.dot'):
+        f = file(filename, 'w')
+        dot_filename = filename
+    else:
+        f = NamedTemporaryFile('w', suffix='.dot', delete=False)
+        dot_filename = f.name
     print >> f, 'digraph ObjectGraph {'
     print >> f, '  node[shape=box, style=filled, fillcolor=white];'
     queue = []
@@ -301,7 +340,7 @@ def show_graph(objs, edge_func, swap_source_target,
         nodes += 1
         target = queue.pop(0)
         tdepth = depth[id(target)]
-        print >> f, '  %s[label="%s"];' % (obj_node_id(target), obj_label(target, tdepth))
+        print >> f, '  %s[label="%s"];' % (obj_node_id(target), obj_label(target, tdepth, extra_info))
         h, s, v = gradient((0, 0, 1), (0, 0, .3), tdepth, max_depth)
         if inspect.ismodule(target):
             h = .3
@@ -313,6 +352,9 @@ def show_graph(objs, edge_func, swap_source_target,
         print >> f, '  %s[fillcolor="%g,%g,%g"];' % (obj_node_id(target), h, s, v)
         if v < 0.5:
             print >> f, '  %s[fontcolor=white];' % (obj_node_id(target))
+        if hasattr(target, '__del__'):
+            print >> f, "  %s->%s_has_a_del[color=red,style=dotted,len=0.25,weight=10];" % (obj_node_id(target), obj_node_id(target))
+            print >> f, '  %s_has_a_del[label="__del__",shape=doublecircle,height=0.25,color=red,fillcolor="0,.5,1",fontsize=6];' % (obj_node_id(target))
         if inspect.ismodule(target) or tdepth >= max_depth:
             continue
         neighbours = edge_func(target)
@@ -338,13 +380,31 @@ def show_graph(objs, edge_func, swap_source_target,
                 break
     print >> f, "}"
     f.close()
-    print "Graph written to objects.dot (%d nodes)" % nodes
-    if os.system('which xdot >/dev/null') == 0:
+    print "Graph written to %s (%d nodes)" % (dot_filename, nodes)
+    if filename is None and program_in_path('xdot'):
         print "Spawning graph viewer (xdot)"
-        os.system("xdot objects.dot &")
+        subprocess.Popen(['xdot', dot_filename])
+    elif program_in_path('dot'):
+        if filename is None:
+            print "Graph viewer (xdot) not found, generating a png instead"
+        if filename and filename.endswith('.png'):
+            f = file(filename, 'wb')
+            png_filename = filename
+        else:
+            if filename is not None:
+                print "Unrecognized file type (%s)" % filename
+            f = NamedTemporaryFile('wb', suffix='.png', delete=False)
+            png_filename = f.name
+        dot = subprocess.Popen(['dot', '-Tpng', dot_filename],
+                               stdout=f)
+        dot.wait()
+        f.close()
+        print "Image generated as %s" % png_filename
     else:
-        os.system("dot -Tpng objects.dot > objects.png")
-        print "Image generated as objects.png"
+        if filename is None:
+            print "Graph viewer (xdot) and image renderer (dot) not found, not doing anything else"
+        else:
+            print "Unrecognized file type (%s), not doing anything else" % filename
 
 
 def obj_node_id(obj):
@@ -353,9 +413,10 @@ def obj_node_id(obj):
     return ('o%d' % id(obj)).replace('-', '_')
 
 
-def obj_label(obj, depth):
+def obj_label(obj, depth, extra_info):
     return quote(type(obj).__name__ + ':\n' +
-                 safe_repr(obj))
+                 safe_repr(obj) + '\n' +
+                 extra_info(obj))
 
 
 def quote(s):
@@ -411,3 +472,8 @@ def edge_label(source, target):
     return ''
 
 
+def program_in_path(program):
+    path = os.environ.get("PATH", os.defpath).split(os.pathsep)
+    path = [os.path.join(dir, program) for dir in path]
+    path = [True for file in path if os.path.isfile(file)]
+    return bool(path)

@@ -31,6 +31,59 @@ def xml2segments(x):
         else:
             yield (label, tagged.split())
 
+
+#Lexer = "\\+[A-Z]+\\+|\\p{Alpha}+|\\p{Digit}+|\\p{Punct}".r
+Lexer = re.compile('|'.join(["http://S+",                                   # keep urls together.. might include invalid URL characters
+                             "\\S+@\\S+",
+                             "[0-9]+\\s*-\\s*[0-9]+",                       # possible page number
+                             "[0-9]+(?:st|nd|rd|th)",
+                             "[A-Z]\\.",
+                             "Ph\\.?[Dd]\\.",
+                             #"[Vv]ol(?:\\.|ume)\\s*[0-9]+",               # make "Vol. 3" one token.
+                             "(?:Vol|Proc|Dept|Univ|No|Inc)\\s*\\.",
+                             "pp\\.",
+                             "\\(\\s*[0-9][0-9][0-9][0-9][a-z]?\\s*\\)",    # e.g. "(1994)" year in parens
+                             "[Ee]d(?:s?\\.|itors?)",
+                             "[0-9][0-9]?\\s*\\([0-9]?\\)",                 # e.g. "7(4)" common in volume
+                             "\\(\\s*[0-9][0-9]?\\s*\\)",                   # e.g. "(4)" common in volume
+                             #"\\w+-\\w+",
+                             "\\+[A-Z]+\\+",
+                             "\\p{Alpha}+(?:'s)?",
+                             #"[0-9]+(?:\\.[0-9]+)?",                      # 231 or 2.0, but not 2.
+                             "[0-9]+",
+                             "[()\"'\\-\\.,]",
+                             "\\S+"]))
+
+TaggedText = re.compile("<([a-z0-9_]+)>([\w\W]+?)</([a-z0-9_]+)>|([^<>\s]+)", re.IGNORECASE)
+
+def fromSGML(f, linegrouper="\n", bioencoding=False):
+    for line in re.split(linegrouper, open(f).read()):
+        seq = list(sgml2sequence(line, bioencoding))
+        if seq:
+            yield seq
+
+def sgml2sequence(x, bioencoding=False):
+    x = x.strip().replace("\n", " +L+ ")
+    for (tag, tagged, close, outside) in TaggedText.findall(x):
+        if tag != close:
+            print
+            print "Sequence: ", x
+            assert False, "opening (%s) and closing (%s) tags do not match." % (tag, close)
+        if tagged:
+            tokens = iter(Lexer.findall(tagged))
+            # which encoding to use
+            if bioencoding:
+                yield (tokens.next(), "B-" + tag)
+                for w in tokens:
+                    yield (w, "I-" + tag)
+            else:
+                for w in tokens:
+                    yield (w, tag)
+        else:
+            for w in Lexer.findall(outside):
+                yield (w, "O")
+        
+
 def xml2bio(x):
     """
     Generate BIO-token pairs from xml-style annotation.
@@ -162,3 +215,10 @@ if __name__ == '__main__':
 
     from nlp.tests.bio2spantest import test_bio2span
     test_bio2span()
+
+    def example():
+        x = list(fromSGML('/home/timv/projects/RexaTextmill/data/tagged_references.txt', '<NEW.*?>', False))
+        assert len(x) == 500
+        print 'fromSGML passed.'
+
+    example()

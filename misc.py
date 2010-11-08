@@ -38,8 +38,8 @@ def piped():
     with sys.stdin as stdin:
         return stdin.read() if not stdin.isatty() else None
 
-def highlighter(p):
-    pattern = re.compile('(\\b%s\\b)' % p)
+def highlighter(p, flags=0):
+    pattern = re.compile('(\\b%s\\b)' % p, flags)
     return lambda x: pattern.sub(colors.bold % colors.yellow % colors.bg_red % r'\1', x)
 
 def deprecated(use_instead=None):

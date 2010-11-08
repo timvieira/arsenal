@@ -380,7 +380,7 @@ def sliding_window(iterable, k):
 
 
 ## TODO: add an option for providing the size
-def iterview(x, every_k=10):
+def iterview(x, every_k=10, length=None):
     """
     iterator which prints its progress to *stderr*.
     """
@@ -420,7 +420,7 @@ def iterview(x, every_k=10):
         return out
 
     starttime = time.time()
-    lenx = len(x)
+    lenx = length or len(x)
     n = lenx
     if lenx == 0:
         raise StopIteration

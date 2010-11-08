@@ -19,10 +19,19 @@ Released under the MIT licence.
 Changes
 =======
 
+1.4.0 (2010-11-03)
+------------------
+
+Compatibility with Python 2.4 and 2.5 (tempfile.NamedTemporaryFile has no
+delete argument).
+
+New function: most_common_types().
+
+
 1.3.1 (2010-07-17)
 ------------------
 
-Rebuild an sdist with no missing files (fixes LP#606604)
+Rebuild an sdist with no missing files (fixes LP#606604).
 
 Added MANIFEST.in and a Makefile to check that setup.py sdist generates
 source distributions with no files missing.
@@ -33,12 +42,13 @@ source distributions with no files missing.
 
 Highlight objects with a __del__ method.
 
-Fixes LP#483411, LP#514422, 
+Fixes LP#483411: suggest always passing [obj] to show_refs, show_backrefs,
+since obj might be a list/tuple.
 
-show_refs, show_backrefs don't create files in the current working
-directory any more.  Instead they accept a filename argument.  It can be a
-.dot file or a .png file.  If None or not specified, those functions will try
-to spawn xdot as before.  Fixes LP#514422.
+Fixes LP#514422: show_refs, show_backrefs don't create files in the current
+working directory any more.  Instead they accept a filename argument, which
+can be a .dot file or a .png file.  If None or not specified, those functions
+will try to spawn xdot as before.
 
 New extra_info argument to graph-generating functions (patch by Thouis Jones,
 LP#558914).
@@ -86,8 +96,8 @@ Spawns xdot if it is available.
 __author__ = "Marius Gedminas (marius@gedmin.as)"
 __copyright__ = "Copyright (c) 2008-2010 Marius Gedminas"
 __license__ = "MIT"
-__version__ = "1.3.1"
-__date__ = "2010-07-17"
+__version__ = "1.4.0"
+__date__ = "2010-11-03"
 
 
 import gc
@@ -97,7 +107,7 @@ import weakref
 import operator
 import os
 import subprocess
-from tempfile import NamedTemporaryFile
+import tempfile
 
 
 def count(typename):
@@ -130,20 +140,34 @@ def typestats():
     return stats
 
 
-def show_most_common_types(limit=10):
+def most_common_types(limit=10):
     """Count the names of types with the most instances.
 
     Note that the GC does not track simple objects like int or str.
 
     Note that classes with the same name but defined in different modules
     will be lumped together.
+
+    Returns a list of (type_name, count), sorted most-frequent-first.
     """
     stats = sorted(typestats().items(), key=operator.itemgetter(1),
                    reverse=True)
     if limit:
         stats = stats[:limit]
+    return stats
+
+
+def show_most_common_types(limit=10):
+    """Print the table of types of most common instances
+
+    Note that the GC does not track simple objects like int or str.
+
+    Note that classes with the same name but defined in different modules
+    will be lumped together.
+    """
+    stats = most_common_types(limit)
     width = max(len(name) for name, count in stats)
-    for name, count in stats[:limit]:
+    for name, count in stats:
         print name.ljust(width), count
 
 
@@ -162,7 +186,7 @@ def by_type(typename):
 
 def at(addr):
     """Return an object at a given memory address.
-    
+
     The reverse of id(obj):
 
         >>> at(id(obj)) is obj
@@ -318,8 +342,8 @@ def show_graph(objs, edge_func, swap_source_target,
         f = file(filename, 'w')
         dot_filename = filename
     else:
-        f = NamedTemporaryFile('w', suffix='.dot', delete=False)
-        dot_filename = f.name
+        fd, dot_filename = tempfile.mkstemp('.dot', text=True)
+        f = os.fdopen(fd, "w")
     print >> f, 'digraph ObjectGraph {'
     print >> f, '  node[shape=box, style=filled, fillcolor=white];'
     queue = []
@@ -393,8 +417,8 @@ def show_graph(objs, edge_func, swap_source_target,
         else:
             if filename is not None:
                 print "Unrecognized file type (%s)" % filename
-            f = NamedTemporaryFile('wb', suffix='.png', delete=False)
-            png_filename = f.name
+            fd, png_filename = tempfile.mkstemp('.png', text=False)
+            f = os.fdopen(fd, "wb")
         dot = subprocess.Popen(['dot', '-Tpng', dot_filename],
                                stdout=f)
         dot.wait()

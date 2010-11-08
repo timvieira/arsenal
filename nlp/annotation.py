@@ -33,26 +33,26 @@ def xml2segments(x):
 
 
 #Lexer = "\\+[A-Z]+\\+|\\p{Alpha}+|\\p{Digit}+|\\p{Punct}".r
-Lexer = re.compile('|'.join(["http://S+",                                   # keep urls together.. might include invalid URL characters
-                             "\\S+@\\S+",
-                             "[0-9]+\\s*-\\s*[0-9]+",                       # possible page number
+Lexer = re.compile('|'.join(["http://\S+",                               # keep urls together.. might include invalid URL characters
+                             "\S+@\S+",
+                             "[0-9][0-9]?\s*\([0-9]?\)",                 # e.g. "7(4)" common in volume
+                             "\(\s*[0-9][0-9]?\s*\)",                    # e.g. "(4)" common in volume
+                             "[0-9]+\s*-\s*[0-9]+",                      # possible page number
                              "[0-9]+(?:st|nd|rd|th)",
-                             "[A-Z]\\.",
-                             "Ph\\.?[Dd]\\.",
-                             #"[Vv]ol(?:\\.|ume)\\s*[0-9]+",               # make "Vol. 3" one token.
-                             "(?:Vol|Proc|Dept|Univ|No|Inc)\\s*\\.",
-                             "pp\\.",
-                             "\\(\\s*[0-9][0-9][0-9][0-9][a-z]?\\s*\\)",    # e.g. "(1994)" year in parens
-                             "[Ee]d(?:s?\\.|itors?)",
-                             "[0-9][0-9]?\\s*\\([0-9]?\\)",                 # e.g. "7(4)" common in volume
-                             "\\(\\s*[0-9][0-9]?\\s*\\)",                   # e.g. "(4)" common in volume
-                             #"\\w+-\\w+",
-                             "\\+[A-Z]+\\+",
-                             "\\p{Alpha}+(?:'s)?",
-                             #"[0-9]+(?:\\.[0-9]+)?",                      # 231 or 2.0, but not 2.
+                             "[A-Z]\.",
+                             "Ph\.?[Dd]\.",
+                             #"[Vv]ol(?:\.|ume)\s*[0-9]+",               # make "Vol. 3" one token.
+                             "(?:Vol|Proc|Dept|Univ|No|Inc)\s*\.",
+                             "pp\.",
+                             "\(\s*[0-9][0-9][0-9][0-9][a-z]?\s*\)",     # e.g. "(1994)" year in parens
+                             "[Ee]d(?:s?\.|itors?)",
+                             #"\w+-\w+",
+                             "\+[A-Z]+\+",
+                             "[a-zA-Z]+(?:'s)?",
+                             #"[0-9]+(?:\.[0-9]+)?",                      # 231 or 2.0, but not 2.
                              "[0-9]+",
-                             "[()\"'\\-\\.,]",
-                             "\\S+"]))
+                             "[()\"'\-\.,]",
+                             "\S+"]))
 
 TaggedText = re.compile("<([a-z0-9_]+)>([\w\W]+?)</([a-z0-9_]+)>|([^<>\s]+)", re.IGNORECASE)
 
@@ -61,6 +61,20 @@ def fromSGML(f, linegrouper="\n", bioencoding=False):
         seq = list(sgml2sequence(line, bioencoding))
         if seq:
             yield seq
+
+def sgml2segmentation(x):
+    x = x.strip().replace("\n", " +L+ ")
+    for (tag, tagged, close, outside) in TaggedText.findall(x):
+        if tag != close:
+            print
+            print "Sequence: ", x
+            assert False, "opening (%s) and closing (%s) tags do not match." % (tag, close)
+        if tagged:
+            yield (tag, Lexer.findall(tagged))
+        else:
+            for w in Lexer.findall(outside):
+                yield ("O", w)
+
 
 def sgml2sequence(x, bioencoding=False):
     x = x.strip().replace("\n", " +L+ ")

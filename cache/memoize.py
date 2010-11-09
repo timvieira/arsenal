@@ -122,9 +122,10 @@ class memoize(object):
                 self.cache[args] = value = self.func(*args)
                 return value
         except TypeError:
-            # uncachable -- for instance, passing a list as an argument.
-            # Better to not cache than to blow up entirely.
-            return self.func(*args)
+            raise
+#            # uncachable -- for instance, passing a list as an argument.
+#            # Better to not cache than to blow up entirely.
+#            return self.func(*args)
     def __repr__(self):
         return '<memoize(%r)>' % self.func
 

@@ -16,9 +16,9 @@ Highlights
 ----------
 
 - misc.py
-    A "dumping ground" for odd and ends. Including a try_k_times decorator
-    preserve current working directory, redirect_io, timelimit decorator.
-    I should really organize this better.
+    A "dumping ground" for odd and ends. Including a ``try_k_times`` decorator
+    ``preserve_cwd``, ``redirect_io``, ``timelimit`` decorator. I should really
+    organize this better.
 
 - automain.py
     Automatically constructs a "main function" for any module which
@@ -44,9 +44,10 @@ Highlights
       and make some of the functionality easier to use.
   
 - cache/
-    contains the memoize decorator and even a persistence shelve-based variant.
+    contains the ``memoize`` decorator and even a persistence shelve-based variant.
 
 - python-snippets/
-    various snippets which I often use as reference. These
-    snippets are meant to illustrate some of python's advanced features as
-    well as quirks and unexpected behaviors.
+    various snippets which I often use as reference. These snippets are meant to
+    illustrate some of python's advanced features as well as quirks and unexpected
+    behaviors.
+

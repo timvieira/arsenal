@@ -16,8 +16,8 @@ Highlights
 ----------
 
 - misc.py
-    A "dumping ground" for odd and ends. Including a `try_k_times` decorator
-    `preserve_cwd`, `redirect_io`, `timelimit` decorator. I should really
+    A "dumping ground" for odd and ends. Including a ``try_k_times`` decorator
+    ``preserve_cwd``, ``redirect_io``, ``timelimit`` decorator. I should really
     organize this better.
 
 - automain.py

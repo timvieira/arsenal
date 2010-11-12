@@ -25,7 +25,7 @@ Highlights
     calls the automain function.
 
 - iterextras.py
-    the most useful things here are iterview and sliding_window
+    the most useful things here are ``iterview`` and ``sliding_window``
 
 - nlp/
     Contains make text-processing utilities useful in natural language

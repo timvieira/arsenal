@@ -44,7 +44,7 @@ Highlights
     and make some of the functionality easier to use.
   
 - cache/
-    contains the `memoize` decorator and even a persistence shelve-based variant.
+    contains the ``memoize`` decorator and even a persistence shelve-based variant.
 
 - python-snippets/
     various snippets which I often use as reference. These snippets are meant to

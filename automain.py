@@ -1,25 +1,33 @@
 import sys
 from misc import timeit
 
-def automain(verbose=False, breakin=False, ultraTB=False, pdb=False):
+def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=False):
     """
     Automatically create a very simple command-line interface.
 
     Note: All functions must take string arguments
     """
     import __main__ as mod
-    
-    if breakin:
-        from debug import breakin
-        breakin.enable()
 
-    if ultraTB:
-        from debug import ultraTB2
-        ultraTB2.enable()
+    try:
+        if breakin:
+            from debug import breakin
+            breakin.enable()
 
-    if pdb:
-        from debug.utils import enable_debug_hook
-        enable_debug_hook()
+        if ultraTB:
+            from debug import ultraTB2
+            ultraTB2.enable()
+
+        if pdb:
+            from debug.utils import enable_debug_hook
+            enable_debug_hook()
+
+        if timemsg:
+            from misc import print_elapsed_time
+            print_elapsed_time()
+    except ImportError:
+        pass
+
 
     # should we print the module's docstring in the help?
     def show_help():
@@ -57,4 +65,3 @@ def automain(verbose=False, breakin=False, ultraTB=False, pdb=False):
             except TypeError:
                 if out is not None:
                     print out
-

@@ -1,71 +1,83 @@
 # -*- coding: utf-8 -*-
 
-## NOTE: this is a hack version of the original ultraTB.py found in the 
-##       IPython distribution. I have only made a few modifications in
-##       order to remove the dependence on IPython.
-##                                                        -- timv
+"""
+This is a gutted version of the original ultraTB module found in the IPython
+distribution. I have only made a few modifications in order to remove the
+dependence on IPython and make it easier to use in other projects.
+
+
+Here's approximately everything you need to know:
+
+  Just import and enable:
+    >>> from debug import ultraTB2
+    >>> ultraTB2.enable()
+
+  There are a few options that you can play with as well. For example, you can
+  change the color scheme and the verbosity as follows:
+
+    >>> ultraTB2.enable(color_scheme='LightBG', include_vars=False)
 
 """
-ultraTB.py -- Spice up your tracebacks!
 
-* ColorTB
-I've always found it a bit hard to visually parse tracebacks in Python.  The
-ColorTB class is a solution to that problem.  It colors the different parts of a
-traceback in a manner similar to what you would expect from a syntax-highlighting
-text editor.
-
-Installation instructions for ColorTB:
-    import sys,ultraTB
-    sys.excepthook = ultraTB.ColorTB()
-
-* VerboseTB  
-I've also included a port of Ka-Ping Yee's "cgitb.py" that produces all kinds
-of useful info when a traceback occurs.  Ping originally had it spit out HTML
-and intended it for CGI programmers, but why should they have all the fun?  I
-altered it to spit out colored text to the terminal.  It's a bit overwhelming,
-but kind of neat, and maybe useful for long-running programs that you believe
-are bug-free.  If a crash *does* occur in that type of program you want details.
-Give it a shot--you'll love it or you'll hate it.
-
-Note:
-
-  The Verbose mode prints the variables currently visible where the exception
-  happened (shortening their strings if too long). This can potentially be
-  very slow, if you happen to have a huge data structure whose string
-  representation is complex to compute. Your computer may appear to freeze for
-  a while with cpu usage at 100%. If this occurs, you can cancel the traceback
-  with Ctrl-C (maybe hitting it more than once).
-
-  If you encounter this kind of situation often, you may want to use the
-  Verbose_novars mode instead of the regular Verbose, which avoids formatting
-  variables (but otherwise includes the information and context given by
-  Verbose).
-  
-
-Installation instructions for ColorTB:
-    import sys,ultraTB
-    sys.excepthook = ultraTB.VerboseTB()
-
-Note:  Much of the code in this module was lifted verbatim from the standard
-library module 'traceback.py' and Ka-Ping Yee's 'cgitb.py'.
-
-* Color schemes
-The colors are defined in the class TBTools through the use of the
-ColorSchemeTable class. Currently the following exist:
-
-  - NoColor: allows all of this module to be used in any terminal (the color
-  escapes are just dummy blank strings).
-
-  - Linux: is meant to look good in a terminal like the Linux console (black
-  or very dark background).
-
-  - LightBG: similar to Linux but swaps dark/light colors to be more readable
-  in light background terminals.
-
-You can implement other color schemes easily, the syntax is fairly
-self-explanatory. Please send back new schemes you develop to the author for
-possible inclusion in future releases.
-"""
+## ultraTB.py -- Spice up your tracebacks!
+## 
+## * ColorTB
+## I've always found it a bit hard to visually parse tracebacks in Python.  The
+## ColorTB class is a solution to that problem.  It colors the different parts of a
+## traceback in a manner similar to what you would expect from a syntax-highlighting
+## text editor.
+## 
+## Installation instructions for ColorTB:
+##     import sys,ultraTB
+##     sys.excepthook = ultraTB.ColorTB()
+## 
+## * VerboseTB  
+## I've also included a port of Ka-Ping Yee's "cgitb.py" that produces all kinds
+## of useful info when a traceback occurs.  Ping originally had it spit out HTML
+## and intended it for CGI programmers, but why should they have all the fun?  I
+## altered it to spit out colored text to the terminal.  It's a bit overwhelming,
+## but kind of neat, and maybe useful for long-running programs that you believe
+## are bug-free.  If a crash *does* occur in that type of program you want details.
+## Give it a shot--you'll love it or you'll hate it.
+## 
+## Note:
+## 
+##   The Verbose mode prints the variables currently visible where the exception
+##   happened (shortening their strings if too long). This can potentially be
+##   very slow, if you happen to have a huge data structure whose string
+##   representation is complex to compute. Your computer may appear to freeze for
+##   a while with cpu usage at 100%. If this occurs, you can cancel the traceback
+##   with Ctrl-C (maybe hitting it more than once).
+## 
+##   If you encounter this kind of situation often, you may want to use the
+##   Verbose_novars mode instead of the regular Verbose, which avoids formatting
+##   variables (but otherwise includes the information and context given by
+##   Verbose).
+##   
+## 
+## Installation instructions for ColorTB:
+##     import sys,ultraTB
+##     sys.excepthook = ultraTB.VerboseTB()
+## 
+## Note:  Much of the code in this module was lifted verbatim from the standard
+## library module 'traceback.py' and Ka-Ping Yee's 'cgitb.py'.
+## 
+## * Color schemes
+## The colors are defined in the class TBTools through the use of the
+## ColorSchemeTable class. Currently the following exist:
+## 
+##   - NoColor: allows all of this module to be used in any terminal (the color
+##   escapes are just dummy blank strings).
+## 
+##   - Linux: is meant to look good in a terminal like the Linux console (black
+##   or very dark background).
+## 
+##   - LightBG: similar to Linux but swaps dark/light colors to be more readable
+##   in light background terminals.
+## 
+## You can implement other color schemes easily, the syntax is fairly
+## self-explanatory. Please send back new schemes you develop to the author for
+## possible inclusion in future releases.
 
 #*****************************************************************************
 #       Copyright (C) 2001 Nathaniel Gray <n8gray@caltech.edu>

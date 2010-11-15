@@ -25,6 +25,7 @@ def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=Fal
         if timemsg:
             from misc import print_elapsed_time
             print_elapsed_time()
+
     except ImportError:
         pass
 

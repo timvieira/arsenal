@@ -142,6 +142,7 @@ def datestr(then, now=None):
 
 if __name__ == '__main__':
     import doctest
+    doctest.testmod()
     doctest.run_docstring_examples("""
     >>> sec2prettytime(1)
     '1s'

@@ -240,3 +240,4 @@ if __name__ == '__main__':
     assert entropy((0.5, 0.5)) == 1.0
     assert abs(entropy((0.75, 0.25)) - 0.8112781244) < 1e-10
     assert abs(entropy((0.1, 0.1, 0.8)) == 0.9219280948) < 1e-10
+

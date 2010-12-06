@@ -103,7 +103,6 @@ def persistent_cache(key, None_is_bad=False):
 
 # TODO:
 #  * add option to pass a reference to another cache (maybe memcached client)
-#  * allow keyword args
 class memoize(object):
     """ cache a function's return value to avoid recalulation """
     def __init__(self, func):
@@ -122,10 +121,7 @@ class memoize(object):
                 self.cache[args] = value = self.func(*args)
                 return value
         except TypeError:
-            raise
-#            # uncachable -- for instance, passing a list as an argument.
-#            # Better to not cache than to blow up entirely.
-#            return self.func(*args)
+            raise TypeError('uncachable instance passed to memoized function.')
     def __repr__(self):
         return '<memoize(%r)>' % self.func
 
@@ -185,3 +181,4 @@ class memoize_persistent(object):
         except TypeError:
             # uncachable -- for instance, passing a list as an argument.
             raise TypeError('uncachable instance passed to memoized function.')
+

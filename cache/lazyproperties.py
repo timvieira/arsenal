@@ -19,7 +19,7 @@ class ondemand(property):
             pass
 
 
-class cached_property(object):
+class cachedproperty(object):
     """
     Lazy-loading read/write property descriptor.
     Value is stored locally in descriptor object. If value is not set when
@@ -59,9 +59,9 @@ if __name__ == '__main__':
         def my_ondemand(self):
             self.log['ondemand'] += 1
             return 'ON DEMAND'.split()        # return something mutable
-        @cached_property
+        @cachedproperty
         def my_cached(self):
-            self.log['cached_property'] += 1
+            self.log['cachedproperty'] += 1
             return 'CACHED PROPERTY'.split()
 
     def test():

@@ -11,6 +11,21 @@ from random import shuffle
 #     >> p.update(10)
 #     10.0%
 
+def partition(data, proportion):
+    """
+    Deterministically partition `data` according to proportion.
+    Note: assumes sum(proportion) <= 1.0
+
+    >>> partition_proportionally(range(10), [0.3, 0.7])
+    [[0, 1, 2], [3, 4, 5, 6, 7, 8, 9]]
+    """
+    assert sum(proportion) <= 1
+    data = list(data)
+    D = iter(data)
+    N = len(data)
+    return [list(take(j, D)) for j in [int(p*N) for p in proportion]]
+
+
 def breadth_first(tree, children=iter, depth=-1, queue=None):
     """Traverse the nodes of a tree in breadth-first order.
     (No need to check for cycles.)
@@ -94,19 +109,8 @@ def cross_triangle(it):
         for y in buf:
             yield (x,y)
 
-if __name__ == '__main__':
-    X = [[0 for i in xrange(4)] for j in xrange(4)]
-    for (k,(i,j)) in enumerate(cross_lower_triangle(range(4))):
-        X[i][j] = k+1
-    target = [[0, 0, 0, 0],
-              [1, 0, 0, 0],
-              [2, 3, 0, 0],
-              [4, 5, 6, 0]]
-    assert X == target
-
 
 import heapq
-
 def imerge(*iterables):
     """
     Merge multiple sorted inputs into a single sorted output.
@@ -379,7 +383,6 @@ def sliding_window(iterable, k):
     return izip(*iterators)
 
 
-## TODO: add an option for providing the size
 def iterview(x, every_k=10, length=None):
     """
     iterator which prints its progress to *stderr*.
@@ -545,28 +548,39 @@ def iunzip(iterable, n=None):
 
 if __name__ == "__main__":
 
-    a0,b0,c0 = range(1, 10), range(21, 30), range(81, 90)
-    test = zip(a0,b0,c0)
-    a, b, c = iunzip(test)
-    a, b, c = map(list, (a,b,c))
-    assert a == a0 and b == b0 and c == c0
-    recombined = zip(a, b, c)
-    assert recombined == test
-
-    def example_iterview():
-        for x in iterview(xrange(400), every_k=20):
-            time.sleep(0.01)
-    #example_iterview()
-
-    import numpy as np
-    d = (np.random.rand(20, 3) - 0.5) * 100
-    A = np.average(d, axis=0)
-    a = last(rolling_average(d))
-    assert np.linalg.norm(A - a) < 1e-10  # roughly zero difference
-
-    import doctest; doctest.testmod()
-
-    from time import sleep
-    for _ in iterview(range(100), 1):
-        sleep(.1)
-
+    def test():
+        a0,b0,c0 = range(1, 10), range(21, 30), range(81, 90)
+        test = zip(a0,b0,c0)
+        a, b, c = iunzip(test)
+        a, b, c = map(list, (a,b,c))
+        assert a == a0 and b == b0 and c == c0
+        recombined = zip(a, b, c)
+        assert recombined == test
+    
+        def example_iterview():
+            for x in iterview(xrange(400), every_k=20):
+                time.sleep(0.01)
+        #example_iterview()
+    
+        X = [[0 for i in xrange(4)] for j in xrange(4)]
+        for (k,(i,j)) in enumerate(cross_lower_triangle(range(4))):
+            X[i][j] = k+1
+        target = [[0, 0, 0, 0],
+                  [1, 0, 0, 0],
+                  [2, 3, 0, 0],
+                  [4, 5, 6, 0]]
+        assert X == target
+    
+        import numpy as np
+        d = (np.random.rand(20, 3) - 0.5) * 100
+        A = np.average(d, axis=0)
+        a = last(rolling_average(d))
+        assert np.linalg.norm(A - a) < 1e-10  # roughly zero difference
+    
+        import doctest; doctest.testmod()
+    
+        from time import sleep
+        for _ in iterview(range(100), 1):
+            sleep(.1)
+    
+    test()

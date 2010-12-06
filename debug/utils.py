@@ -18,7 +18,7 @@ try:
     def pm():    
         p = Pdb()
         p.reset()
-        p.interaction(None, sys.last_traceback)    
+        p.interaction(None, sys.last_traceback)
 except ImportError:
     from pdb import set_trace, pm, Pdb
 

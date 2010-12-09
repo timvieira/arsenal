@@ -28,7 +28,7 @@ Highlights
     the most useful things here are ``iterview`` and ``sliding_window``
 
 - nlp/
-    Contains make text-processing utilities useful in natural language
+    Contains many text-processing utilities useful in natural language
     processing. This directory has gotten big enough to almost become its
     own project.
 

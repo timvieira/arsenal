@@ -33,7 +33,6 @@ Highlights
     own project.
 
 - debug/
-
   + breakin.py
     ripped out bzr's infamous breakin feature. enabling this allows the user
     to send a SIGQUIT or SIGBREAK signal to a running process and get an

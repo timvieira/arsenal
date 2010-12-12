@@ -12,7 +12,7 @@ class SaferList(list):
         return isinstance(item, int) and item >= 0 and item < list.__len__(self)
 
     def __getslice__(self, i, j):
-        assert map(self.boundscheck, filter(None, (i,j))), 'getslice did not have idicies in bounds. %r' % ((i,j),)
+        assert map(self.boundscheck, filter(None, (i,j))), 'getslice does not have indicies in bounds. %r' % ((i,j),)
         xx = list.__getslice__(self, i, j)
         assert len(xx) == (j-i), 'slices must have the proper size!'
         return SaferList(xx)

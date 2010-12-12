@@ -33,7 +33,7 @@ Highlights
     own project.
 
 - debug/
-    I'm a big fan of `debug.utils.ip` and a HUGE fan of ultraTB2!
+    I'm a big fan of ``debug.utils.ip`` and a huge fan of ``ultraTB2``!
 
     + breakin.py
       ripped out bzr's infamous breakin feature. enabling this allows the user
@@ -46,7 +46,7 @@ Highlights
   
       It's as simple as:
   
-        >>> from debug import ultraTB2; ultraTB2.enable()
+      >>> from debug import ultraTB2; ultraTB2.enable()
     
 - cache/
     contains the ``memoize`` decorator and even a persistence shelve-based variant.

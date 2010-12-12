@@ -33,21 +33,21 @@ Highlights
     own project.
 
 - debug/
-  I'm a big fan of `debug.utils.ip` and a HUGE fan of ultraTB2!
+    I'm a big fan of `debug.utils.ip` and a HUGE fan of ultraTB2!
 
-  + breakin.py
-    ripped out bzr's infamous breakin feature. enabling this allows the user
-    to send a SIGQUIT or SIGBREAK signal to a running process and get an
-    interactive shell or pdb session AND even resume the process!
-
-  + ultraTB2.py
-    I ripped out ultraTB from IPython (to remove the dependence)
-    and make some of the functionality easier to use. 
-
-    It's as simple as:
-
-      >>> from debug import ultraTB2; ultraTB2.enable()
+    + breakin.py
+      ripped out bzr's infamous breakin feature. enabling this allows the user
+      to send a SIGQUIT or SIGBREAK signal to a running process and get an
+      interactive shell or pdb session AND even resume the process!
   
+    + ultraTB2.py
+      I ripped out ultraTB from IPython (to remove the dependence)
+      and make some of the functionality easier to use. 
+  
+      It's as simple as:
+  
+        >>> from debug import ultraTB2; ultraTB2.enable()
+    
 - cache/
     contains the ``memoize`` decorator and even a persistence shelve-based variant.
 

@@ -8,10 +8,11 @@ class Alphabet(object):
         self.mapping = Flipdict()
         self.i = 0
         self.frozen = False
+        self.growing = True
     def freeze(self):
         self.frozen = True
-    def unfreeze(self):
-        self.frozen = False
+    def stop_growth(self):
+        self.growing = False
     @classmethod
     def from_iterable(cls, it):
         inst = cls()
@@ -28,6 +29,8 @@ class Alphabet(object):
         except KeyError:
             if not isinstance(k, basestring):
                 raise InvalidKeyException("Invalid key (%s): only strings allowed." % k)
+            if not self.growing:
+                return None
             if self.frozen:
                 raise AssertionError('Alphabet is frozen and key (%s) was not found.' % k)
             self.mapping[k] = self.i
@@ -38,6 +41,9 @@ class Alphabet(object):
         return iter(self.mapping)
     def __len__(self):
         return len(self.mapping)
+    def plaintext(self):
+        return '\n'.join(self.lookup(i) for i in xrange(self.i))
+
 
 class InvalidKeyException(Exception):
     pass

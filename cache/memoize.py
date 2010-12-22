@@ -182,3 +182,14 @@ class memoize_persistent(object):
             # uncachable -- for instance, passing a list as an argument.
             raise TypeError('uncachable instance passed to memoized function.')
 
+
+    def get_cached(self, *args):
+        """ If result is cached return it, otherwise return `None`. """
+        # wait until you call the function to un-pickle
+        if not self.loaded:
+            self.load()
+
+        if args in self.cache:
+            return self.cache[args]
+        else:
+            return None

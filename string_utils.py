@@ -41,6 +41,35 @@ def clean_html(html):
     cleaned = re.sub(r"  ", " ", cleaned)
 
 
+'''
+import unicodedata
+def strip_accents(s):
+    """Transform accentuated unicode symbols into their simple counterpart
+
+    Warning: the python-level loop and join operations make this implementation
+    20 times slower than the to_ascii basic normalization.
+    """
+    return u''.join([c for c in unicodedata.normalize('NFKD', s)
+                     if not unicodedata.combining(c)])
+
+
+def to_ascii(s):
+    """Transform accentuated unicode symbols into ascii or nothing
+
+    Warning: this solution is only suited for roman languages that have a direct
+    transliteration to ASCII symbols.
+
+    A better solution would be to use transliteration based on a precomputed
+    unidecode map to be used by translate as explained here:
+
+        http://stackoverflow.com/questions/2854230/
+
+    """
+    nkfd_form = unicodedata.normalize('NFKD', s)
+    only_ascii = nkfd_form.encode('ASCII', 'ignore')
+    return only_ascii
+'''
+
 # iso-8859-1
 LATIN2ASCII = {
     # uppercase

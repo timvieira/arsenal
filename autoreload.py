@@ -35,7 +35,7 @@ def file_changed(filename):
     return False
 
 
-def start_reloader(mod, sleepsec=1, verbose=True):
+def watch(mod, sleepsec=1, verbose=True):
 
     def reloader_thread():
         f = mod.__file__

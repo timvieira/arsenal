@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 
 
 def nth(n):
@@ -68,7 +68,6 @@ def datestr(then, now=None):
     """
     Converts a (UTC) datetime object to a nice string representation.
 
-    >>> from datetime import datetime, timedelta
     >>> d = datetime(1970, 5, 1)
     >>> datestr(d, now=d)
     '0 microseconds ago'
@@ -101,13 +100,13 @@ def datestr(then, now=None):
     if not then:
         return ""
     if not now:
-        now = datetime.datetime.utcnow()
+        now = datetime.utcnow()
     if type(now).__name__ == "DateTime":
-        now = datetime.datetime.fromtimestamp(now)
+        now = datetime.fromtimestamp(now)
     if type(then).__name__ == "DateTime":
-        then = datetime.datetime.fromtimestamp(then)
+        then = datetime.fromtimestamp(then)
     elif type(then).__name__ == "date":
-        then = datetime.datetime(then.year, then.month, then.day)
+        then = datetime(then.year, then.month, then.day)
 
     delta = now - then
     deltaseconds = int(delta.days * oneday + delta.seconds
@@ -147,7 +146,6 @@ if __name__ == '__main__':
     doctest.testmod()
 
     def test():
-        from datetime import datetime, timedelta
         d = datetime(1970, 5, 1)
 
         examples = {

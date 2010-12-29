@@ -1,7 +1,7 @@
 import sys
 from misc import timeit
 
-def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=False):
+def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=False, available=None):
     """
     Automatically create a very simple command-line interface.
 
@@ -16,7 +16,7 @@ def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=Fal
 
         if ultraTB:
             from debug import ultraTB2
-            ultraTB2.enable()
+            ultraTB2.enable(include_vars=False)
 
         if pdb:
             from debug.utils import enable_debug_hook
@@ -30,12 +30,21 @@ def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=Fal
         pass
 
 
+    names = available or dir(mod)
+
     # should we print the module's docstring in the help?
     def show_help():
         print 'what do you want to do?'
-        for name in dir(mod):
-            obj = getattr(mod, name)
+        for name in names:
             try:
+
+                # we might have been passed objects instead of names
+                if isinstance(name, basestring):
+                    obj = getattr(mod, name)
+                else:
+                    obj = name
+                    name = obj.__name__
+                
                 if obj.__module__ == '__main__':
                     if obj.__doc__ is None:
                         doc = '<no documentation provided>'

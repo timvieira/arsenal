@@ -5,13 +5,13 @@ class Alphabet(object):
     Bijective mapping from strings to integers.
 
     >>> a = Alphabet()
-    >>> [a[x] for x in 'abcdefg']
-    [0, 1, 2, 3, 4, 5, 6]
-    >>> map(a.lookup, range(7))
-    ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+    >>> [a[x] for x in 'abcd']
+    [0, 1, 2, 3]
+    >>> map(a.lookup, range(4))
+    ['a', 'b', 'c', 'd']
 
     >>> a.stop_growth()
-    >>> a['A']
+    >>> a['e']
 
     >>> a.freeze()
     >>> a.add('z')
@@ -19,6 +19,11 @@ class Alphabet(object):
       ...
     ValueError: Alphabet is frozen. Key "z" not found.
 
+    >>> print a.plaintext()
+    a
+    b
+    c
+    d
     """
 
     def __init__(self):
@@ -35,19 +40,24 @@ class Alphabet(object):
         self.growing = False
 
     @classmethod
-    def from_iterable(cls, it):
+    def from_iterable(cls, s):
         inst = cls()
-        for x in it:
+        for x in s:
             inst.add(x)
         inst.freeze()
         return inst
 
     def lookup(self, i):
+        if i is None:
+            return None
         assert isinstance(i, int)
         return self.flip[i]
 
     def map(self, seq):
-        """ apply alphabet to sequence """
+        """ 
+        Apply alphabet to sequence while filtering `None`s emitted after growth
+        has stopped.
+        """
         for s in seq:
             x = self[s]
             if x is not None:
@@ -71,13 +81,14 @@ class Alphabet(object):
     add = __getitem__
 
     def __iter__(self):
-        return iter(self.mapping)
+        for i in xrange(len(self)):
+            yield self.lookup(i) 
 
     def __len__(self):
         return len(self.mapping)
 
     def plaintext(self):
-        return '\n'.join(self.lookup(i) for i in xrange(self.i))
+        return '\n'.join(self)
 
 
 if __name__ == '__main__':

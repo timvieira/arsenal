@@ -15,7 +15,7 @@ try:
     def set_trace():
         callerframe = sys._getframe().f_back
         Pdb().set_trace(callerframe)
-    def pm():    
+    def pm():
         p = Pdb()
         p.reset()
         p.interaction(None, sys.last_traceback)
@@ -40,7 +40,7 @@ def dumpobj(o, callables=0, dbl_under=0):
         if not dbl_under and a.startswith('__'):
             continue
         try:
-            print '  %20s: %s ' % (a, type(getattr(o,a)).__name__)
+            print '%20s: %s ' % (a, type(getattr(o,a)).__name__)
         except:
             pass
     print
@@ -115,22 +115,25 @@ def debugx(obj):
 def framedump():
     """
     Print the usual traceback information, followed by a listing of all the
-    local variables in each frame.
-
-    Note: this function does not work when there is no exception.
+    local variables in each frame. If this function is called when an exception
+    has been thrown the framedump will start at the origin of the exception
+    not where it was caught.
     """
 
     # Move to the frame where the exception occurred, which is often not the
     # same frame where the exception was caught.
     tb = sys.exc_info()[2]
-    while 1:
-        if not tb.tb_next:
-            break
-        tb = tb.tb_next
+    if tb is not None:
+        while 1:
+            if not tb.tb_next:
+                break
+            tb = tb.tb_next
+        f = tb.tb_frame
+    else:                             # no exception occurred
+        f = sys._getframe()
 
     # get the stack frames
     stack = []
-    f = tb.tb_frame
     while f:
         stack.append(f)
         f = f.f_back
@@ -147,15 +150,13 @@ def framedump():
                                              frame.f_code.co_filename,
                                              frame.f_lineno)
         for key, value in frame.f_locals.iteritems():
-            print '\t%10s = %r' % (key, value)
+            print '%20s = %r' % (key, value)
 
         print
         print
 
 
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
 
     def example():
         """
@@ -193,9 +194,17 @@ if __name__ == '__main__':
         # caused the problem. The variable 'thing' has the value 3, so we know
         # that the TypeError we got was because of that. A quick look at the
         # value for 'data' shows us we simply forgot the quotes on that item.
-        try:
-            pad4(data)
-        except:
+
+        if 1:
+            try:
+                pad4(data)
+            except:
+                framedump()
+        else:
+#            pad4(data)
             framedump()
 
     example()
+
+    import doctest
+    doctest.testmod()

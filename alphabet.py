@@ -82,7 +82,11 @@ class Alphabet(object):
 
     def __iter__(self):
         for i in xrange(len(self)):
-            yield self.lookup(i) 
+            yield self.flip[i] 
+
+    def enum(self):
+        for i in xrange(len(self)):
+            yield (i, self.flip[i])
 
     def __len__(self):
         return len(self.mapping)

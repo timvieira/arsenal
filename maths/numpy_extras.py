@@ -1,9 +1,11 @@
 from numpy.core import array, log, dot, abs as np_abs
 
-try:
-    from scipy.maxentropy import logsumexp
-except ImportError:
-    pass
+def logsumexp(a):
+    """
+    Compute the log of the sum of exponentials of an array ``a``, :math:`\log(\exp(a_0) + \exp(a_1) + ...)`
+    """
+    b = a.max()
+    return b + log((exp(a-b)).sum())
 
 log_of_2 = log(2)
 

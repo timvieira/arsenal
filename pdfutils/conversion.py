@@ -47,6 +47,7 @@ def pdftotext(pdf, verbose=True):
 
 
 ## TODO:
+##   (!) make this a fsutil
 ##   take a list of files and globs
 ##   recursive option
 ##   timeout option

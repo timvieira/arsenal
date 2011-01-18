@@ -1,5 +1,29 @@
 import os, sys
 
+try:
+    import readline
+except ImportError:
+    pass
+
+def substring_completer(values, normalize=lambda x: x.lower()):
+    completions = {}
+    values = [(v, normalize(v)) for v in values]
+
+    def completer(text, state):
+        try:
+            matches = completions[text]   # timv: caching (maybe we don't want to do this.. maybe use an LRU)
+        except KeyError:
+            matches = [v for v, normalized_v in values if normalize(text) in normalized_v]
+            completions[text] = matches
+        try:
+            return matches[state]
+        except IndexError:
+            return None
+
+    readline.set_completer(completer)
+    readline.parse_and_bind('tab: menu-complete')
+
+
 def console_width(minimum=None, default=80):
     """Return width of available window area. Autodetection works for
     Windows and POSIX platforms. Returns 80 for others
@@ -56,6 +80,28 @@ def console_width(minimum=None, default=80):
 def marquee(msg=''):
     return ('{0:*^%s}' % console_width()).format(msg)
 
+
 if __name__ == '__main__':
-    print console_width()
+
+    w = console_width()
+    print 'Console width:', w
+    print '='*w
+
+    def example():
+
+        values = ['Paul Eden <paul@domain.com>',
+                  'Eden Jones <ejones@domain.com>',
+                  'Somebody Else <somebody@domain.com>']
+        print 'substring completer example:'
+        for x in values:
+            print x
+
+        substring_completer(values)
+
+        while 1:
+            a = raw_input('> ')
+            print 'said:', a
+
+    example()
+
 

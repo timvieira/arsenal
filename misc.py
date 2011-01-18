@@ -47,8 +47,6 @@ def deprecated(use_instead=None):
     as deprecated. It will result in a warning being emitted
     when the function is used."""
 
-    assert not use_instead or isinstance(use_instead, str)
-
     def wrapped(func):
         @wraps(func)
         def new_func(*args, **kwargs):

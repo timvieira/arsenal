@@ -15,11 +15,11 @@ class ImmutableList(tuple):
 
     Example::
 
-        >>> a = ImmutableList(range(5), warning="You cannot mutate this.")
+        >>> a = ImmutableList(range(5))
         >>> a[3] = '4'
         Traceback (most recent call last):
             ...
-        AttributeError: You cannot mutate this.
+        AssertionError
     """
 
     def __new__(cls, *args, **kwargs):
@@ -102,7 +102,31 @@ class SaferList(list, InequalityComplaints):
     __ne__       = complain
 
 
+# TODO: implement ImmutableDict
+"""
+class ImmutableDict(object):    
+    @classmethod
+    def fromkeys(cls, keys, value=None):
+        instance = super(cls, cls).__new__(cls)
+        instance.__init__(zip(keys, repeat(value)))
+        return instance
+
+    def __reduce_ex__(self, protocol):
+        return type(self), (dict(self),)
+
+    setdefault  = complain
+    update      = complain
+    pop         = complain
+    popitem     = complain
+    __setitem__ = complain
+    __delitem__ = complain
+    clear       = complain
+""" 
+
+
 if __name__ == '__main__':
+
+    # TODO: add some tests
     def example():
         
         x = ImmutableList([])

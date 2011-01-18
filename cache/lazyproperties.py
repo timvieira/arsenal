@@ -1,5 +1,6 @@
 import weakref
 
+
 class ondemand(property):
     """A property that is loaded once from a function."""
     def __init__(self, fget, doc=None):
@@ -19,6 +20,14 @@ class ondemand(property):
             pass
 
 
+from cache.lazy import lazy
+from misc import deprecated
+@deprecated(lazy)
+def cachedproperty(*args, **kw):
+    return lazy(*args, **kw)
+
+
+'''
 class cachedproperty(object):
     """
     Lazy-loading read/write property descriptor.
@@ -46,6 +55,7 @@ class cachedproperty(object):
         if self.__name__ in obj.__dict__:
             del obj.__dict__[self.__name__]
         self._values[obj] = None
+'''
 
 
 if __name__ == '__main__':
@@ -63,6 +73,15 @@ if __name__ == '__main__':
         def my_cached(self):
             self.log['cachedproperty'] += 1
             return 'CACHED PROPERTY'.split()
+        @lazy
+        def my_lazy(self):
+            self.log['my_lazy'] += 1
+            return 'LAZY PROPERTY'.split()
+        @lazy
+        def my_lazy_list(self):
+            self.log['my_lazy_list'] += 1
+            for i in xrange(10):
+                yield i
 
     def test():
         import pickle
@@ -70,9 +89,15 @@ if __name__ == '__main__':
         def checks(x):
             o = x.my_ondemand
             c = x.my_cached
+            l = x.my_lazy
             assert x.my_ondemand is o
             assert x.my_cached is c
+            assert x.my_lazy is l
             assert min(x.log.values()) == max(x.log.values()) == 1
+
+            ll = x.my_lazy_list
+            assert ll == range(10), ll
+            assert ll is x.my_lazy_list
 
         foo = Foo('XXX')
         checks(foo)
@@ -85,4 +110,3 @@ if __name__ == '__main__':
         checks(foo2)
 
     test()
-

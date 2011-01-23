@@ -52,7 +52,7 @@ def daemonize(workdir='/', log=os.devnull, pidfile=None, umask=0):
         reads/writes to any files, it must call daemonize before opening them.
     """
 
-    # flush everything before daemoizing
+    # flush everything before daemoizing (timv: this might not be necessary)
     sys.stdout.flush()
     sys.stderr.flush()
 

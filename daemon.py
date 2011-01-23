@@ -12,6 +12,7 @@ Based on an implementation by Chad J. Schroeder
 """
 
 import os
+import sys
 import resource
 
 # Notes
@@ -50,6 +51,10 @@ def daemonize(workdir='/', log=os.devnull, pidfile=None, umask=0):
       * This function will close all open file descriptors. If you processes
         reads/writes to any files, it must call daemonize before opening them.
     """
+
+    # flush everything before daemoizing
+    sys.stdout.flush()
+    sys.stderr.flush()
 
     # Fork a child process so the parent can exit.  
     # * returns control to the command-line or shell. 

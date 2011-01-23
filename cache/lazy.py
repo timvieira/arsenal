@@ -1,28 +1,24 @@
 from types import GeneratorType
 
 class lazy(object):
-    """A decorator that converts a function into a lazy property.
-    The function wrapped is called the first time to retrieve the
-    result and then that result is used the next time you access
-    the value. If the method is a generator, the value is stored
-    as a list.
+    """
+    Lazily load a property defined by a method. The method wrapped is called
+    at most once to retrieve the result and the result is reused. If the method
+    is a generator, the value is stored as a list.
 
-    Note: instances must have a `__dict__` attribute in order for
-    this property to work. So no '__slots__' please.
+    Note: instances must have a `__dict__` attribute in order for this property
+    to work, i.e. no '__slots__' class attribute.
+
+    Implementation detail: this is not implemented as a data descriptor so that
+    we can completely avoid the function call overhead. If one choses to invoke
+    `__get__` by hand the property will still work as expected because the 
+    lookup logic is replicated in `__get__` for manual invocation.
     """
 
-    # implementation detail: this property is implemented as non-data
-    # descriptor.  non-data descriptors are only invoked if there is
-    # no entry with the same name in the instance's __dict__.
-    # this allows us to completely get rid of the access function call
-    # overhead.  If one choses to invoke __get__ by hand the property
-    # will still work as expected because the lookup logic is replicated
-    # in __get__ for manual invocation.
-
-    def __init__(self, func, name=None, doc=None):
-        self.__name__ = name or func.__name__
+    def __init__(self, func):
+        self.__name__ = func.__name__
         self.__module__ = func.__module__
-        self.__doc__ = doc or func.__doc__
+        self.__doc__ = func.__doc__
         self.func = func
 
     def __get__(self, obj, type_=None):

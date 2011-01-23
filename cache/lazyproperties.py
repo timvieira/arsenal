@@ -64,7 +64,7 @@ if __name__ == '__main__':
     class Foo(object):
         def __init__(self, x):
             self.x = x
-            self.log = defaultdict(int)
+            self.log = defaultdict(int)       # track the number of calls to our cached properties/methods
         @ondemand
         def my_ondemand(self):
             self.log['ondemand'] += 1
@@ -98,6 +98,9 @@ if __name__ == '__main__':
             ll = x.my_lazy_list
             assert ll == range(10), ll
             assert ll is x.my_lazy_list
+            
+            print x.log
+            assert all(v == 1 for v in x.log.values())
 
         foo = Foo('XXX')
         checks(foo)

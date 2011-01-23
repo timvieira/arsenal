@@ -69,9 +69,22 @@ def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=Fal
         with timeit(msg='took %%.3f seconds to execute '
                         '"%s%s".' % (action.__name__, args)):
             out = action(*args, **kw)
-            try:
-                for x in out:
-                    print x
-            except TypeError:
-                if out is not None:
-                    print out
+            if isinstance(out, basestring):
+                print out
+
+            elif isinstance(out, dict):
+                from pprint import pprint
+                from collections import defaultdict
+                if isinstance(out, defaultdict):
+                    out = dict(out)
+
+                pprint(out)
+
+            else:
+                try:
+                    for x in out:
+                        print x
+                except TypeError:
+                    if out is not None:
+                        print out
+

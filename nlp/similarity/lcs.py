@@ -1,7 +1,7 @@
 from itertools import repeat
 from array import array
 
-def LCS(a, b, costfn=lambda a,b: a != b, empty=None, just_length=0):
+def LCS(a, b, costfn=lambda a,b: a != b, empty=None, just_length=False):
     """
     Calculate the minimum cost for aligning the elements in the sequence a
     with the elements in the sequence b with respect to costfn.

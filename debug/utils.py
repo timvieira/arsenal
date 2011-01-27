@@ -21,6 +21,7 @@ try:
         p.interaction(None, sys.last_traceback)
 except ImportError:
     from pdb import set_trace, pm, Pdb
+    ip = set_trace  # if ipython is unavailable, PDB is the next best thing
 
 
 def enable_debug_hook():
@@ -30,6 +31,7 @@ def enable_debug_hook():
         pm()
     sys.excepthook = debug_hook
 
+enable_pm = enable_debug_hook
 
 def dumpobj(o, callables=0, dbl_under=0):
     print repr(o)

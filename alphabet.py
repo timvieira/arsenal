@@ -68,9 +68,9 @@ class Alphabet(object):
             return self.mapping[k]
         except KeyError:
             if not isinstance(k, basestring):
-                raise ValueError("Invalid key (%s): only strings allowed." % k)
+                raise ValueError("Invalid key (%s): only strings allowed." % (k,))
             if self.frozen:
-                raise ValueError('Alphabet is frozen. Key "%s" not found.' % k)
+                raise ValueError('Alphabet is frozen. Key "%s" not found.' % (k,))
             if not self.growing:
                 return None
             x = self.mapping[k] = self.i

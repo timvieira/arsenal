@@ -115,13 +115,18 @@ class memoize(object):
             pass
     def __call__(self, *args):
         try:
-            if args in self.cache:
-                return self.cache[args]
-            else:
-                self.cache[args] = value = self.func(*args)
-                return value
+            return self.cache[args]
+        except KeyError:
+            value = self.func(*args)
+            try:
+                self.cache[args] = value
+            except TypeError:
+                # uncachable -- for instance, passing a list as an argument.
+                raise TypeError('uncachable arguments %r passed to memoized function.' % (args,))
+            return value
         except TypeError:
-            raise TypeError('uncachable instance passed to memoized function.')
+            # uncachable -- for instance, passing a list as an argument.
+            raise TypeError('uncachable arguments %r passed to memoized function.' % (args,))
     def __repr__(self):
         return '<memoize(%r)>' % self.func
 
@@ -170,25 +175,27 @@ class memoize_persistent(object):
         # wait until you call the function to un-pickle
         if not self.loaded:
             self.load()
-
         try:
-            if args in self.cache:
-                return self.cache[args]
+            return self.cache[args]
+        except KeyError:
+            value = self.func(*args)
+            try:
+                self.cache[args] = value
+            except TypeError:
+                # uncachable -- for instance, passing a list as an argument.
+                raise TypeError('uncachable arguments %r passed to memoized function.' % (args,))
             else:
                 self.dirty = True
-                self.cache[args] = value = self.func(*args)
-                return value
+            return value
         except TypeError:
             # uncachable -- for instance, passing a list as an argument.
-            raise TypeError('uncachable instance passed to memoized function.')
-
+            raise TypeError('uncachable arguments %r passed to memoized function.' % (args,))
 
     def get_cached(self, *args):
         """ If result is cached return it, otherwise return `None`. """
         # wait until you call the function to un-pickle
         if not self.loaded:
             self.load()
-
         if args in self.cache:
             return self.cache[args]
         else:

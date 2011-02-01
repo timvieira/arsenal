@@ -5,6 +5,43 @@ File system utilities
 import os
 import tempfile
 
+class preserve_cwd(object):
+    """
+    context-manager which doubles as a decorator that preserve current
+    working directory.
+
+    Usage example:
+
+    As a decorator:
+        >>> before = os.getcwd()
+        >>> @preserve_cwd
+        ... def foo():
+        ...     os.chdir('..')
+        >>> foo()
+        >>> before == os.getcwd()
+        True
+
+    As a context-manager:
+        >>> before = os.getcwd()
+        >>> with preserve_cwd():
+        ...     os.chdir('..')
+        >>> before == os.getcwd()
+        True
+    """
+    def __init__(self, f=None):
+        self.f = f
+        self._cwd = None
+
+    def __enter__(self):
+        self._cwd = os.getcwd()
+
+    def __exit__(self, *args):
+        os.chdir(self._cwd)
+
+    def __call__(self, *args, **kwargs):
+        with self:
+            return self.f(*args, **kwargs)
+
 def atomicwrite(filename, contents, mode=0666):
     """Create a file 'filename' with 'contents' atomically.
 

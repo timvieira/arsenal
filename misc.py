@@ -1,7 +1,7 @@
+# stdlib
 import re, os, sys, time
 import gc
 import atexit
-import threading
 import warnings
 import BaseHTTPServer
 import webbrowser
@@ -9,7 +9,30 @@ import subprocess, tempfile
 from functools import wraps
 from StringIO import StringIO
 from contextlib import contextmanager
+from threading import Thread
+
+# python-extras imports
 from terminal import colors
+
+# this which used to be in this module
+from fsutils import preserve_cwd
+from humanreadable import marquee
+
+def attn(msg):
+    """ Display a dialog which is sure to get my attention. """
+    import gtk
+    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+    window.connect("delete_event", lambda *x: False)
+    window.connect("destroy", lambda *x: gtk.main_quit())
+    window.set_border_width(10)
+    button = gtk.Button(msg)
+    button.connect_object("clicked", gtk.Widget.destroy, window)
+    window.add(button)
+    button.show()
+    window.show()
+    window.fullscreen()
+    gtk.main()
+
 
 #def trace(f):
 #    def wrap(*args, **kw):
@@ -32,6 +55,18 @@ from terminal import colors
 ##         mod = getattr(mod, comp)
 ##     return mod
 
+'''
+import difflib
+def showdiff(old, new):
+    d = difflib.Differ()
+    lines = d.compare(old.lines(),new.lines())
+    realdiff = False
+    for l in lines:
+        print l,
+        if not realdiff and not l[0].isspace():
+            realdiff = True
+    return realdiff
+'''
 
 def piped():
     """Returns piped input via stdin, else False"""
@@ -73,7 +108,7 @@ timesection = lambda x: timeit(header='%s...' % x,
                                msg=' -> %s took %%.2f seconds' % x)
 
 
-def LoadInBrowser(html):
+def browser(html):
     """Display html in the default web browser without creating a temp file.
 
     Instantiates a trivial http server and calls webbrowser.open with a URL
@@ -90,10 +125,11 @@ def LoadInBrowser(html):
     webbrowser.open('http://127.0.0.1:%s' % server.server_port)
     server.handle_request()
 
-def use_pager(s, pager='less'):
+
+def pager(s, pager='less'):
     """Use the pager passed in and send string s through it."""
-    p = subprocess.Popen(pager, stdin=subprocess.PIPE)
-    p.communicate(s)
+    subprocess.Popen(pager, stdin=subprocess.PIPE).communicate(s)
+
 
 def edit_with_editor(s=None):
     """
@@ -108,73 +144,6 @@ def edit_with_editor(s=None):
             t.seek(0)
         subprocess.call([os.environ.get('EDITOR', 'nano'), t.name])
         return t.read().strip()
-
-
-'''
-# TODO:
-# * I see a lot of potential in this function
-#   it might be a good place for code generation and other interesting things
-# * borrow ideas form the "decorator" module
-def decorator(d):
-    """ automatically preserves the-functions-being-decorated's signature
-    Example:
-    >>> def goo(f): return lambda *args, **kw: f(*args,**kw)
-    >>> def foo(): pass
-    >>> foo.__name__
-    'foo'
-    >>> goo(foo).__name__
-    '<lambda>'
-    >>> goo = decorator(goo)
-    >>> goo(foo).__name__
-    'foo'
-    """
-    @wraps(d)
-    def f1(f):
-        f3 = d(f)
-        @wraps(f)
-        def f2(*args, **kw):
-            return f3(*args, **kw)
-        return f2
-    return f1
-'''
-
-class preserve_cwd(object):
-    """
-    context-manager which doubles as a decorator that preserve current
-    working directory.
-
-    Usage example:
-
-    As a decorator:
-        >>> before = os.getcwd()
-        >>> @preserve_cwd
-        ... def foo():
-        ...     os.chdir('..')
-        >>> foo()
-        >>> before == os.getcwd()
-        True
-
-    As a context-manager:
-        >>> before = os.getcwd()
-        >>> with preserve_cwd():
-        ...     os.chdir('..')
-        >>> before == os.getcwd()
-        True
-    """
-    def __init__(self, f=None):
-        self.f = f
-        self._cwd = None
-
-    def __enter__(self):
-        self._cwd = os.getcwd()
-
-    def __exit__(self, *args):
-        os.chdir(self._cwd)
-
-    def __call__(self, *args, **kwargs):
-        with self:
-            return self.f(*args, **kwargs)
-
 
 #_________________________________________________________________________
 #
@@ -237,7 +206,7 @@ def threaded(callback=lambda *args, **kwargs: None, daemonic=False):
         @wraps(func)
         def inner(*args, **kwargs):
             target = lambda: callback(func(*args, **kwargs))
-            t = threading.Thread(target=target)
+            t = Thread(target=target)
             t.setDaemon(daemonic)
             t.start()
         return inner
@@ -280,100 +249,8 @@ def garbagecollect(f):
     return inner
 
 
-class Dispatch(threading.Thread):
-    def __init__(self, f, *args, **kwargs):
-        threading.Thread.__init__(self)
-        self.f = f
-        self.args = args
-        self.kwargs = kwargs
-        self.result = None
-        self.error = None
-        self.setDaemon(True)
-        self.start()
-    def run(self):
-        try:
-            self.result = self.f(*self.args, **self.kwargs)
-        except:
-            # store exception information in the thread.
-            self.error = sys.exc_info()
-
-
-class TimeoutError(Exception):
-    pass
-
-def timelimit(timeout):
-    """
-    A decorator to limit a function to `timeout` seconds, raising TimeoutError
-    if it takes longer.
-
-        >>> def meaningoflife():
-        ...     time.sleep(.2)
-        ...     return 42
-        >>>
-        >>> timelimit(.1)(meaningoflife)()
-        Traceback (most recent call last):
-            ...
-        TimeoutError: took too long
-        >>> timelimit(1)(meaningoflife)()
-        42
-
-    _Caveat:_ The function isn't stopped after `timeout` seconds but continues
-    executing in a separate thread. (There seems to be no way to kill a thread)
-    inspired by
-        <http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/473878>
-    """
-    def _1(f):
-        @wraps(f)
-        def _2(*args, **kwargs):
-            c = Dispatch(f, *args, **kwargs)
-            c.join(timeout)
-            if c.isAlive():
-                raise TimeoutError('took too long')
-            if c.error:
-                raise c.error[1]
-            return c.result
-        return _2
-    return _1
-
 #_______________________________________________________________________________
 #
-
-def try_k_times(fn, args, k, pause=0.1, suppress=(Exception,)):
-    """ attempt to call fn up to k times with the args as arguments.
-        All exceptions up to the kth will be ignored. """
-    for i in xrange(k):
-        try:
-            return fn(*args)
-        except suppress:
-            if i == k - 1:  # the last iteration
-                raise
-        time.sleep(pause)
-
-def try_k_times_decorator(k, pause=0.1):
-    def wrap2(fn):
-        @wraps(fn)
-        def wrap(*args):
-            return try_k_times(fn, args, k, pause=pause)
-        return wrap
-    return wrap2
-
-#_______________________________________________________________________________
-#
-
-def marquee(txt='', width=78, mark='*'):
-    """
-    Return the input string centered in a 'marquee'.
-
-    >>> marquee('hello', width=50)
-    '********************* hello *********************'
-    """
-    if not txt:
-        return (mark*width)[:width]
-    nmark = (width-len(txt)-2)/len(mark)/2
-    if nmark < 0: nmark =0
-    marks = mark*nmark
-    return '%s %s %s' % (marks, txt, marks)
-
 
 # TODO: use htime and marquee
 def print_elapsed_time():
@@ -396,34 +273,8 @@ def print_elapsed_time():
 if __name__ == '__main__':
 
     import doctest
-    from assertutils import assert_throws
 
     def run_tests():
-
-        def test_try_k_times():
-
-            class NotCalledEnough(Exception): pass
-            class TroublsomeFunction(object):
-                "Function-like object which must be called >=4 times before succeeding."
-                def __init__(self):
-                    self.tries = 0
-                def __call__(self, *args):
-                    self.tries += 1
-                    if self.tries > 4:
-                        return True
-                    else:
-                        raise NotCalledEnough
-
-            f = TroublsomeFunction()
-            assert try_k_times(f, (1,2,3), 5)
-            assert f.tries == 5
-
-            with assert_throws(NotCalledEnough):
-                f = TroublsomeFunction()
-                print try_k_times(f, (10,), 2)
-
-        test_try_k_times()
-
 
         def test_preserve_cwd():
             before = os.getcwd()
@@ -442,27 +293,6 @@ if __name__ == '__main__':
 
         test_preserve_cwd()
 
-
-        def test_timed():
-            print 'test_timed'
-
-            @timelimit(1.0)
-            def sleepy_function(x): time.sleep(x)
-
-            with assert_throws(TimeoutError):
-                sleepy_function(3.0)
-            print 'sleepy_function(3.0): pass'
-
-            sleepy_function(0.2)
-            print 'sleepy_function(0.2): pass'
-
-            @timelimit(1)
-            def raises_errors(): return 1/0
-            with assert_throws(ZeroDivisionError):
-                raises_errors()
-            print 'raises_errors(): pass'
-
-        test_timed()
 
         def test_redirect_io():
             @redirect_io
@@ -494,4 +324,5 @@ if __name__ == '__main__':
     run_tests()
 
     doctest.testmod()
+
 

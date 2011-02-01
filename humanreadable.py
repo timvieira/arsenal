@@ -1,5 +1,19 @@
 from datetime import datetime, timedelta
 
+def marquee(txt='', width=78, mark='*'):
+    """
+    Return the input string centered in a 'marquee'.
+
+    >>> marquee('hello', width=50)
+    '********************* hello *********************'
+    """
+    if not txt:
+        return (mark*width)[:width]
+    nmark = (width-len(txt)-2)/len(mark)/2
+    if nmark < 0: nmark =0
+    marks = mark*nmark
+    return '%s %s %s' % (marks, txt, marks)
+
 
 def nth(n):
     """

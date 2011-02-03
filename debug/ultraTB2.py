@@ -119,7 +119,7 @@ except ImportError:
     #print "IPython's debugger is not available"
     pass
 
-import PyColorize
+import pycolorize
 #from IPython.genutils import Term, error, info
 
 
@@ -437,7 +437,7 @@ def _fixed_getinnerframes(etb, context=1,tb_offset=0):
 # can be recognized properly by ipython.el's py-traceback-line-re
 # (SyntaxErrors have to be treated specially because they have no traceback)
 
-_parser = PyColorize.Parser()
+_parser = pycolorize.Parser()
     
 def _formatTracebackLines(lnum, index, lines, Colors, lvals=None, scheme='LightBG'):
     numbers_width = INDENT_SIZE - 1

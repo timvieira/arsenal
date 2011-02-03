@@ -7,6 +7,8 @@ import sys
 import inspect
 import traceback
 
+from debug.edit import emacs
+
 # try to use IPython's fancy debugger if available
 try:
     from IPython.Debugger import Pdb

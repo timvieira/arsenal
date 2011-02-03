@@ -4,6 +4,16 @@ File system utilities
 
 import os
 import tempfile
+from contextlib import contextmanager
+
+@contextmanager
+def cd(d=None):
+    before = os.getcwd()
+    if d is not None:
+        os.chdir(d)
+    yield 
+    os.chdir(before)
+
 
 class preserve_cwd(object):
     """
@@ -41,6 +51,7 @@ class preserve_cwd(object):
     def __call__(self, *args, **kwargs):
         with self:
             return self.f(*args, **kwargs)
+
 
 def atomicwrite(filename, contents, mode=0666):
     """Create a file 'filename' with 'contents' atomically.

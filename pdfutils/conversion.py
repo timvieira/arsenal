@@ -23,24 +23,28 @@ class file_specifier(object):
         return 'file_specifier {\n%s\n}' % ('\n'.join(map('  %8s: %s'.__mod__, self.__dict__.iteritems())))
 
 
-def pdftotext(pdf, verbose=True):
+def pdftotext(pdf, verbose=True, usecached=False):
     """Wraps a system call to pdftotext. """
     outdir = file_specifier(pdf).noext + '.d'
     output = outdir + '/pdftotext.txt'
     if not os.path.exists(outdir):
-        print 'need to make directory...'
+        if verbose:
+            print '[pdftotext] making directory "%s"' % outdir
         os.makedirs(outdir)
 
-    if not os.path.exists(output):
-        if verbose:
-            print '[pdftotext] processing "%s"' % pdf
-        p = Popen(['pdftotext', pdf, output])     # TODO: error checking
-        p.wait()
-        if verbose:
-            print '[pdftotext] "%s" exited with status %s' % (pdf, p.returncode)
-    else:
+    if usecached and os.path.exists(output):
         if verbose:
             print '[pdftotext] "%s" cached.' % pdf
+    else:
+        if verbose:
+            print '[pdftotext] processing "%s"' % pdf
+        p = Popen(['pdftotext', pdf, output], stdout=None, stderr=None)     # TODO: error checking
+        p.wait()
+        if verbose:
+            if p.returncode == 0:
+                print '[pdftotext] successfully processed "%s".' % (pdf,)
+            else:
+                print '[pdftotext] "%s" exited with status %s' % (pdf, p.returncode)
 
     with file(output, 'r') as f:
         return f.read()

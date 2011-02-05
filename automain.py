@@ -1,13 +1,14 @@
 import sys
 from misc import timeit
 
-def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=False, available=None):
+def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=False, available=None):
     """
     Automatically create a very simple command-line interface.
 
     Note: All functions must take string arguments
     """
     import __main__ as mod
+    argv = argv or sys.argv
 
     try:
         if breakin:
@@ -29,7 +30,6 @@ def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=Fal
     except ImportError:
         pass
 
-
     names = available or dir(mod)
 
     # should we print the module's docstring in the help?
@@ -47,7 +47,7 @@ def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=Fal
                 
                 if obj.__module__ == '__main__':
                     if obj.__doc__ is None:
-                        doc = '<no documentation provided>'
+                        doc = '...'
                     else:
                         if verbose:
                             doc = obj.__doc__.strip()
@@ -59,12 +59,12 @@ def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=Fal
                 pass
 
     try:
-        action = getattr(mod, sys.argv[1])
+        action = getattr(mod, argv[1])
         assert hasattr(action, '__call__')
     except (IndexError, AttributeError, AssertionError):
         show_help()
     else:
-        args = tuple(sys.argv[2:])
+        args = tuple(argv[2:])
         kw = {}  # TODO: parse keywords
         with timeit(msg='took %%.3f seconds to execute '
                         '"%s%s".' % (action.__name__, args)):
@@ -82,9 +82,11 @@ def automain(verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=Fal
 
             else:
                 try:
-                    for x in out:
-                        print x
+                    out = iter(out)
                 except TypeError:
                     if out is not None:
                         print out
+                else:
+                    for x in out:
+                        print x
 

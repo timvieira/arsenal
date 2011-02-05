@@ -1,10 +1,11 @@
 """
 File system utilities
 """
-
-import os
-import tempfile
+import re, os, tempfile
 from contextlib import contextmanager
+from fnmatch import fnmatch
+from iterextras import atmost
+
 
 @contextmanager
 def cd(d=None):
@@ -86,7 +87,7 @@ def atomicwrite(filename, contents, mode=0666):
                           'errors cleaning up temporary file "%s":\n%s' % (exc, tmp_filename, e))
         raise exc
 
-import re
+
 _filename_ascii_strip_re = re.compile(r'[^A-Za-z0-9_.-]')
 _windows_device_files = ('CON', 'AUX', 'COM1', 'COM2', 'COM3', 'COM4', 'LPT1',
                          'LPT2', 'LPT3', 'PRN', 'NUL')
@@ -130,21 +131,29 @@ def secure_filename(filename):
     return filename
 
 
-# does not yet support finding directories
-def find_files(d, filterfn=lambda x: True, relpath=True):
+def find(d, filterfn=None, abspath=False, glob=None, regex=None):
     """
     Recursively walks directory `d` yielding files which satisfy `filterfn`.
     Set option `relpath` to False to output absolute paths.
+
+    glob: shell glob filter function
+    regex: regex filter function
+    dirs: only search for directories matching filterfn
     """
-    for dirpath, _, filenames in os.walk(d):
+
+    assert atmost(1, [filterfn, glob, regex])
+
+    if filterfn is None:
+        if glob is not None:
+            filterfn = lambda x: fnmatch(x, glob)
+        elif regex is not None:
+            filterfn = re.compile(regex).match
+
+    for dirpath, _, filenames in os.walk(d):        
         for f in filenames:
-            if relpath:
-                f = os.path.join(dirpath, f)   # TIM: should I call abspath here?
-            if filterfn(f):
+            f = os.path.join(dirpath, f)
+            if abspath:
+                f = os.path.abspath(f)
+            if filterfn is None or filterfn(f):
                 yield f
-
-
-if __name__ == '__main__':
-    import automain
-    automain.automain()
 

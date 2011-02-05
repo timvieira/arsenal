@@ -178,3 +178,5 @@ if __name__ == '__main__':
             assert datestr(d, now=d+t) == v
 
     test()
+
+

@@ -11,6 +11,26 @@ from random import shuffle
 #     >> p.update(10)
 #     10.0%
 
+
+def atmost(k, seq):
+    """
+    >>> atmost(1, [0,0,0])
+    True
+
+    >>> atmost(1, [0,1,0])
+    True
+
+    >>> atmost(1, [0,1,1])
+    False
+    """
+    count = 0
+    for x in seq:
+        if x:
+            count += 1
+        if count > k:
+            return False
+    return True
+
 def partition(data, proportion):
     """
     Deterministically partition `data` according to proportion.

@@ -1,7 +1,8 @@
 import sys
 from misc import timeit
 
-def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False, timemsg=False, available=None):
+def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False,
+             timemsg=False, available=None):
     """
     Automatically create a very simple command-line interface.
 
@@ -46,6 +47,7 @@ def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False, 
                     name = obj.__name__
                 
                 if obj.__module__ == '__main__':
+
                     if obj.__doc__ is None:
                         doc = '...'
                     else:
@@ -54,7 +56,10 @@ def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False, 
                         else:
                             doc = obj.__doc__.strip().split('\n')[0]   # use first line
 
-                    print '  %s:\n\t%s\n' % (name, doc)
+                    # TODO: print call signature
+                    print '  %s:' % name
+                    print '   ', doc
+
             except AttributeError:
                 pass
 
@@ -89,4 +94,12 @@ def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False, 
                 else:
                     for x in out:
                         print x
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1].endswith('py'):
+        sys.argv = sys.argv[1:]
+        execfile(sys.argv[0])
+        # TODO: remove automain from the list
+        automain()
 

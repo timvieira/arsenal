@@ -7,7 +7,6 @@
 import sys
 
 from debug import ultraTB2
-ultraTB2.enable()
 
 from optparse import OptionParser
 parser = OptionParser()
@@ -17,6 +16,7 @@ parser.add_option('--verbose-doctest', action="store_true", default=False)
 parser.add_option('--pm', action="store_true", default=False)
 parser.add_option('--breakin', action="store_true", default=False)
 parser.add_option('--automain', action="store_true", default=False)
+parser.add_option('--less-verbose', action="store_true", default=False)
 
 # split the argument list at the first item ending with .py
 source = [(i+1,f) for i, f in enumerate(sys.argv[1:]) if f.endswith('.py')]
@@ -28,6 +28,11 @@ scriptargs = sys.argv[source[0][0]:]
 #print 'scriptargs:',  scriptargs
 
 (opts, args) = parser.parse_args(devargs)
+
+if opts.less_verbose:
+    ultraTB2.enable(include_vars=False)
+else:
+    ultraTB2.enable()
 
 # hack sys.argv so that it no longer contains this script's options
 sys.argv = scriptargs

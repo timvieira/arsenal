@@ -23,15 +23,18 @@ class file_specifier(object):
         return 'file_specifier {\n%s\n}' % ('\n'.join(map('  %8s: %s'.__mod__, self.__dict__.iteritems())))
 
 
-def pdftotext(pdf, verbose=True, usecached=False):
+def pdftotext(pdf, output=None, verbose=False, usecached=False):
     """Wraps a system call to pdftotext. """
-    outdir = file_specifier(pdf).noext + '.d'
-    output = outdir + '/pdftotext.txt'
-    if not os.path.exists(outdir):
+    if not output:
+        output = '{pdf.noext}.d/pdftotext.txt'.format(pdf=file_specifier(pdf))
+    output = os.path.abspath(output)
+    outdir = os.path.dirname(output)
+    # TODO: use fsutils.ensure_dir
+    # check if output directory exists
+    if outdir and not os.path.exists(os.path.dirname(output)):
         if verbose:
             print '[pdftotext] making directory "%s"' % outdir
         os.makedirs(outdir)
-
     if usecached and os.path.exists(output):
         if verbose:
             print '[pdftotext] "%s" cached.' % pdf
@@ -43,9 +46,10 @@ def pdftotext(pdf, verbose=True, usecached=False):
         if verbose:
             if p.returncode == 0:
                 print '[pdftotext] successfully processed "%s".' % (pdf,)
+                print '[pdftotext] wrote "%s".' % (output,)
             else:
                 print '[pdftotext] "%s" exited with status %s' % (pdf, p.returncode)
-
+    # return contents of output file
     with file(output, 'r') as f:
         return f.read()
 
@@ -58,7 +62,7 @@ def pdftotext(pdf, verbose=True, usecached=False):
 ##   maybe a hook for pre/post-processing, useful for logging and zipping
 ##   check for success / failure
 def pdf2image(input_files, outputdir_fmt='{f.noext}.d', output_format='{f.noext}.page.%d.png',
-              resolution=200, create_outputdir=True, testing=0, verbose=0):
+              resolution=200, create_outputdir=True, testing=False, verbose=False):
     """
     Wraps a system call to ghostscript, which takes a pdf or postscript file
     and renders it to a series of images.
@@ -112,7 +116,6 @@ def pdf2image(input_files, outputdir_fmt='{f.noext}.d', output_format='{f.noext}
     opts = '-dBATCH -dNOPAUSE -sDEVICE=png256'
 
     for f in map(file_specifier, glob.glob(input_files)):
-
         info = dict(f=f, opts=opts, resolution=resolution)
         outputdir = outputdir_fmt.format(**info)
         info['outputdir'] = outputdir
@@ -143,6 +146,6 @@ def pdf2image(input_files, outputdir_fmt='{f.noext}.d', output_format='{f.noext}
 if __name__ == '__main__':
     import sys
     if len(sys.argv) == 2:
-        pdf2image(sys.argv[1], outputdir_fmt='{f.noext}.d', verbose=1, testing=0)
+        pdf2image(sys.argv[1], outputdir_fmt='{f.noext}.d', verbose=True, testing=False)
     else:
         print 'usage: <file>'

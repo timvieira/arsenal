@@ -28,7 +28,7 @@ def find_filename(obj):
         return f
 
 
-def emacs(obj, line=None, column=None):
+def edit(obj):
     """
     Set the synchronize with editor hook with a callable object.
      - obj: introspection is used to retrieve relevant source code for the
@@ -50,11 +50,12 @@ def emacs(obj, line=None, column=None):
         # if the source code cannot be retrieved.
         _, line = inspect.getsourcelines(obj)
     except IOError:
-        line = None
+        line = 0
 
-    line = line or 0
-    column = column or 0
+    emacs(filename, line=line)
 
+
+def emacs(filename, line=0, column=0):
     r = os.system('emacsclient -n +%d:%d "%s" 2>/dev/null' % (line, column, filename))
     if r != 0:
         os.system('emacs --quick -f server-start +%d:%d "%s"' % (line, column, filename))
@@ -62,5 +63,5 @@ def emacs(obj, line=None, column=None):
 
 if __name__ == '__main__':
     import alphabet
-    emacs(alphabet.Alphabet.__init__)
+    edit(alphabet.Alphabet.__init__)
 

@@ -7,12 +7,27 @@ from fnmatch import fnmatch
 from iterextras import atmost
 
 
+def ensure_dir(x, verbose=False):
+    d = os.path.abspath(os.path.dirname(x))
+    try:
+        os.makedirs(d)
+    except OSError as e:
+        if verbose:
+            print '[ensuredir]', d, 'suppressing:', e
+        if e.errno != 17:  # errno 17: File exists
+            raise
+    else:
+        if verbose:
+            print '[ensuredir] created', d
+    return d
+
+
 @contextmanager
 def cd(d=None):
     before = os.getcwd()
     if d is not None:
         os.chdir(d)
-    yield 
+    yield
     os.chdir(before)
 
 
@@ -53,25 +68,26 @@ class preserve_cwd(object):
         with self:
             return self.f(*args, **kwargs)
 
-
-def atomicwrite(filename, contents, mode=0666):
-    """Create a file 'filename' with 'contents' atomically.
-
-    As in Write, 'mode' is modified by the umask.  This creates and moves
-    a temporary file, and errors doing the above will be propagated normally,
-    though it will try to clean up the temporary file in that case.
-
-    This is very similar to the prodlib function with the same name.
+@contextmanager
+def atomicwrite(filename, mode=0666, verbose=False):
+    """
+    Write to `filename` atomically, if for some reason an error occurs in this
+    context the contents of the file prior to entering will not be lost.
 
     Args:
       filename: str; the name of the file
-      contents: str; the data to write to the file
-      mode: int; permissions with which to create the file (default is 0666 octal)
+      mode: permissions with which to create the file
     """
-    (fd, tmp_filename) = tempfile.mkstemp(prefix=filename,
-                                          dir=os.path.dirname(filename))
+
+    # TODO: try to create the file right next to existing file.
+    #       >>> tempfile.mkstemp(prefix=filename, dir=os.path.dirname(filename))
+    (fd, tmp_filename) = tempfile.mkstemp()
+
+    if verbose:
+        print '[atomicwrite] using temporary file:', tmp_filename
+
     try:
-        os.write(fd, contents)
+        yield os.open(tmp_filename, os.O_WRONLY|os.O_CREAT)
     finally:
         os.close(fd)
 
@@ -81,7 +97,6 @@ def atomicwrite(filename, contents, mode=0666):
     except OSError as exc:
         try:
             os.remove(tmp_filename)
-
         except OSError as e:
             exc = OSError('%s.\n\natomicwrite encountered additional '
                           'errors cleaning up temporary file "%s":\n%s' % (exc, tmp_filename, e))
@@ -131,7 +146,27 @@ def secure_filename(filename):
     return filename
 
 
-def find(d, filterfn=None, abspath=False, glob=None, regex=None):
+def files(d, abspath=False):
+    """ recursively list all files. """
+    for dirpath, _, filenames in os.walk(d):
+        for f in filenames:
+            f = os.path.join(dirpath, f)
+            if abspath:
+                f = os.path.abspath(f)
+            yield f
+
+
+# TODO: there has to be a faster way to do this which doesn't
+# require reading a list of all the files in the directory.
+def directories(d, abspath=False):
+    """ recursively list all directories. """
+    for directory, _, _ in os.walk(d):
+        if abspath:
+            directory = os.path.abspath(directory)
+        yield directory
+
+
+def find(d, filterfn=None, abspath=False, glob=None, regex=None, dirs=False):
     """
     Recursively walks directory `d` yielding files which satisfy `filterfn`.
     Set option `relpath` to False to output absolute paths.
@@ -149,11 +184,8 @@ def find(d, filterfn=None, abspath=False, glob=None, regex=None):
         elif regex is not None:
             filterfn = re.compile(regex).match
 
-    for dirpath, _, filenames in os.walk(d):        
-        for f in filenames:
-            f = os.path.join(dirpath, f)
-            if abspath:
-                f = os.path.abspath(f)
-            if filterfn is None or filterfn(f):
-                yield f
+    collection = directories(d, abspath=abspath) if dirs else files(d, abspath=abspath)
 
+    for item in collection:
+        if filterfn is None or filterfn(item):
+            yield item

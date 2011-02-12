@@ -7,8 +7,9 @@ from fnmatch import fnmatch
 from iterextras import atmost
 
 
-def ensure_dir(x, verbose=False):
-    d = os.path.abspath(os.path.dirname(x))
+def ensure_dir(f, verbose=False):
+    """ Ensure  directories need to create a file exist. """
+    d = os.path.abspath(os.path.dirname(f))
     try:
         os.makedirs(d)
     except OSError as e:
@@ -67,6 +68,7 @@ class preserve_cwd(object):
     def __call__(self, *args, **kwargs):
         with self:
             return self.f(*args, **kwargs)
+
 
 @contextmanager
 def atomicwrite(filename, mode=0666, verbose=False):
@@ -189,3 +191,4 @@ def find(d, filterfn=None, abspath=False, glob=None, regex=None, dirs=False):
     for item in collection:
         if filterfn is None or filterfn(item):
             yield item
+

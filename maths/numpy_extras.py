@@ -20,13 +20,13 @@ def kl_divergence(p, q):
     NOTE: If any value in q is 0.0 then the KL-divergence is infinite.
     """
     assert len(p) == len(q)
-    p = p[p > 0]
+    p = p[p.nonzero()]
     return dot(p, log(p / q)) / log_of_2
 
 # KL(p||q) = sum_i p[i] log(p[i] / q[i])
 #          = sum_i p[i] (log p[i] - log q[i])
 #          = sum_i p[i] log p[i] - sum_i p[i] log(q[i])
-#          = H(p) + CE(p,q)
+#          = Entropy(p) + CrossEntropy(p,q)
 
 def cross_entropy(p, q):
     """ Cross Entropy of two vectors, 

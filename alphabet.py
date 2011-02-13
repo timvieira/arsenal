@@ -1,5 +1,3 @@
-
-
 class Alphabet(object):
     """
     Bijective mapping from strings to integers.
@@ -27,17 +25,17 @@ class Alphabet(object):
     """
 
     def __init__(self):
-        self.mapping = {}
-        self.flip = {}
-        self.i = 0
-        self.frozen = False
-        self.growing = True
+        self._mapping = {}   # str -> int
+        self._flip = {}      # int -> str; timv: consider using array or list
+        self._i = 0
+        self._frozen = False
+        self._growing = True
 
     def freeze(self):
-        self.frozen = True
+        self._frozen = True
 
     def stop_growth(self):
-        self.growing = False
+        self._growing = False
 
     @classmethod
     def from_iterable(cls, s):
@@ -51,45 +49,57 @@ class Alphabet(object):
         if i is None:
             return None
         assert isinstance(i, int)
-        return self.flip[i]
+        return self._flip[i]
 
-    def map(self, seq):
-        """ 
-        Apply alphabet to sequence while filtering `None`s emitted after growth
-        has stopped.
+    def map(self, seq, emit_none=False):
         """
-        for s in seq:
-            x = self[s]
-            if x is not None:
-                yield x
+        Apply alphabet to sequence while filtering. By default, `None` is not
+        emitted, so the Note that the output sequence may have fewer items.
+        """
+        if emit_none:
+            for s in seq:
+                yield self[s]
+        else:
+            for s in seq:
+                x = self[s]
+                if x is not None:
+                    yield x
+
+    def add_many(self, x):
+        for k in x:
+            self.add(k)
+
+    def lookup_many(self, x):
+        for k in x:
+            yield self.lookup(k)
 
     def __getitem__(self, k):
         try:
-            return self.mapping[k]
+            return self._mapping[k]
         except KeyError:
             if not isinstance(k, basestring):
                 raise ValueError("Invalid key (%s): only strings allowed." % (k,))
-            if self.frozen:
+            if self._frozen:
                 raise ValueError('Alphabet is frozen. Key "%s" not found.' % (k,))
-            if not self.growing:
+            if not self._growing:
                 return None
-            x = self.mapping[k] = self.i
-            self.flip[x] = k
-            self.i += 1
+            x = self._mapping[k] = self._i
+            self._flip[x] = k
+            self._i += 1
             return x
 
     add = __getitem__
 
     def __iter__(self):
         for i in xrange(len(self)):
-            yield self.flip[i] 
+            yield self._flip[i]
 
     def enum(self):
         for i in xrange(len(self)):
-            yield (i, self.flip[i])
+            yield (i, self._flip[i])
 
     def __len__(self):
-        return len(self.mapping)
+        return len(self._mapping)
 
     def plaintext(self):
         return '\n'.join(self)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# TODO: 
+# TODO:
 #  * Is there a way to remove the topmost level traceback's which correspond to
 #    this script?
 
@@ -12,6 +12,7 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option('--coverage',action="store_true", default=False)
 parser.add_option('--doctest', action="store_true", default=False)
+parser.add_option('--doctest-for', default=None)
 parser.add_option('--verbose-doctest', action="store_true", default=False)
 parser.add_option('--pm', action="store_true", default=False)
 parser.add_option('--breakin', action="store_true", default=False)
@@ -42,13 +43,15 @@ if opts.coverage:
     cov = coverage(data_suffix=True, branch=True)
     cov.start()
 
-if opts.doctest or opts.verbose_doctest:
+if opts.doctest or opts.verbose_doctest or opts.doctest_for is not None:
     import doctest, atexit
-    if opts.verbose_doctest:
-        atexit.register(lambda: doctest.testmod(verbose=True))
+    if opts.doctest_for is not None:   # XXX: not sure how useful this is
+        print 'running doctest for %s only' % opts.doctest_for
+        atexit.register(lambda: doctest.run_docstring_examples(eval(opts.doctest_for).__doc__,
+                                                               globals(),
+                                                               verbose=opts.verbose_doctest))
     else:
-        if opts.doctest:
-            atexit.register(doctest.testmod)
+        atexit.register(lambda: doctest.testmod(verbose=opts.verbose_doctest))
 
 if opts.pm:
     from debug.utils import enable_pm
@@ -64,5 +67,3 @@ execfile(source[0][1])
 if opts.automain:
     from automain import automain
     automain()
-
-

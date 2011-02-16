@@ -36,7 +36,7 @@ def partition(data, proportion):
     Deterministically partition `data` according to proportion.
     Note: assumes sum(proportion) <= 1.0
 
-    >>> partition_proportionally(range(10), [0.3, 0.7])
+    >>> partition(range(10), [0.3, 0.7])
     [[0, 1, 2], [3, 4, 5, 6, 7, 8, 9]]
     """
     assert sum(proportion) <= 1

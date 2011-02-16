@@ -99,7 +99,7 @@ def misspellings(passage, WORDS):
 
     import re, cPickle, sys
     try:
-        bf = cPickle.load(file('dict.pck', 'rb'))
+        bf = cPickle.load(file('dict.pkl', 'rb'))
     except IOError:
         # /usr/share/dict/words has 234936 words on this Mac and is 2.4 megs
         print "reading dictionary..."
@@ -115,7 +115,7 @@ def misspellings(passage, WORDS):
 
         print 'done reading dictionary'
         try:
-            cPickle.dump(bf, file('dict.pck', 'wb'), 2)
+            cPickle.dump(bf, file('dict.pkl', 'wb'), 2)
         except:
             pass
 

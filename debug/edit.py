@@ -73,6 +73,7 @@ def emacs(filename, line=0, column=0):
 
 if __name__ == '__main__':
 
+    # TODO: look at misc.find_object
     import sys
     X = {}
     if len(sys.argv) == 2:
@@ -81,7 +82,6 @@ if __name__ == '__main__':
 
         grab = '.'.join(['THING'] + sys.argv[2].split('.')[1:])
         exec """from %s import %s as THING; THING=%s""" % (sys.argv[1], sys.argv[2].split('.')[0], grab) in X
-
 
     else:
         print '%s <module> or %s <module> <object>' % (sys.argv[0], sys.argv[0])

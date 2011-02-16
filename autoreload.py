@@ -1,63 +1,62 @@
 import os
 import sys
-import time
 
-try:
-    import thread
-except ImportError:
-    import dummy_thread as thread
+from time import sleep
+from threading import Thread
 
-# This import does nothing, but it's necessary to avoid some race conditions
-# in the threading module. See http://code.djangoproject.com/ticket/2330 .
-try:
-    import threading
-except ImportError:
-    pass
-
-_mtimes = {}
 _win = sys.platform == "win32"
 
+# TODO: make this a more general purpose utility
+class watch(Thread):
+    """
+    Daemon thread with watches a file for changes
+    """
+    def __init__(self, mod, name=None, pause=1, verbose=True):
+        Thread.__init__(self)
+        self.filename = mod.__file__   # TODO: consider using debug.edit get_filename
+        self.name = name or mod.__name__
+        self.mod = mod
+        self.pause = pause
+        self.verbose = verbose
+        self.setDaemon(True)
+        self.start()
+        self.mtimes = {}
 
-def file_changed(filename):
-    if not os.path.exists(filename):
-        print "file '%s' doens't exist..." % filename
-        return False
-    stat = os.stat(filename)
-    mtime = stat.st_mtime
-    if _win:
-        mtime -= stat.st_ctime
-    if filename not in _mtimes:
-        _mtimes[filename] = mtime
-        return False
-    if mtime != _mtimes[filename]:
-        _mtimes.clear()
-        return True
-    return False
-
-
-def watch(mod, sleepsec=1, verbose=True):
-
-    def reloader_thread():
-        f = mod.__file__
-        if f.endswith('.pyc') or f.endswith('.pyo'):
-            f = f[0:-1]
-        if verbose:
-            print 'autoreload module:', mod.__name__
-            print 'watching file:', f
+    def run(self):
+        if self.filename.endswith('.pyc') or self.filename.endswith('.pyo'):
+            self.filename = self.filename[0:-1]
+        if self.verbose:
+            print 'autoreload module:', self.name
+            print 'watching file:', self.filename
         while True:
-            if file_changed(f) or file_changed(mod.__file__):
+            if self.file_changed(self.filename):
                 try:
-                    if verbose:
-                        print 'reloading', mod.__name__
-                    globals()[mod.__name__] = reload(mod)
+                    if self.verbose:
+                        print 'reloading', self.name
+                    globals()[self.name] = reload(self.mod)
                 except Exception as e:
-                    print 'error in:', f, '... ignoring reload.'
+                    print 'error in:', self.filename, '... ignoring reload.'
                     print e
-            time.sleep(sleepsec)
-        if verbose:
+            sleep(self.pause)
+        if self.verbose:
             print 'thread done...'
 
-    thread.start_new_thread(reloader_thread, tuple())
+    def file_changed(self, filename):
+        if not os.path.exists(filename):
+            sys.stderr.write("file '%s' doens't exist..." % filename)
+            return False
+        stat = os.stat(filename)
+        mtime = stat.st_mtime
+        if _win:
+            mtime -= stat.st_ctime
+        if filename not in self.mtimes:
+            self.mtimes[filename] = mtime
+            return False
+        if mtime != self.mtimes[filename]:
+            self.mtimes.clear()
+            return True
+        return False
+
 
 
 if __name__ == '__main__':
@@ -67,33 +66,33 @@ if __name__ == '__main__':
         new = "new message :-)"
         function = 'f = lambda : %r'
         filename = 'watch_me.py'
-    
+
         try:
             with file(filename, 'wb') as f:
                 f.write(function % old)
-    
+
             import watch_me
-            start_reloader(watch_me)
-    
+            watch(watch_me, pause=0.1)
+
             assert watch_me.f() == old
-    
+
             # wait a few seconds to make a change
-            time.sleep(2)
-    
+            sleep(2)
+
             # make a change
             with file(filename, 'wb') as f:
                 f.write(function % new)
-    
+
             # wait a few seconds
-            time.sleep(5)
-    
+            sleep(4)
+
             assert watch_me.f() == new
-    
+
         finally:
             try:
                 os.remove('watch_me.py')
                 os.remove('watch_me.pyc')
             except OSError:
                 pass
-
+        print 'done.'
     test()

@@ -3,7 +3,7 @@ import time
 from threading import Thread
 from functools import wraps
 
-class Dispatch(Thread):
+class dispatch(Thread):
     def __init__(self, f, *args, **kwargs):
         Thread.__init__(self)
         self.f = f
@@ -47,7 +47,7 @@ def timelimit(timeout):
     def _1(f):
         @wraps(f)
         def _2(*args, **kwargs):
-            c = Dispatch(f, *args, **kwargs)
+            c = dispatch(f, *args, **kwargs)
             c.join(timeout)
             if c.isAlive():
                 raise TimeoutError('took too long')
@@ -90,7 +90,7 @@ def retry(tries=2, pause=0.1, suppress=(Exception,), allow=(NameError, NotImplem
 
 
 if __name__ == '__main__':
-    from assertutils import assert_throws
+    from testing.assertions import assert_throws
 
     def test_retry():
 

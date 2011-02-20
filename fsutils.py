@@ -192,3 +192,28 @@ def find(d, filterfn=None, abspath=False, glob=None, regex=None, dirs=False):
         if filterfn is None or filterfn(item):
             yield item
 
+
+if __name__ == '__main__':
+
+    def run_tests():
+
+        def test_preserve_cwd():
+            before = os.getcwd()
+            with preserve_cwd():
+                os.chdir('..')
+                os.chdir('..')
+            assert before == os.getcwd()
+
+            @preserve_cwd
+            def foo():
+                os.chdir('..')
+                os.chdir('..')
+            cwd_before = os.getcwd()
+            foo()
+            assert os.getcwd() == cwd_before
+
+        test_preserve_cwd()
+        print 'done.'
+
+    run_tests()
+

@@ -1,3 +1,4 @@
+englishwords = frozenset(x.strip() for x in """
 10th
 11th
 12th
@@ -89184,3 +89185,4 @@ zygotic
 zymase
 zymases
 zymurgy
+""".split())

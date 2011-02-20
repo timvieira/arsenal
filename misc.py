@@ -1,7 +1,5 @@
 # stdlib
 import re, os, sys, time
-import gc
-import atexit
 import warnings
 import BaseHTTPServer
 import webbrowser

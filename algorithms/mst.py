@@ -1,4 +1,4 @@
-from unionfind import UnionFind
+from datastructures.unionfind import UnionFind
 
 '''
 def mst(G):

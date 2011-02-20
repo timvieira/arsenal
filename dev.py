@@ -14,9 +14,9 @@ parser.add_option('--coverage',action="store_true", default=False)
 parser.add_option('--doctest', action="store_true", default=False)
 parser.add_option('--doctest-for', default=None)
 parser.add_option('--verbose-doctest', action="store_true", default=False)
-parser.add_option('--pm', action="store_true", default=False)
+parser.add_option('--pm', '--post-mortem', action="store_true", default=False)
 parser.add_option('--breakin', action="store_true", default=False)
-parser.add_option('--automain', action="store_true", default=False)
+parser.add_option('-a','--automain', action="store_true", default=False)
 parser.add_option('--less-verbose', action="store_true", default=False)
 
 # split the argument list at the first item ending with .py

@@ -14,10 +14,6 @@ from threading import Thread
 # python-extras imports
 from terminal import colors
 
-# this which used to be in this module
-from fsutils import preserve_cwd
-from humanreadable import marquee
-
 def attn(msg):
     """ Display a dialog which is sure to get my attention. """
     import gtk
@@ -100,14 +96,17 @@ def showdiff(old, new):
     return realdiff
 '''
 
+
 def piped():
     """Returns piped input via stdin, else False"""
     with sys.stdin as stdin:
         return stdin.read() if not stdin.isatty() else None
 
+
 def highlighter(p, flags=0):
     pattern = re.compile('%s' % p, flags)
     return lambda x: pattern.sub(colors.bold % colors.yellow % colors.bg_red % r'\1', x)
+
 
 def deprecated(use_instead=None):
     """This is a decorator which can be used to mark functions
@@ -180,6 +179,7 @@ def edit_with_editor(s=None):
 #_________________________________________________________________________
 #
 
+# TODO: use a contextdecorator
 @contextmanager
 def ctx_redirect_io(f=None):
     r"""
@@ -204,7 +204,6 @@ def ctx_redirect_io(f=None):
 
     # Restore stdio and close the file.
     sys.stdout = original_stdout
-
 
 
 def redirect_io(f):
@@ -244,87 +243,14 @@ def threaded(callback=lambda *args, **kwargs: None, daemonic=False):
         return inner
     return innerDecorator
 
-def dump_garbage():
-    """
-    Show us what's in the garbage!
-
-    Make a leak:
-      l = []
-      l.append(l)
-      del l
-
-    Show the dirt:
-      dump_garbage()
-    """
-    gc.enable()
-    gc.set_debug(gc.DEBUG_LEAK)
-
-    # force collection
-    print "GARBAGE:"
-    gc.collect()
-
-    print "\nGARBAGE OBJECTS:"
-    for x in gc.garbage:
-        s = str(x)
-        if len(s) > 80:
-            s = s[:80] + '.........'
-        print type(x),"\n    ", s
-
-
-def garbagecollect(f):
-    """ Decorate a function to invoke the garbage collecter after each execution. """
-    @wraps(f)
-    def inner(*args, **kwargs):
-        result = f(*args, **kwargs)
-        gc.collect()
-        return result
-    return inner
-
-
 #_______________________________________________________________________________
 #
-
-# TODO: use htime and marquee
-def print_elapsed_time():
-    "register an exit hook which prints the start, finish, and elapsed times of a script."
-    begin = time.clock()
-    started = time.localtime()
-    def hook():
-        secs = time.clock() - begin
-        mins, secs = divmod(secs, 60)
-        hrs, mins = divmod(mins, 60)
-        print
-        print '======================================================================'
-        print 'Started on', time.strftime("%B %d, %Y at %I:%M:%S %p", started)
-        print 'Finished on', time.strftime("%B %d, %Y at %I:%M:%S %p", time.localtime())
-        print 'Total time: %02d:%02d:%02d' % (hrs, mins, secs)
-        print
-    atexit.register(hook)
-
 
 if __name__ == '__main__':
 
     import doctest
 
     def run_tests():
-
-        def test_preserve_cwd():
-            before = os.getcwd()
-            with preserve_cwd():
-                os.chdir('..')
-                os.chdir('..')
-            assert before == os.getcwd()
-
-            @preserve_cwd
-            def foo():
-                os.chdir('..')
-                os.chdir('..')
-            cwd_before = os.getcwd()
-            foo()
-            assert os.getcwd() == cwd_before
-
-        test_preserve_cwd()
-
 
         def test_redirect_io():
             @redirect_io
@@ -335,23 +261,6 @@ if __name__ == '__main__':
             assert str(foo.io_target.getvalue().strip()) == msg
 
         test_redirect_io()
-
-
-        from debug.utils import dumpobj
-
-        print
-        print 'testing dumpobj...'
-        class FooBurger(object):
-            x = 10
-            def __init__(self, y):
-                self.y = y
-            def span(self):
-                print 'spam:', self.y
-
-        dumpobj(FooBurger('WHY'))
-        dumpobj(FooBurger('WHY'), 1, 0)
-        dumpobj(FooBurger('WHY'), 0, 1)
-
 
     run_tests()
 

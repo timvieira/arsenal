@@ -35,19 +35,45 @@ def enable_debug_hook():
 
 enable_pm = enable_debug_hook
 
-def dumpobj(o, callables=0, dbl_under=0):
+def dumpobj(o, callables=False, private=False):
+    """
+    >>> class A(object):
+    ...     x = 10
+    ...     def __init__(self, y):
+    ...         self.y = y
+    ...     def span(self):
+    ...         pass
+    ...     def __repr__(self):
+    ...         return 'A(%r, %r)' % (self.x, self.y)
+    ...
+
+    >>> dumpobj(A('hello'))
+    A(10, 'hello')
+    instance of: A
+                       x: int
+                       y: str
+
+    >>> dumpobj(A('hello'), callables=0, private=True)
+    A(10, 'hello')
+    instance of: A
+                __dict__: dict
+                 __doc__: NoneType
+              __module__: str
+             __weakref__: NoneType
+                       x: int
+                       y: str
+    """
     print repr(o)
     print 'instance of:', type(o).__name__
     for a in dir(o):
         if not callables and callable(getattr(o, a)):
             continue
-        if not dbl_under and a.startswith('__'):
+        if not private and a.startswith('__'):
             continue
         try:
-            print '%20s: %s ' % (a, type(getattr(o,a)).__name__)
+            print '%20s: %s' % (a, type(getattr(o,a)).__name__)
         except:
             pass
-    print
 
 
 debug_expr_fmt = '[DEBUG:%s] %s -> %r'
@@ -161,6 +187,7 @@ def framedump():
 
 
 if __name__ == '__main__':
+    import doctest
 
     def example():
         """

@@ -76,37 +76,17 @@ which can be overridden to allow for custom logging.
 
 Usage example:
 
->>> from pyftpdlib import ftpserver
+>>> from web import ftpserver
 >>> authorizer = ftpserver.DummyAuthorizer()
->>> authorizer.add_user('user', 'password', '/home/user', perm='elradfmw')
->>> authorizer.add_anonymous('/home/nobody')
+>>> authorizer.add_user('user', 'password', os.path.expanduser('~'), perm='elradfmw')
 >>> ftp_handler = ftpserver.FTPHandler
 >>> ftp_handler.authorizer = authorizer
->>> address = ("127.0.0.1", 21)
+>>> address = ("127.0.0.1", 9093)
 >>> ftpd = ftpserver.FTPServer(address, ftp_handler)
->>> ftpd.serve_forever()
-Serving FTP on 127.0.0.1:21
-[]127.0.0.1:2503 connected.
-127.0.0.1:2503 ==> 220 Ready.
-127.0.0.1:2503 <== USER anonymous
-127.0.0.1:2503 ==> 331 Username ok, send password.
-127.0.0.1:2503 <== PASS ******
-127.0.0.1:2503 ==> 230 Login successful.
-[anonymous]@127.0.0.1:2503 User anonymous logged in.
-127.0.0.1:2503 <== TYPE A
-127.0.0.1:2503 ==> 200 Type set to: ASCII.
-127.0.0.1:2503 <== PASV
-127.0.0.1:2503 ==> 227 Entering passive mode (127,0,0,1,9,201).
-127.0.0.1:2503 <== LIST
-127.0.0.1:2503 ==> 150 File status okay. About to open data connection.
-[anonymous]@127.0.0.1:2503 OK LIST "/". Transfer starting.
-127.0.0.1:2503 ==> 226 Transfer complete.
-[anonymous]@127.0.0.1:2503 Transfer complete. 706 bytes transmitted.
-127.0.0.1:2503 <== QUIT
-127.0.0.1:2503 ==> 221 Goodbye.
-[anonymous]@127.0.0.1:2503 Disconnected.
+>>> ftpd.serve_forever()   # doctest:+SKIP
+Serving FTP on 127.0.0.1:9093
+  ...
 """
-
 
 import asyncore
 import asynchat
@@ -3202,11 +3182,11 @@ class FTPServer(asyncore.dispatcher):
 
 def test():
     # cmd line usage (provide a read-only anonymous ftp server):
-    # python -m pyftpdlib.ftpserver
+    # python -m web.ftpserver
     authorizer = DummyAuthorizer()
     authorizer.add_anonymous(os.getcwd())
     FTPHandler.authorizer = authorizer
-    address = ('', 21)
+    address = ('', 9010)
     ftpd = FTPServer(address, FTPHandler)
     ftpd.serve_forever()
 

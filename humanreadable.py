@@ -1,5 +1,9 @@
 from datetime import datetime, timedelta
+from time import clock, localtime, strftime
+import atexit
 
+
+# TODO: option to use terminal width if possible
 def marquee(txt='', width=78, mark='*'):
     """
     Return the input string centered in a 'marquee'.
@@ -153,6 +157,24 @@ def datestr(then, now=None):
         return agohence(deltamicroseconds, 'millisecond', 1000)
 
     return agohence(deltamicroseconds, 'microsecond')
+
+
+# TODO: use htime and marquee
+def print_elapsed_time():
+    "register an exit hook which prints the start, finish, and elapsed times of a script."
+    begin = clock()
+    started = localtime()
+    def hook():
+        secs = clock() - begin
+        mins, secs = divmod(secs, 60)
+        hrs, mins = divmod(mins, 60)
+        print
+        print '======================================================================'
+        print 'Started on', strftime("%B %d, %Y at %I:%M:%S %p", started)
+        print 'Finished on', strftime("%B %d, %Y at %I:%M:%S %p", localtime())
+        print 'Total time: %02d:%02d:%02d' % (hrs, mins, secs)
+        print
+    atexit.register(hook)
 
 
 if __name__ == '__main__':

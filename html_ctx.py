@@ -1,15 +1,15 @@
 # Copyright (c) 2009 eKit.com Inc (http://www.ekit.com/)
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,7 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-'''Simple, elegant HTML generation.
+"""
+Simple, elegant HTML generation.
 
 Constructing your HTML
 ----------------------
@@ -26,23 +27,19 @@ Constructing your HTML
 To construct HTML start with an instance of ``html.HTML()``. Add
 tags by accessing the tag's attribute on that object. For example::
 
-   >>> from html import HTML
+   >>> from html_ctx import HTML
    >>> h = HTML()
-   >>> h.br
-   >>> print h
+   >>> print h.br
    <br>
 
 If the tag should have text content you may pass it at tag creation time or
 later using the tag's ``.text()`` method (note it is assumed that a fresh
 ``HTML`` instance is created for each of the following examples)::
 
-   >>> p = h.p('hello world!\\n')
+   >>> p = h.p('hello, world! & ')
    >>> p.text('more &rarr; text', escape=False)
-   >>> h.p
-   >>> print h
-   <p>hello, world!
-   more &rarr; text</p>
-   <p>
+   >>> print p            #doctest:+NORMALIZE_WHITESPACE
+   <p>hello, world! &amp; more &rarr; text</p>
 
 Any HTML-specific characters (``<>&"``) in the text will be escaped for HTML
 safety as appropriate unless ``escape=False`` is passed. Note also that the
@@ -53,8 +50,12 @@ the sub-tags directly on the tag::
 
    >>> l = h.ol
    >>> l.li('item 1')
+   <HTML li>
    >>> l.li.b('item 2 > 1')
+   <HTML b>
    >>> print h
+   <br>
+   <p>hello, world! &amp; more &rarr; text</p>
    <ol>
    <li>item 1</li>
    <li><b>item 2 &gt; 1</b></li>
@@ -69,12 +70,14 @@ The alternative to the above method is to use the containter tag as a
 context for adding the sub-tags. The top-level ``HTML`` object keeps track
 of which tag is the current context::
 
+   >>> h = HTML()
    >>> with h.table(border='1'):
-   ...   for i in range(2):
-   ...     with h.tr:
-   ...       h.td('column 1')
-   ...       h.td('column 2')
-   ...  print h
+   ...     for i in range(2):
+   ...         with h.tr:
+   ...             h.td('column 1')
+   ...             h.td('column 2')
+   ...
+   >>> print h
    <table border="1">
    <tr><td>column 1</td><td>column 2</td></tr>
    <tr><td>column 1</td><td>column 2</td></tr>
@@ -87,12 +90,14 @@ but then there's really no benefit to using a ``with`` statement. The
 following is functionally identical to the first list construction::
 
    >>> with h.ol as l:
-   ...   l.li('item 1')
-   ...   l.li.b('item 2 > 1')
+   ...     l.li('item 1')
+   ...     l.li.b('item 2 > 1')
+   ...
 
 You may turn off/on adding newlines by passing ``newlines=False`` or
 ``True`` to the tag (or ``HTML`` instance) at creation time::
 
+   >>> h = HTML()
    >>> l = h.ol(newlines=False)
    >>> l.li('item 1')
    >>> l.li('item 2')
@@ -102,7 +107,7 @@ You may turn off/on adding newlines by passing ``newlines=False`` or
 Since we can't use ``class`` as a keyword, the library recognises ``klass``
 as a substitute::
 
-   >>> print h.p(content, klass="styled")
+   >>> print h.p('content', klass="styled")
    <p class="styled">content</p>
 
 
@@ -122,23 +127,21 @@ even if it's just a single space character.
 Rendering doesn't affect the HTML document's state, so you can add to or
 otherwise manipulate the HTML after you've stringified it.
 
-
 ----
 
 This code is copyright 2009 eKit.com Inc (http://www.ekit.com/)
 See the end of the source file for the license of use.
-'''
+"""
+
 __version__ = '1.4'
 
 import unittest
 import cgi
 
 class HTML(object):
-    '''Easily generate HTML.
-
-    '''
+    """ Easily generate HTML. """
     newline_default_on = set('table ol ul dl'.split())
-        
+
     def __init__(self, name=None, stack=None, newlines=True):
         self.name = name
         self.content = []
@@ -192,7 +195,7 @@ class HTML(object):
         # we're done adding tags to me!
         self.stack.pop()
     def __repr__(self):
-        return '<HTML %s 0x%x>'%(self.name, id(self))
+        return '<HTML %s>' % (self.name)
     def __str__(self):
         # turn me and my content into text
         join = '\n' if self.newlines else ''
@@ -202,7 +205,7 @@ class HTML(object):
         l = [self.name] + a
         s = '<%s>%s'%(' '.join(l), join)
         if self.content:
-            s += join.join(map(str, self.content))   
+            s += join.join(map(str, self.content))
             s += join + '</%s>'%self.name
         return s
 
@@ -212,7 +215,7 @@ class TestCase(unittest.TestCase):
         h = HTML()
         h.br
         self.assertEquals(str(h), '<br>')
- 
+
     def test_just_tag(self):
         'generate the HTML for just one tag'
         h = HTML()
@@ -319,6 +322,3 @@ class TestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-
-

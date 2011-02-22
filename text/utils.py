@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-
-
+import codecs
 
 # Borrowed from: http://www.codigomanso.com/en/2010/05/una-de-python-force_unicode/
 def force_unicode(s, encoding='utf-8', errors='ignore'):
@@ -10,7 +9,6 @@ def force_unicode(s, encoding='utf-8', errors='ignore'):
     Returns a unicode object representing 's'. Treats bytestrings using the
     'encoding' codec.
     """
-    import codecs
     if s is None:
         return u''
     try:

@@ -166,6 +166,30 @@ def line_groups(text, pattern):
 from collections import namedtuple
 Span = namedtuple('Span', 'label begins ends')
 
+def extract_contiguous(s, labeler=None, background="O"):
+    labeler = labeler or (lambda x: x)
+    prev = background
+    entity = [0, None]
+    for i, token in enumerate(s):
+        curr = labeler(token)
+        if curr != background:
+            if curr == prev:
+                #entity.append(token)
+                entity[1] = i + 1  # ends here
+            else:
+                if len(entity):
+                    yield Span(prev, entity[0], entity[1])
+                entity = [i, None]
+        else:
+            if len(entity):
+                yield Span(prev, entity[0], entity[1])
+            entity = [i, None]
+        prev = curr
+    # emit lingering bits
+    if len(entity):
+        yield Span(prev, entity[0], entity[1])
+
+
 # TIM: add an option for strict BIO sequences, no heuristics
 def bio2span(seq, tagger=None, include_O=True):
     """

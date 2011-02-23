@@ -50,7 +50,7 @@ class F1:
             if P + R != 0:
                 F = 2*P*R / (P + R)
             if verbose:
-                print ' | %8s | %5d | %5.1f | %5.1f | %5.1f |' % (label, count, P*100, R*100, F*100)
+                print ' | %8s | %5d | %5.1f | %5.1f | %5.1f |' % (label[:8], count, P*100, R*100, F*100)
                 #t.add_row([label, P*100, R*100, F*100])
             tbl.append((label,count,P,R,F))
         if verbose:

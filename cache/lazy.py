@@ -1,3 +1,6 @@
+# TODO:
+#  - consider allowing lazy things to depend on one another
+
 from types import GeneratorType
 
 class lazy(object):

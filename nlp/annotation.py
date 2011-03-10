@@ -148,7 +148,6 @@ def bracket2bio(x):
                 yield ('I-%s' % label, w)
 
 # TIMV: we want something like a LineGroupIterator
-# TDOD: make this
 def line_groups(text, pattern):
     """
     Very simple function for breaking up text into groups based on a 
@@ -166,28 +165,30 @@ def line_groups(text, pattern):
 from collections import namedtuple
 Span = namedtuple('Span', 'label begins ends')
 
-def extract_contiguous(s, labeler=None, background="O"):
+def extract_contiguous(s, labeler=None):
+    """
+    >>> list(extract_contiguous(""))
+    []
+
+    >>> list(extract_contiguous("AABBC"))
+    [Span(label='A', begins=0, ends=2), Span(label='B', begins=2, ends=4), Span(label='C', begins=4, ends=5)]
+
+    >>> list(extract_contiguous("AABBB"))
+    [Span(label='A', begins=0, ends=2), Span(label='B', begins=2, ends=5)]
+    """
     labeler = labeler or (lambda x: x)
-    prev = background
-    entity = [0, None]
-    for i, token in enumerate(s):
+    prev = None
+    b = e = 0
+    for e, token in enumerate(s):
         curr = labeler(token)
-        if curr != background:
-            if curr == prev:
-                #entity.append(token)
-                entity[1] = i + 1  # ends here
-            else:
-                if len(entity):
-                    yield Span(prev, entity[0], entity[1])
-                entity = [i, None]
-        else:
-            if len(entity):
-                yield Span(prev, entity[0], entity[1])
-            entity = [i, None]
+        if curr != prev:
+            if prev is not None:
+                yield Span(prev, b, e)
+            b = e
         prev = curr
     # emit lingering bits
-    if len(entity):
-        yield Span(prev, entity[0], entity[1])
+    if prev is not None:
+        yield Span(prev, b, e + 1)
 
 
 # TIM: add an option for strict BIO sequences, no heuristics
@@ -255,7 +256,7 @@ if __name__ == '__main__':
     test_bio2span()
 
     def example():
-        x = list(fromSGML('/home/timv/projects/RexaTextmill/data/tagged_references.txt', '<NEW.*?>', False))
+        x = list(fromSGML('/home/timv/projects/data/citations/tagged_references.txt', '<NEW.*?>', False))
         assert len(x) == 500
         print 'fromSGML passed.'
 

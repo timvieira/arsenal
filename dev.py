@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 # TODO:
-#  * Is there a way to remove the topmost level traceback's which correspond to
-#    this script?
+#  * Is there a way to remove the topmost level traceback's which correspond to this script?
+#  * add option to run profiler
 
 import sys
+sys.path.append('..')
 
 from debug import ultraTB2
 

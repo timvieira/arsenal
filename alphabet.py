@@ -51,6 +51,9 @@ class Alphabet(object):
         assert isinstance(i, int)
         return self._flip[i]
 
+    def keys(self):
+        return self._mapping.iterkeys()
+
     def map(self, seq, emit_none=False):
         """
         Apply alphabet to sequence while filtering. By default, `None` is not

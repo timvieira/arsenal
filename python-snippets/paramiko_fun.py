@@ -1,25 +1,20 @@
-import paramiko
-from terminal_colors import blue, red, black
+from paramiko import SSHClient, AutoAddPolicy
+from terminal.colors import blue, red, black
 
-ssh = None
+class SSH(object):
 
-def connect():
-    print 'connecting...'
-    global ssh
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect('jasper.cs.umass.edu', username='timv')
-    return ssh
+    def __init__(self, host, user):
+        c = SSHClient()
+        c.set_missing_host_key_policy(AutoAddPolicy())  # try to use automatic authentication
+        c.connect(host, username=user)
+        self.connection = c
 
-def run(cmd):
-    s = ssh or connect()
-    stdin, stdout, stderr = s.exec_command(cmd)
-    blue()
-    print ''.join(stdout.readlines()).strip()
-    red()
-    print ''.join(stderr.readlines()).strip()
-    black()
-    if stdin.channel.closed:
-        return None
-    return stdin
+    def run(self, cmd):
+        stdin, stdout, stderr = self.connection.exec_command(cmd)
+        print blue % (''.join(stdout.readlines()).strip(),)
+        print red % (''.join(stderr.readlines()).strip())
 
+
+def run(cmd, host='jasper.cs.umass.edu', user='timv'):
+    c = SSH(host=host, user=user)
+    c.run(cmd)

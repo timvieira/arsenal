@@ -12,6 +12,36 @@ from threading import Thread
 # python-extras imports
 from terminal import colors
 
+
+# by George Sakkis (gsakkis at rutgers.edu)
+# http://mail.python.org/pipermail/python-list/2005-March/312004.html
+def parse_sexpr(expression):
+    subexpressions,stack = [],[]
+    for token in re.split(r'([()])|\s+', expression):
+        if token == '(':
+            new = []
+            if stack:
+                stack[-1].append(new)
+            else:
+                subexpressions.append(new)
+            stack.append(new)
+        elif token == ')':
+            try:
+                stack.pop()
+            except IndexError:
+                raise ValueError("Unbalanced right parenthesis: %s" % expression)
+        elif token:
+            try:
+                stack[-1].append(token)
+            except IndexError:
+                raise ValueError("Unenclosed subexpression (near %s)" % token)
+    if stack:
+        raise ValueError("Unbalanced left parenthesis: %s" % expression)
+    if len(subexpressions) > 1:
+        raise ValueError("Single s-expression expected (%d given)" % len(subexpressions))
+    return subexpressions[0]
+
+
 def attn(msg):
     """ Display a dialog which is sure to get my attention. """
     import gtk
@@ -107,10 +137,10 @@ def highlighter(p, flags=0):
 
 
 def deprecated(use_instead=None):
-    """This is a decorator which can be used to mark functions
-    as deprecated. It will result in a warning being emitted
-    when the function is used."""
-
+    """
+    This is a decorator which can be used to mark functions as deprecated.
+    It will result in a warning being emitted when the function is used.
+    """
     def wrapped(func):
         @wraps(func)
         def new_func(*args, **kwargs):

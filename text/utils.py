@@ -2,6 +2,9 @@
 
 import re
 import codecs
+from text import markup
+from xml.sax.saxutils import escape as xmlescape, unescape as xmlunescape
+
 
 # Borrowed from: http://www.codigomanso.com/en/2010/05/una-de-python-force_unicode/
 def force_unicode(s, encoding='utf-8', errors='ignore'):
@@ -65,54 +68,24 @@ _recodings = {'ae': ['ä', u'ä', '&auml;', '\u00E4', u'\u00E4', '\u0308a', '\xc
 
 # taken from NLTK
 def clean_html(html):
-    """
-    Remove HTML markup from the given string.
-
-    @param html: the HTML string to be cleaned
-    @type html: C{string}
-    @rtype: C{string}
-    """
-    # First we remove inline JavaScript/CSS:
-    cleaned = re.sub(r"(?is)<(script|style).*?>.*?(</\1>)", "", html.strip())
-    # Then we remove html comments. This has to be done before removing regular
-    # tags since comments can contain '>' characters.
-    cleaned = re.sub(r"(?s)<!--(.*?)-->[\n]?", "", cleaned)
-    # Next we can remove the remaining tags:
-    cleaned = re.sub(r"(?s)<.*?>", " ", cleaned)
-    # Finally, we deal with whitespace
-    cleaned = re.sub(r"&nbsp;", " ", cleaned)
-    cleaned = re.sub(r"  ", " ", cleaned)
-    cleaned = re.sub(r"  ", " ", cleaned)
+    """ Remove HTML markup from the given string. """
+    # remove inline JavaScript / CSS
+    x = re.sub(r'(?is)<(script|style).*?>.*?(</\1>)', '', html.strip())
+    # remove html comments. must be done before removing regular tags since comments can contain '>' characters.
+    x = re.sub(r'(?s)<!--(.*?)-->[\n]?', '', x)
+    # remove the remaining tags
+    x = re.sub(r'(?s)<.*?>', ' ', x)
+    # remove html entities
+    x = markup.remove_entities(x)
+    # clean up whitespace
+    x = re.sub(r'[ ]+', ' ', x)
+    return x
 
 
-'''
 import unicodedata
 def strip_accents(s):
-    """Transform accentuated unicode symbols into their simple counterpart
-
-    Warning: the python-level loop and join operations make this implementation
-    20 times slower than the to_ascii basic normalization.
-    """
-    return u''.join([c for c in unicodedata.normalize('NFKD', s)
-                     if not unicodedata.combining(c)])
-
-
-def to_ascii(s):
-    """Transform accentuated unicode symbols into ascii or nothing
-
-    Warning: this solution is only suited for roman languages that have a direct
-    transliteration to ASCII symbols.
-
-    A better solution would be to use transliteration based on a precomputed
-    unidecode map to be used by translate as explained here:
-
-        http://stackoverflow.com/questions/2854230/
-
-    """
-    nkfd_form = unicodedata.normalize('NFKD', s)
-    only_ascii = nkfd_form.encode('ASCII', 'ignore')
-    return only_ascii
-'''
+    """ Transform accentuated unicode symbols into their simple counterpart. """
+    return u''.join(c for c in unicodedata.normalize('NFKD', s) if not unicodedata.combining(c))
 
 # iso-8859-1
 LATIN2ASCII = {
@@ -227,6 +200,7 @@ def remove_latin(text):
     return text
 
 def remove_accents(text):
+    text = unicode(text).encode('utf-8')
     for plain, funny_set in (('a','áàâãäå\u0101'), ('e','éèêẽë'), ('i',"íìîĩï"), ('o','óòôõöø'),
                              ('u',"úùûũü"), ('A','ÁÀÂÃÄÅ'), ('E','ÉÈÊẼË'), ('I',"ÍÌÎĨÏ"),
                              ('O','ÓÒÔÕÖØ'), ('U',"ÚÙÛŨÜ"), ('n',"ñ"), ('c',"ç"), ('N',"Ñ"),
@@ -239,11 +213,10 @@ def remove_accents(text):
 
 
 
+#   ' '    &#160;  &nbsp;
 XXX = u"""
-    ' ' &#160;  &nbsp;
     ™ &#8482;
     € &euro;
-        &#32;   &nbsp;
     !  &#33;
     "  &#34;   &quot;
     #  &#35;
@@ -577,7 +550,6 @@ XXX = u"""
     Ţ  &#354;
     ţ  &#355;
     Ť  &#356;
-    ť  &#577;
     Ŧ  &#358;
     ŧ  &#359;
     Ũ  &#360;
@@ -608,17 +580,26 @@ XXX = u"""
 
 
 if __name__ == '__main__':
-    import markup
 
-    no_ent = markup.remove_entities(XXX)
+    if 0:
+        no_ent = markup.remove_entities(XXX)
+    
+        for orig, line in zip(XXX.split('\n'), (x.strip().split() for x in no_ent.split('\n'))):
+            if not line:
+                print
+                print 'SKIPPED:', orig
+                continue
+            a = line[0]
+            if not all(a == b for b in line):
+                print
+                print 'INPUT: ', orig.strip()
+                print 'OUTPUT:', ' '.join(line).strip()
 
-    for orig, line in zip(XXX.split('\n'), (x.strip().split() for x in no_ent.split('\n'))):
-        if not line:
-            print
-            print 'SKIPPED:', orig
-            continue
-        a = line[0]
-        if not all(a == b for b in line):
-            print
-            print 'INPUT: ', orig.strip()
-            print 'OUTPUT:', ' '.join(line).strip()
+    if 1:
+        A = strip_accents(XXX)
+        print A
+
+    if 0:
+        B = remove_accents(XXX)
+        print B
+

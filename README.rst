@@ -16,16 +16,22 @@ Highlights
 ----------
 
 - misc.py
-    A "dumping ground" for odd and ends. Including a ``try_k_times`` decorator
-    ``preserve_cwd``, ``redirect_io``, ``timelimit`` decorator. I should really
-    organize this better.
+    A "dumping ground" for odd and ends. I normally drop things in here and later
+    move them elsewhere if the turn out to be useful.
 
 - automain.py
     Automatically constructs a "main function" for any module which
     calls the automain function.
 
+- robust.py
+    utilities such as ``timelimit`` and `retry`` to help "robustify" your code.
+
 - iterextras.py
     the most useful things here are ``iterview`` and ``sliding_window``
+
+- fsutils.py
+    utilities for working with the file system like atomic file writes and
+    recursively listing directories (like UNIX find)
 
 - nlp/
     Contains many text-processing utilities useful in natural language
@@ -33,7 +39,7 @@ Highlights
     own project.
 
 - debug/
-    I'm a big fan of ``debug.utils.ip`` and a huge fan of ``ultraTB2``!
+    I'm a big fan of ``debug.utils.ip`` and ``debug.ultraTB2.enable``!
 
     + breakin.py
       ripped out bzr's infamous breakin feature. enabling this allows the user

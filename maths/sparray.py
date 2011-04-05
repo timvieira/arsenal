@@ -10,8 +10,8 @@ import numpy
 
 
 class sparray(object):
-    """ Class for n-dimensional sparse array objects using
-        Python's dictionary structure.
+    """
+    Class for n-dimensional sparse array objects using dict.
     """
     def __init__(self, shape, default=0, dtype=float):
         
@@ -85,8 +85,7 @@ class sparray(object):
             raise ValueError('Array sizes do not match. '+str(self.shape)+' versus '+str(other.shape))
 
     def __div__(self, other):
-        """ Divide two arrays (element wise). 
-            Type of division is determined by dtype. """
+        """ Divide two arrays (element wise). Type of division is determined by dtype. """
         
         if self.shape == other.shape:
             out = self.__class__(self.shape, self.dtype)
@@ -102,8 +101,7 @@ class sparray(object):
             raise ValueError('Array sizes do not match. '+str(self.shape)+' versus '+str(other.shape))
 
     def __truediv__(self, other):
-        """ Divide two arrays (element wise). 
-            Type of division is determined by dtype. """
+        """ Divide two arrays (element wise). Type of division is determined by dtype. """
         
         if self.shape == other.shape:
             out = self.__class__(self.shape, self.dtype)

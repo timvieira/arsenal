@@ -581,6 +581,17 @@ XXX = u"""
 
 if __name__ == '__main__':
 
+    import sys
+
+    if sys.stdin.isatty():
+        sys.exit(1)
+
+    x = sys.stdin.read()
+    x = clean_html(x)
+    x = markup.remove_entities(x)
+
+    print x
+
     if 0:
         no_ent = markup.remove_entities(XXX)
     
@@ -595,7 +606,7 @@ if __name__ == '__main__':
                 print 'INPUT: ', orig.strip()
                 print 'OUTPUT:', ' '.join(line).strip()
 
-    if 1:
+    if 0:
         A = strip_accents(XXX)
         print A
 

@@ -47,4 +47,4 @@ def mst(G):
         if subtrees[u] != subtrees[v]:
             tree.append((u,v))
             subtrees.union(u,v)
-    return tree        
+    return tree

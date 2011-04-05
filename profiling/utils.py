@@ -5,9 +5,10 @@ import sys
 import pstats
 import cProfile
 
-# maybe add an option to delete `out` tempfile or keep it
-# I don't like that this currently makes a system call to open the image...
-# gprof2dot is on the pythonpath we should be able to avoid the system call there
+# TODO: 
+#  - maybe we should delete the `out` tempfile
+#  - I don't like that this currently makes a system call to open the image...
+#  - gprof2dot is on the pythonpath we should be able to avoid the system call
 def profile_viz(cmd, global_dict=None, local_dict=None, img='profile.png', out='profile.tmp', noctx=False):
     "Run gprof2dot on the output for profiling."
     if noctx:
@@ -17,7 +18,6 @@ def profile_viz(cmd, global_dict=None, local_dict=None, img='profile.png', out='
             call_frame = sys._getframe().f_back
             local_dict = call_frame.f_locals
             global_dict = call_frame.f_globals
-
         cProfile.runctx(cmd, global_dict, local_dict, out)
 
     stats = pstats.Stats(out)
@@ -26,6 +26,17 @@ def profile_viz(cmd, global_dict=None, local_dict=None, img='profile.png', out='
     stats.print_stats()
     # for more on the viz check out: http://code.google.com/p/jrfonseca/wiki/Gprof2Dot
     os.system('gprof2dot.py -f pstats %s | dot -Tpng -o %s && eog %s &' % (out, img, img))
+
+
+def kcachegrind(cmd, out='profile.kgrind'):
+    from profiling.lsprofcalltree import KCacheGrind
+    p = cProfile.Profile()
+    p.run(cmd)
+    # Get the stats in a form kcachegrind can use and save it
+    k = KCacheGrind(p)
+    with file(out, 'wb') as f:
+        k.output(f)
+    os.system("kcachegrind %s &" % out)
 
 
 ## from cStringIO import StringIO
@@ -57,29 +68,3 @@ def profile_viz(cmd, global_dict=None, local_dict=None, img='profile.png', out='
 ##     return (result, x)
 
 
-def main():
-    from optparse import OptionParser
-
-    parser = OptionParser()
-    parser.allow_interspersed_args = False
-    parser.add_option('-i', '--img', dest="image", help="Save image of hotspots to <img>", default='profile.png')
-    parser.add_option('-o', '--out', dest="out", help="Save stats to <outfile>", default='profile.tmp')
-
-    if not sys.argv[1:]:
-        parser.print_help()
-        sys.exit(2)
-
-    (options, args) = parser.parse_args()
-
-    if len(args) > 0:
-        sys.argv[:] = args
-        sys.path.insert(0, os.path.dirname(sys.argv[0]))
-        profile_viz('execfile(%r)' % (sys.argv[0],), img=options.image, out=options.out, noctx=True)
-    else:
-        parser.print_help()
-    return parser
-
-
-if __name__ == '__main__':
-    #print profile(time.sleep, 0.01)[1]
-    main()

@@ -109,6 +109,12 @@ import os
 import subprocess
 import tempfile
 
+import __builtin__
+def type(x):
+    if hasattr(x, '__class__'):   # HACK: from old style classes
+        return x.__class__
+    else:
+        return __builtin__.type(x)
 
 def count(typename):
     """Count objects tracked by the garbage collector with a given class name.

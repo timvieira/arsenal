@@ -1,6 +1,6 @@
 import os, sys, datetime
 import logging
-import logging.handlers
+from logging.handlers import SMTPHandler
 
 def using_log_file():
     LOG_FILENAME = 'my-log-file'
@@ -21,34 +21,32 @@ def using_log_file():
     print '***********************************************'
     os.remove(LOG_FILENAME)
 
+# timv: this thing doesn't work super well..
+def email_logger():
+    my_logger = logging.getLogger('my-logger')
+    
+    smtp = 'localhost'
+    my_logger.addHandler(SMTPHandler(smtp, 
+                                     'tim.f.vieira@gmail.com', 
+                                     'tim.f.vieira@gmail.com', 
+                                     'testing critical message system.'))
+    my_logger.critical('critical message from your script.')
+    
 
-my_logger = logging.getLogger('my-logger')
 
-#smtp = 'smtp.gmail.com'
-#smtp = 'mail-auth.oit.umass.edu'
-#smtp = 'express-smtp.cites.uiuc.edu'
-smtp = 'localhost'
-email_handler = logging.handlers.SMTPHandler(smtp, 'tim.f.vieira@gmail.com', 'tim.f.vieira@gmail.com', 'testing critical message system.')
-my_logger.addHandler(email_handler)
-my_logger.critical('critical message from your script.')
-
-
-
-def quick_start_log(log_fn=None, mode=None, level=logging.DEBUG, format='%(asctime)s|%(name)s|%(levelname)s| %(message)s'):
-    '''
+def quick_start_log(log_fn=None, mode='w', level=logging.DEBUG, 
+                    fmt='%(asctime)s|%(name)s|%(levelname)s| %(message)s'):
+    """
     simplest basicConfig wrapper, open log file and return default log handler
-    '''
+    """
 
     if log_fn is None:
         now = datetime.datetime.now()
         ts = now.strftime('%Y-%m-%d_%H%M%S')
         log_fn = '%s.%s.log' % (sys.argv[0], ts)
 
-    if mode is None:
-        mode = 'w'
-
     logging.basicConfig(level=level,
-                        format=format,
+                        format=fmt,
                         filename=log_fn,
                         filemode=mode)
 
@@ -59,7 +57,7 @@ def quick_start_log(log_fn=None, mode=None, level=logging.DEBUG, format='%(ascti
     return logger
 
 
-#if __name__ == '__main__':
-#    log = quick_start_log()
-#    log.info('message')
-#    log.fatal('exit')
+def quick_start_example():
+    log = quick_start_log()
+    log.info('message')
+    log.fatal('exit')

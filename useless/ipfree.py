@@ -1,4 +1,5 @@
-"""Look up the country for a given IP address.
+"""
+Look up the country for a given IP address.
 
     >>> import ipfree
     >>> ipfree.lookup('129.97.128.15')
@@ -10,7 +11,8 @@
 This module provides a single function, lookup(ipaddr), that returns the
 two-letter country code and country name for an IP address given as a
 string of four period-separated decimal numbers.  The database in this
-module is derived from the free database in the Perl module Geo::IPfree."""
+module is derived from the free database in the Perl module Geo::IPfree.
+"""
 
 __author__ = 'Ka-Ping Yee'
 __date__ = '2005-04-14'

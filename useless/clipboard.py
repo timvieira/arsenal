@@ -49,3 +49,7 @@ def tkinter_clipboard_get():
     return text
 
 
+if __name__ == '__main__':
+    print tkinter_clipboard_get()
+
+

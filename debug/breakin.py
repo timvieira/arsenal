@@ -64,7 +64,7 @@ def hook_to_signal(handler):
 def breakin_ctx(frame):
     import traceback
     sys.stderr.write('** Breaking in to running process **\n'
-                     'Traceback:\n%s' 
+                     'Traceback:\n%s'
                      % (''.join(traceback.format_stack(frame))))
 
     d = {'_frame': frame}        # Allow access to frame object.
@@ -80,7 +80,7 @@ def breakin_ctx(frame):
         yield d
     finally:
         signal.signal(_breakin_signal_number, debug)
-        
+
 
 # [TIMV] ideas:
 #   * I'm not crazy about being dropped into `_debug`'s frame - it would
@@ -94,14 +94,14 @@ def debug(signal_number, frame):
 
 def shell(sig, frame):
     """Interrupt running process and provide a python prompt for debugging."""
-    with breakin_ctx(frame) as d:    
+    with breakin_ctx(frame) as d:
         try:
             from IPython.Shell import IPShellEmbed
             IPShellEmbed([])(local_ns=d)
         except ImportError:
             from code import InteractiveConsole
             InteractiveConsole(d).interact()
-    
+
 
 # TIMV: alias (much easier to remember)
 enable_pdb = lambda: hook_to_signal(debug)
@@ -123,4 +123,3 @@ if __name__ == '__main__':
     enable_shell()
     #enable_pdb()
     example()
-

@@ -12,6 +12,12 @@ from threading import Thread
 # python-extras imports
 from terminal import colors
 
+def force(g):
+    """ force evaluation of generator `g`. """
+    @wraps(g)
+    def wrap(*args, **kw):
+        return list(g(*args, **kw))
+    return wrap
 
 # by George Sakkis (gsakkis at rutgers.edu)
 # http://mail.python.org/pipermail/python-list/2005-March/312004.html
@@ -61,11 +67,11 @@ def attn(msg):
 # borrowed from whoosh
 def find_object(name, blacklist=None, whitelist=None):
     """Imports and returns an object given a fully qualified name.
-    
+
     >>> find_object("whoosh.analysis.StopFilter")
     <class 'whoosh.analysis.StopFilter'>
     """
-    
+
     if blacklist:
         for pre in blacklist:
             if name.startswith(pre):
@@ -78,13 +84,13 @@ def find_object(name, blacklist=None, whitelist=None):
                 break
         if not passes:
             raise TypeError("Can't instantiate %r" % name)
-    
+
     lastdot = name.rfind(".")
-    
+
     assert lastdot > -1, "Name %r must be fully qualified" % name
     modname = name[:lastdot]
     clsname = name[lastdot + 1:]
-    
+
     mod = __import__(modname, fromlist=[clsname])
     cls = getattr(mod, clsname)
     return cls
@@ -101,8 +107,8 @@ def find_object(name, blacklist=None, whitelist=None):
 ## I'm not sure about this function yet..
 ## def deep_import(name):
 ##     """
-##     A version of __import__ that works as expected when using the form 
-##     'module.name' (returns the object corresponding to 'name', instead of 
+##     A version of __import__ that works as expected when using the form
+##     'module.name' (returns the object corresponding to 'name', instead of
 ##     'module').
 ##     """
 ##     mod = __import__(name)
@@ -126,9 +132,8 @@ def showdiff(old, new):
 
 
 def piped():
-    """Returns piped input via stdin, else False"""
-    with sys.stdin as stdin:
-        return stdin.read() if not stdin.isatty() else None
+    """ Returns piped input via stdin, else None. """
+    return sys.stdin if not sys.stdin.isatty() else None
 
 
 def highlighter(p, flags=0):
@@ -168,7 +173,8 @@ timesection = lambda x: timeit(header='%s...' % x,
 
 
 def browser(html):
-    """Display html in the default web browser without creating a temp file.
+    """
+    Display html in the default web browser without creating a temp file.
 
     Instantiates a trivial http server and calls webbrowser.open with a URL
     to retrieve html from that server.

@@ -1,38 +1,30 @@
 import re
-from nlp.wordsplitter import wordsplit_sentence
+from misc import force
+from itertools import imap
 
 class ParseError(Exception):
     """ Custom exception class used by this module. """
     pass
 
-NEWLINE = '-NEWLINE-'
-
-def _preprocess(x):
-    "Warning: wordsplitter may alter non-whitespace characters in `x`."
-    x = re.sub('\s+', ' ', x)    # collapse consecutive spaces
-    x = wordsplit_sentence(x)    # apply wordsplitter
-    return re.sub('(<[/]?[A-Za-z0-9]+>)', r' \1 ', x)
-
-def xml2segments(x):
-    """
-    Generate a segmentation from an xml-style annotation.
-    All the assumptions in `xml2bio` still apply.
-
-    >>> x = xml2segments("<title>Cat in the Hat</title><author>Dr. Seuss</author>")
-    >>> list(x)
-    [('title', ['Cat', 'in', 'the', 'Hat']), ('author', ['Dr.', 'Seuss'])]
-    """
-    x = _preprocess(x)
-    for label, tagged, close, word in re.findall('(?:(?:\s*<([A-Za-z0-9]+)>\s*([\w\W]+?)\s*</([A-Za-z0-9]+)>\s*)|([\w\W]+?)(?:\s+|$))', x):
-        if close != label:
-            raise ParseError('Mismatched xml tags (%s, %s)' % (close, label))
-        if word:
-            yield ('O', [word])
+class Span(object):
+    __slots__ = ('label','begins','ends')
+    def __init__(self, label, begins, ends):
+        self.label = label
+        self.begins = begins
+        self.ends = ends
+    def __repr__(self):
+        return 'Span(label=%r, begins=%r, ends=%r)' % (self.label, self.begins, self.ends)
+    def __eq__(self, other):
+        if isinstance(other, Span):
+            return (self.label == other.label and self.begins == other.begins and self.ends == other.ends)
         else:
-            yield (label, tagged.split())
+            return len(other) == 3 and (self.label == other[0] and self.begins == other[1] and self.ends == other[2])
+    def __iter__(self):
+        return iter((self.label, self.begins, self.ends))
 
 
-#Lexer = "\\+[A-Z]+\\+|\\p{Alpha}+|\\p{Digit}+|\\p{Punct}".r
+WhitespaceLexer = re.compile('\S+')
+
 Lexer = re.compile('|'.join(["http://\S+",                               # keep urls together.. might include invalid URL characters
                              "\S+@\S+",
                              "[0-9][0-9]?\s*\([0-9]?\)",                 # e.g. "7(4)" common in volume
@@ -42,7 +34,7 @@ Lexer = re.compile('|'.join(["http://\S+",                               # keep 
                              "[A-Z]\.",
                              "Ph\.?[Dd]\.",
                              #"[Vv]ol(?:\.|ume)\s*[0-9]+",               # make "Vol. 3" one token.
-                             "(?:Vol|Proc|Dept|Univ|No|Inc)\s*\.",
+                             "(?:Vol|Proc|Dept|Univ|No|Inc|Dr)\s*\.",
                              "pp\.",
                              "\(\s*[0-9][0-9][0-9][0-9][a-z]?\s*\)",     # e.g. "(1994)" year in parens
                              "[Ee]d(?:s?\.|itors?)",
@@ -58,71 +50,50 @@ TaggedText = re.compile("<([a-z0-9_]+)>([\w\W]+?)</([a-z0-9_]+)>|([^<>\s]+)", re
 
 def fromSGML(f, linegrouper="\n", bioencoding=False):
     for line in re.split(linegrouper, open(f).read()):
-        seq = list(sgml2sequence(line, bioencoding))
+        if bioencoding:
+            seq = sgml2bio(line)
+        else:
+            seq = sgml2seq(line)
         if seq:
             yield seq
 
-def sgml2segmentation(x):
+@force
+def sgml2segmentation(x, lexer=WhitespaceLexer):
+    """
+    >>> sgml2segmentation('<title>Cat in the Hat</title><author>Dr. Seuss</author>')
+    [('title', ['Cat', 'in', 'the', 'Hat']), ('author', ['Dr.', 'Seuss'])]
+    """
     x = x.strip().replace("\n", " +L+ ")
     for (tag, tagged, close, outside) in TaggedText.findall(x):
         if tag != close:
-            print
-            print "Sequence: ", x
-            assert False, "opening (%s) and closing (%s) tags do not match." % (tag, close)
+            raise ParseError("opening (%s) and closing (%s) tags do not match in sequence\n    %r\n" % (tag, close, x))
         if tagged:
-            yield (tag, Lexer.findall(tagged))
+            yield (tag, lexer.findall(tagged))
         else:
-            for w in Lexer.findall(outside):
+            for w in lexer.findall(outside):
                 yield ("O", w)
 
-
-def sgml2sequence(x, bioencoding=False):
-    x = x.strip().replace("\n", " +L+ ")
-    for (tag, tagged, close, outside) in TaggedText.findall(x):
-        if tag != close:
-            print
-            print "Sequence: ", x
-            assert False, "opening (%s) and closing (%s) tags do not match." % (tag, close)
-        if tagged:
-            tokens = iter(Lexer.findall(tagged))
-            # which encoding to use
-            if bioencoding:
-                yield (tokens.next(), "B-" + tag)
-                for w in tokens:
-                    yield (w, "I-" + tag)
-            else:
-                for w in tokens:
-                    yield (w, tag)
-        else:
-            for w in Lexer.findall(outside):
-                yield (w, "O")
-        
-
-def xml2bio(x):
+@force
+def sgml2bio(x):
     """
-    Generate BIO-token pairs from xml-style annotation.
-    Notes:
-      1) Splits text on spaces, so wordsplitting should already be done.
-      2) Assumes no self-closing tags
-      3) Assumes no nesting (tags within tags)
-      4) Converts newlines into a token "-NEWLINE-"
-
-    >>> x = xml2bio("<title>Cat in the Hat</title><author>Dr. Seuss</author>")
-    >>> list(x)                                  #doctest:+NORMALIZE_WHITESPACE
-    [('B-title', 'Cat'), ('I-title', 'in'), ('I-title', 'the'), 
-     ('I-title', 'Hat'), ('B-author', 'Dr.'), ('I-author', 'Seuss')]
+    >>> sgml2bio('<title>Cat in the Hat</title><author>Dr. Seuss</author>')
+    [('B-title', 'Cat'), ('I-title', 'in'), ('I-title', 'the'), ('I-title', 'Hat'), ('B-author', 'Dr.'), ('I-author', 'Seuss')]
     """
-    x = _preprocess(x)
-    for label, tagged, close, word in re.findall('(?:(?:\s*<([A-Za-z0-9]+)>\s*([\w\W]+?)\s*</([A-Za-z0-9]+)>\s*)|([\w\W]+?)(?:\s+|$))', x):
-        if close != label:
-            raise ParseError('Mismatched xml tags (%s, %s)' % (close, label))
-        if word:
-            yield ('O', word)
-        else:
-            words = iter(tagged.split())
-            yield ('B-%s' % label, words.next())
-            for w in words:
-                yield ('I-%s' % label, w)
+    for (tag, tokens) in sgml2segmentation(x):
+        tokens = iter(tokens)
+        yield ('B-' + tag, tokens.next())
+        for w in tokens:
+            yield ('I-' + tag, w)
+
+@force
+def sgml2seq(x):
+    """
+    >>> sgml2seq('<title>Cat in the Hat</title><author>Dr. Seuss</author>')
+    [('title', 'Cat'), ('title', 'in'), ('title', 'the'), ('title', 'Hat'), ('author', 'Dr.'), ('author', 'Seuss')]
+    """
+    for (tag, tokens) in sgml2segmentation(x):
+        for w in tokens:
+            yield (tag, w)
 
 def bracket2bio(x):
     """
@@ -131,7 +102,7 @@ def bracket2bio(x):
 
     >>> x = bracket2bio("[TITLE Cat in the Hat][AUTHOR Dr. Seuss]")
     >>> list(x)                                  #doctest:+NORMALIZE_WHITESPACE
-    [('B-TITLE', 'Cat'), ('I-TITLE', 'in'), ('I-TITLE', 'the'), 
+    [('B-TITLE', 'Cat'), ('I-TITLE', 'in'), ('I-TITLE', 'the'),
      ('I-TITLE', 'Hat'), ('B-AUTHOR', 'Dr.'), ('I-AUTHOR', 'Seuss')]
     """
     if '\n' in x:
@@ -150,7 +121,7 @@ def bracket2bio(x):
 # TIMV: we want something like a LineGroupIterator
 def line_groups(text, pattern):
     """
-    Very simple function for breaking up text into groups based on a 
+    Very simple function for breaking up text into groups based on a
     single pattern.
 
     >>> list(line_groups("a BB c d BB", "BB"))
@@ -161,9 +132,6 @@ def line_groups(text, pattern):
         if group:
             yield group
 
-
-from collections import namedtuple
-Span = namedtuple('Span', 'label begins ends')
 
 def extract_contiguous(s, labeler=None):
     """
@@ -176,88 +144,62 @@ def extract_contiguous(s, labeler=None):
     >>> list(extract_contiguous("AABBB"))
     [Span(label='A', begins=0, ends=2), Span(label='B', begins=2, ends=5)]
     """
-    labeler = labeler or (lambda x: x)
+    if labeler is not None:
+        s = imap(labeler, s)
     prev = None
     b = e = 0
     for e, token in enumerate(s):
-        curr = labeler(token)
-        if curr != prev:
+        if token != prev:
             if prev is not None:
                 yield Span(prev, b, e)
             b = e
-        prev = curr
+        prev = token
     # emit lingering bits
     if prev is not None:
         yield Span(prev, b, e + 1)
 
 
-# TIM: add an option for strict BIO sequences, no heuristics
+@force
 def bio2span(seq, tagger=None, include_O=True):
-    """
-    Given a sequence and a function for grabbing labels, return a list of `Spans`.
-    Note: Will interpret `None` as "O"
-
-    >>> bio2span(['O','B-NUM','B-DATE', 'I-DATE'], include_O=False)
-    [Span(label='NUM', begins=1, ends=2), Span(label='DATE', begins=2, ends=4)]
-
-    `bio2span` will apply some heuristics for bad BIO sequences.
-    For example:
-      >>> bio2span(['O','B-NUM','I-DATE'], include_O=False)
-      [Span(label='NUM', begins=1, ends=2), Span(label='DATE', begins=2, ends=3)]
-    """
     if tagger is not None:
-        seq = [tagger(tk) for tk in seq]
-    phrase = []
-    phrases = []
+        seq = imap(tagger, seq)
+    phrase = None
     intag = None
     for i, lbl in enumerate(seq):
         if lbl is None:
             lbl = 'O'
+        label = lbl[2:]
         if lbl.startswith('B-'):
-            if intag and len(phrase):
-                phrases.append(phrase)
-                phrase = []
-            intag = lbl[2:]
-            phrase = [intag, i]
+            if intag and phrase:
+                yield phrase
+            phrase = Span(label, i, i + 1)
         elif lbl.startswith('I-'):
-            if intag == lbl[2:]:             # and youre still in the same span
-                phrase.append(i)
-            else:                            # you're in a new span (hueristic correction)
-                if len(phrase):
-                    phrases.append(phrase)
-                intag = lbl[2:]
-                phrase = [intag, i]
-        elif intag:                          # was in tag, now outiside ("O")
-            intag = None
-            phrases.append(phrase)
-            phrases.append(i)
-            phrase = []
+            if intag == label:             # and youre still in the same span
+                phrase.ends = i + 1
+            else:                          # you're in a new span (hueristic correction)
+                if phrase:
+                    yield phrase
+                phrase = Span(label, i, i + 1)
         else:
-            phrases.append(i)
-    if intag and len(phrase):                # close any lingering spans
-        phrases.append(phrase)
-    if include_O:
-        ret = []
-        for s in phrases:
-            if isinstance(s, list):
-                ret.append(Span(s[0], s[1], s[-1]+1))
-            else:
-                ret.append(Span('O', s, s+1))
-    else:
-        ret = [Span(s[0], s[1], s[-1]+1) for s in phrases if isinstance(s, list)]
-    return ret
+            if intag:                      # was in tag, now outiside ("O")
+                if phrase:
+                    yield phrase
+                phrase = None
+            if include_O:
+                yield Span(lbl, i, i + 1)
+        if lbl == 'O':
+            intag = None
+        else:
+            intag = label
+    if intag and phrase:                   # close any lingering spans
+        yield phrase
 
 
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
-    from nlp.tests.bio2spantest import test_bio2span
-    test_bio2span()
-
-    def example():
-        x = list(fromSGML('/home/timv/projects/data/citations/tagged_references.txt', '<NEW.*?>', False))
-        assert len(x) == 500
-        print 'fromSGML passed.'
-
-    example()
+    from misc import piped
+    def main():
+        for line in piped() or []:
+            for (label, w) in sgml2bio(line):
+                print '%s\t%s' % (label, w)
+            print
+    main()

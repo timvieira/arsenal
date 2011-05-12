@@ -21,6 +21,7 @@
 
 import sys, signal
 from contextlib import contextmanager
+from debug.utils import ip, set_trace
 
 _breakin_signal_number = None
 _breakin_signal_name = None
@@ -79,32 +80,26 @@ def breakin_ctx(frame):
     try:
         yield d
     finally:
-        signal.signal(_breakin_signal_number, debug)
+        signal.signal(_breakin_signal_number, shell)
 
 
 # [TIMV] ideas:
 #   * I'm not crazy about being dropped into `_debug`'s frame - it would
 #     probably be more useful to land in the interrupted frame
 def debug(signal_number, frame):
-    import pdb
     with breakin_ctx(frame):
         sys.stderr.write("** Type 'c' to continue or 'q' to stop the process\n")
-        pdb.set_trace()
+        set_trace()
 
 
 def shell(sig, frame):
     """Interrupt running process and provide a python prompt for debugging."""
     with breakin_ctx(frame) as d:
-        try:
-            from IPython.Shell import IPShellEmbed
-            IPShellEmbed([])(local_ns=d)
-        except ImportError:
-            from code import InteractiveConsole
-            InteractiveConsole(d).interact()
+        ip(local_ns=d)
 
 
 # TIMV: alias (much easier to remember)
-enable_pdb = lambda: hook_to_signal(debug)
+#enable = lambda: hook_to_signal(debug)
 enable = enable_shell = lambda: hook_to_signal(shell)
 
 
@@ -113,13 +108,13 @@ if __name__ == '__main__':
     import time
     def example():
         myvar = 'Break-in should be able to see me in the shell!'
-        N = 5
+        N = 8
         print 'You have %s seconds to hit \C-\\' % N
         for i in reversed(xrange(N)):
             print i, '..',
             time.sleep(1)
             sys.stdout.flush()
 
-    enable_shell()
-    #enable_pdb()
+    enable()
+
     example()

@@ -45,12 +45,6 @@ class Alphabet(object):
         inst.freeze()
         return inst
 
-    def lookup(self, i):
-        if i is None:
-            return None
-        assert isinstance(i, int)
-        return self._flip[i]
-
     def keys(self):
         return self._mapping.iterkeys()
 
@@ -71,6 +65,12 @@ class Alphabet(object):
     def add_many(self, x):
         for k in x:
             self.add(k)
+
+    def lookup(self, i):
+        if i is None:
+            return None
+        assert isinstance(i, int)
+        return self._flip[i]
 
     def lookup_many(self, x):
         for k in x:

@@ -11,19 +11,36 @@ from debug.edit import emacs
 
 # try to use IPython's fancy debugger if available
 try:
-    from IPython.Debugger import Pdb
-    from IPython.Shell import IPShellEmbed
+    #from IPython import ipapi
+    from IPython.Shell import IPShellEmbed, IPShell
+    #from IPython.Debugger import Pdb
+
     ip = __IPYTHON__ = IPShellEmbed([])
-    def set_trace():
-        callerframe = sys._getframe().f_back
-        Pdb().set_trace(callerframe)
-    def pm():
-        p = Pdb()
-        p.reset()
-        p.interaction(None, sys.last_traceback)
+    shell = IPShell(argv=[''])
+
+    #def set_trace(frame=None):
+    #    # get frame
+    #    frame = frame or sys._getframe().f_back
+    #    # start ipdb with colors
+    #    ip = ipapi.get()
+    #    d = Pdb(ip.options.colors)
+    #    d.set_trace(frame)
+    #
+    #def pm():
+    #    p = Pdb()
+    #    p.reset()
+    #    p.interaction(None, sys.last_traceback)
+
+
 except ImportError:
-    from pdb import set_trace, pm, Pdb
-    ip = set_trace  # if ipython is unavailable, PDB is the next best thing
+    # if ipython is unavailable, use interactive console
+    from code import InteractiveConsole
+    def ip():
+        frame = sys._getframe().f_back
+        InteractiveConsole(frame).interact()
+
+
+from pdb import set_trace, pm, Pdb
 
 
 def enable_debug_hook():

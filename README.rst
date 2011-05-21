@@ -24,7 +24,7 @@ Highlights
     calls the automain function.
 
 - robust.py
-    utilities such as ``timelimit`` and `retry`` to help "robustify" your code.
+    utilities such as ``timelimit`` and ``retry`` to help "robustify" your code.
 
 - iterextras.py
     the most useful things here are ``iterview`` and ``sliding_window``
@@ -57,8 +57,4 @@ Highlights
 - cache/
     contains the ``memoize`` decorator and even a persistence shelve-based variant.
 
-- python-snippets/
-    various snippets which I often use as reference. These snippets are meant to
-    illustrate some of python's advanced features as well as quirks and unexpected
-    behaviors.
 

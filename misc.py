@@ -64,36 +64,36 @@ def attn(msg):
     gtk.main()
 
 
-# borrowed from whoosh
-def find_object(name, blacklist=None, whitelist=None):
-    """Imports and returns an object given a fully qualified name.
-
-    >>> find_object("whoosh.analysis.StopFilter")
-    <class 'whoosh.analysis.StopFilter'>
-    """
-
-    if blacklist:
-        for pre in blacklist:
-            if name.startswith(pre):
-                raise TypeError("%r: can't instantiate names starting with %r" % (name, pre))
-    if whitelist:
-        passes = False
-        for pre in whitelist:
-            if name.startswith(pre):
-                passes = True
-                break
-        if not passes:
-            raise TypeError("Can't instantiate %r" % name)
-
-    lastdot = name.rfind(".")
-
-    assert lastdot > -1, "Name %r must be fully qualified" % name
-    modname = name[:lastdot]
-    clsname = name[lastdot + 1:]
-
-    mod = __import__(modname, fromlist=[clsname])
-    cls = getattr(mod, clsname)
-    return cls
+## # borrowed from whoosh
+## def find_object(name, blacklist=None, whitelist=None):
+##     """Imports and returns an object given a fully qualified name.
+## 
+##     >>> find_object("whoosh.analysis.StopFilter")
+##     <class 'whoosh.analysis.StopFilter'>
+##     """
+## 
+##     if blacklist:
+##         for pre in blacklist:
+##             if name.startswith(pre):
+##                 raise TypeError("%r: can't instantiate names starting with %r" % (name, pre))
+##     if whitelist:
+##         passes = False
+##         for pre in whitelist:
+##             if name.startswith(pre):
+##                 passes = True
+##                 break
+##         if not passes:
+##             raise TypeError("Can't instantiate %r" % name)
+## 
+##     lastdot = name.rfind(".")
+## 
+##     assert lastdot > -1, "Name %r must be fully qualified" % name
+##     modname = name[:lastdot]
+##     clsname = name[lastdot + 1:]
+## 
+##     mod = __import__(modname, fromlist=[clsname])
+##     cls = getattr(mod, clsname)
+##     return cls
 
 
 #def trace(f):
@@ -222,9 +222,6 @@ def ctx_redirect_io(f=None):
       ...    print 'how is this for io?'
       >>> io_target.getvalue()
       'how is this for io?\n'
-      >>> print io_target.getvalue()   # doctest:+NORMALIZE_WHITESPACE
-      how is this for io?
-      >>>
     """
     target = f or StringIO()
 

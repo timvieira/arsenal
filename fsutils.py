@@ -15,7 +15,7 @@ def ensure_dir(f, verbose=False):
     except OSError as e:
         if verbose:
             print '[ensuredir]', d, 'suppressing:', e
-        if e.errno != 17:  # errno 17: File exists
+        if e.errno != 17:  # errno 17: File exists (you probably don't have permissions)
             raise
     else:
         if verbose:

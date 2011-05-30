@@ -457,9 +457,6 @@ def iterview(x, every_k=10, length=None):
 #_______________________________________________________________________________
 #
 
-def enumerate2(iterable, start=0):
-    return izip(count(start), iterable)
-
 def consume(iterator, n):
     "Advance the iterator n-steps ahead. If n is none, consume entirely."
     # The technique uses objects that consume iterators at C speed.

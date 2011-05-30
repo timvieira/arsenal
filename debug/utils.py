@@ -12,11 +12,8 @@ from debug.edit import emacs
 # try to use IPython's fancy debugger if available
 try:
     #from IPython import ipapi
-    from IPython.Shell import IPShellEmbed, IPShell
-    #from IPython.Debugger import Pdb
-
+    from IPython.Shell import IPShellEmbed
     ip = __IPYTHON__ = IPShellEmbed([])
-    shell = IPShell(argv=[''])
 
     #def set_trace(frame=None):
     #    # get frame
@@ -40,6 +37,7 @@ except ImportError:
         InteractiveConsole(frame).interact()
 
 
+#from IPython.Debugger import Pdb
 from pdb import set_trace, pm, Pdb
 
 

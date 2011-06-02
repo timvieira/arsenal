@@ -38,7 +38,7 @@ NONE  = 2
 
 class PrettyTable:
 
-    def __init__(self, fields=None, caching=True, padding_width=0, left_padding=None, right_padding=None):
+    def __init__(self, fields=None, caching=True, padding_width=1, left_padding=None, right_padding=None):
         """
         fields - list or tuple of field names
         caching - boolean value to turn string caching on/off
@@ -63,7 +63,7 @@ class PrettyTable:
         self.right_padding = right_padding
         self.vertical_char = "|"
         self.horizontal_char = "="
-        self.junction_char = "+"
+        self.junction_char = "="
 
     def __str__(self):
         return self.get_string()

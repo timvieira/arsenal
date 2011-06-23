@@ -71,7 +71,7 @@ def sgml2segmentation(x, lexer=WhitespaceLexer):
             yield (tag, lexer.findall(tagged))
         else:
             for w in lexer.findall(outside):
-                yield ("O", w)
+                yield ("O", [w])
 
 @force
 def sgml2bio(x):

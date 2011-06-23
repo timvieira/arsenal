@@ -13,8 +13,6 @@ __all__ = ['TermColors','InputTermColors','ColorScheme','ColorSchemeTable']
 
 import os
 
-#from IPython.ipstruct import Struct
-
 def make_color_table(in_class):
     """Build a set of color attributes in a class.
 

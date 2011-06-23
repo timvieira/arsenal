@@ -3,7 +3,7 @@ import re
 # based on:
 #   http://immike.net/blog/2007/04/06/5-regular-expressions-every-web-programmer-should-know/
 URL_RE = re.compile("""
-
+(
   # Match the leading part (proto://hostname, or just hostname)
   (
     # http://, https:// or ftp leading part
@@ -37,6 +37,7 @@ URL_RE = re.compile("""
       [.!,?]+ [^.!,?;"\\'<>()\\[\\]\{\\}\s\\x7F-\\xFF]+
     )*
   )?
+)
 """, re.VERBOSE|re.IGNORECASE)
 
 
@@ -51,7 +52,7 @@ RFC2822_RE = re.compile("""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=
 # EMAIL_I = re.compile("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", re.IGNORECASE)
 
 
-# TODO: add restrictions on email length 
+# TODO: add restrictions on email length
 #   {local}@{domain}: local 64 characters, domain 255
 
 # refinment of EMAIL-I, it limits country code to 2 letters
@@ -69,7 +70,7 @@ EMAIL_RE = re.compile("""
 (?:[a-z0-9]                    # startswith alphanum
    (?:[a-z0-9-]*[a-z0-9])?     # endswith alphanum
    \.                          # the dot in dot com
-)+   
+)+
 
 # the ending .com part
 (?:
@@ -98,17 +99,23 @@ DATE_RE = re.compile("""
 
     )?
 
+    \s*
     (?:
-        (?:the\s+)?
+        \\b
+        (?:\\bthe\\b)?
+        \s*
         [0-3]?[0-9]
+        \s*
         (?:st|nd|rd|th|)
-        (?: \s*? of )?
-        \s*?
+        \s*
+        (?: of )?
+        \\b
     )?
+    \s*
 
     # mandatory: month (written)
-    (?:\s+?|^)
-    (?:jan(?:uary)?
+
+    \\b(?:jan(?:uary)?
         |febr?(?:uary)?
         |mar(?:ch)?
         |apr(?:il)?
@@ -120,16 +127,13 @@ DATE_RE = re.compile("""
         |oct(?:ober)?
         |nov(?:ember)?
         |dec(?:ember)?
-    )
+    )\\b[\s.,]*
 
-    (?: \. | , | ) \s+
+    (?: [0-3][0-9] | [0-9] )?  (?:(?:st|nd|rd|th|)\\b)?   # the word splitter will always keep numbers ord-suffix together
 
-    (?: [0-3][0-9] | [0-9] )?  (?:st|nd|rd|th|\s|$)   # the word splitter will always keep numbers ord-suffix together
+    \s*  (?: of | , | ) \s+
 
-    \s*
-    (?: of | , | ) \s+
-    
-    (?:  [0-9][0-9][0-9][0-9] | [0-9][0-9] )? (?:\s|$)
+    (?:  [0-9][0-9][0-9][0-9] | [0-9][0-9] )? \\b
 
 )
 """, re.VERBOSE|re.IGNORECASE)
@@ -137,42 +141,29 @@ DATE_RE = re.compile("""
 
 if __name__ == '__main__':
 
-    from nlp.wordsplitter import wordsplit_sentence
-
-    def parse_text(text):
-        return wordsplit_sentence(text).split()
-
-    def remove_extra_spaces(s):
-        return re.sub('\s+', ' ', s)
-
-    def with_extra_spaces(seq):
-        return '       '.join(seq)
-
-    def test_sentence(s, target=''):
+    def test_sentence(x, target=''):
         print
-        seq = parse_text(s)
-        print 'input: ', ' '.join(seq)
-        output = remove_extra_spaces(DATE_RE.findall(with_extra_spaces(seq))[0][0])
-        print 'output:', output.strip()
-        print 'target:', target.strip()
+        print 'input: ', x
+
+        output = DATE_RE.findall(x)[0]
+        print 'output:', output
+        print 'target:', target
         if target:
             assert target.strip() == output.strip()
-        return seq
 
-    test_sentence('I was born on Monday, March of 1986.',  'Monday , March of 1986')
-    test_sentence('I was born on Monday, March 18, 1986.', 'Monday , March 18 , 1986')
+    test_sentence('I was born on Monday, March of 1986.',  'Monday, March of 1986')
+    test_sentence('I was born on Monday, March 18, 1986.', 'Monday, March 18, 1986')
     test_sentence('I was born on March 18 1986 .',         'March 18 1986')
-    test_sentence('I was born on Mon. March 18, 86 .',     'Mon. March 18 , 86')
-    test_sentence('I was born on March 18, 86 .',          'March 18 , 86')
-    test_sentence('I was born on March, 86 .',             'March , 86')
+    test_sentence('I was born on Mon. March 18, 86 .',     'Mon. March 18, 86')
+    test_sentence('I was born on March 18, 86 .',          'March 18, 86')
+    test_sentence('I was born on March, 86 .',             'March, 86')
     test_sentence('I was born on March 86 .',              'March 86')
-    test_sentence('I was born on Mon. March, 1986 .',      'Mon. March , 1986')
+    test_sentence('I was born on Mon. March, 1986 .',      'Mon. March, 1986')
     test_sentence('11th February 1990 , ',                 '11th February 1990')
     test_sentence('the 11th of February , 1990 , ',        'the 11th of February , 1990')
-    test_sentence('February, 1990 , ',                     'February , 1990')
-    test_sentence('Monday the 3rd of February, 1990 , ',   'Monday the 3rd of February , 1990')
-    test_sentence('Mon. the 3rd of February, 1990 , ',     'Mon. the 3rd of February , 1990')
-    test_sentence('Mon. 3rd of February, 1990 , ',         'Mon. 3rd of February , 1990')
+    test_sentence('February, 1990 , ',                     'February, 1990')
+    test_sentence('Monday the 3rd of February, 1990 , ',   'Monday the 3rd of February, 1990')
+    test_sentence('Mon. the 3rd of February, 1990 , ',     'Mon. the 3rd of February, 1990')
+    test_sentence('Mon. 3rd of February, 1990 , ',         'Mon. 3rd of February, 1990')
     test_sentence('Mon. 30th of February 1990 ',           'Mon. 30th of February 1990')
     test_sentence('th February 1990 , ',                   'February 1990')
-

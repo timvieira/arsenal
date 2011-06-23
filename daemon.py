@@ -129,14 +129,15 @@ def daemonize(workdir='/', log=os.devnull, pidfile=None, umask=0):
 
 
 if __name__ == "__main__":
-    pid = os.getpid()
-    print 'pid:', pid
-    daemonize(None, log='daemon.out', pidfile='daemon.PID')
-    print "Hello I'm a daemon (pid=%s) and this is my standard out." % pid
+    def test():
+        pid = os.getpid()
+        print 'pid:', pid
+        daemonize(None, log='daemon.out', pidfile='daemon.PID')
+        print "Hello I'm a daemon (pid=%s) and this is my standard out." % pid
+        print 'I am now sleeping for 20 seconds.'
+        import time
+        time.sleep(20)
+        print 'I am awake! ready or not, here I come!'
 
-    print 'I am now sleeping for 20 seconds.'
-    import time
-    time.sleep(20)
-
-    print 'I am awake! ready or not, here I come!'
-
+    daemonize(None)
+    os.system(' '.join(sys.argv[1:]))

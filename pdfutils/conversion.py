@@ -16,7 +16,8 @@ class file_specifier(object):
         self.abspath = os.path.abspath(path)
         (self.dir, self.name) = os.path.split(self.abspath)
         (noext, self.ext) = os.path.splitext(self.name)
-        self.noext = os.path.join(self.dir, noext)
+        self.abs_noext = os.path.join(self.dir, noext)
+        self.noext = noext
         self.relpath = os.path.relpath(path)
 
     def __repr__(self):

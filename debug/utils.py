@@ -90,6 +90,20 @@ def dumpobj(o, callables=False, private=False):
         except:
             pass
 
+def debug(s, *args, **kwargs):
+    """
+    >>> def foo():
+    ...     bar = 'world'
+    ...     debug('hello {bar}')
+    >>> foo()
+    hello world
+    """
+    c_frame = inspect.getouterframes(inspect.currentframe(), 1)[1][0]
+    c_args, c_varargs, c_varkw, c_locals = inspect.getargvalues(c_frame)
+    d = dict(c_locals)
+    d.update(kwargs)
+    print s.format(*args, **d)
+
 
 debug_expr_fmt = '[DEBUG:%s] %s -> %r'
 

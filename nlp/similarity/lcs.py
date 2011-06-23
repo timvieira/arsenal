@@ -1,102 +1,84 @@
-from itertools import repeat
-from array import array
+from numpy import zeros
 
-def LCS(a, b, costfn=lambda a,b: a != b, empty=None, just_length=False):
-    """
-    Calculate the minimum cost for aligning the elements in the sequence a
-    with the elements in the sequence b with respect to costfn.
+def default_cost(a,b):
+    if a == b:
+        return 0.0
+    elif a is None or b is None:
+        return 1.0
+    else:
+        return 1000.0
 
-    usage:
-        >>> LCS('121', '212')
-        (2.0, [('1', None), ('2', '2'), ('1', '1'), (None, '2')])
-    """
+def lcs(a, b, cost=default_cost):
 
     N = len(a)
     M = len(b)
-    M1 = M+1
 
-    # allocated some space
-    c = array('f')
-    c.extend(repeat(0, (N+1)*(M+1)))
+    c = zeros((N + 1, M + 1))
 
-    # intialize for all empty matches
-    for i in xrange(N):
-        c[i*M1+M] = costfn(a[i], empty)+ c[(i+1)*M1+M]
+    for i in reversed(xrange(N)):
+        c[i, M] = cost(a[i], None) + c[i + 1, M]
 
-    # intialize for all empty matches
-    for j in xrange(M):
-        c[N*M1+j] = costfn(empty, b[j])+c[N*M1+(j+1)]
+    for j in reversed(xrange(M)):
+        c[N, j] = cost(None, b[j]) + c[N, j + 1]
 
-    # fill in table
     for i in reversed(xrange(N)):
         for j in reversed(xrange(M)):
-            c[i*M1+j] = min(costfn( a[i],  b[j]) + c[(i+1)*M1 + (j+1)],  # no_gap
-                            costfn( a[i], empty) + c[(i+1)*M1 + ( j )],  # insert_gap1
-                            costfn(empty,  b[j]) + c[( i )*M1 + (j+1)])  # insert_gap2
+            c[i, j] = min(cost(a[i], b[j]) + c[i + 1, j + 1],
+                          cost(a[i], None) + c[i + 1, j],
+                          cost(None, b[j]) + c[i, j + 1])
 
-    if just_length:
-        return c[0]
-
-    # backtrace to find an optimal alignment
-    y1s = []
-    y2s = []
-
-    i = 0
-    j = 0
-    while (i < N or j < M):
-        c12 = c[i*M1+j]
-        if i < N and j < M and c12 == costfn(a[i], b[j]) + c[(i+1)*M1+(j+1)]:
-            y1s.append(a[i])
-            y2s.append(b[j])
+    y = []; i = 0; j = 0
+    while i < N or j < M:
+        cij = c[i, j]
+        if i < N and j < M and cij == cost(a[i], b[j]) + c[i + 1, j + 1]:
+            y.append((a[i], b[j]))
             i += 1
             j += 1
-        elif i < N and c12 == costfn(a[i], empty) + c[(i+1)*M1+j]:
-            y1s.append(a[i])
+        elif i < N and cij == cost(a[i], None) + c[i + 1, j]:
+            y.append((a[i], None))
             i += 1
-            y2s.append(empty)
         else:
-            y1s.append(empty)
-            y2s.append(b[j])
+            assert j < M and cij == cost(None, b[j]) + c[i, j + 1]
+            y.append((None, b[j]))
             j += 1
 
-    return (c[0], zip(y1s, y2s))
+    assert i == N and j == M
+
+    return (c[0,0], y)
 
 
-def pprint_alignment(A):
-    print '\n'.join(map('%18r -> %r'.__mod__, A))
+def longest_increasing_subsequence(a, verbose=False):
+
+    s = a[:]
+    s.sort()
+
+    (cost, alignment) = lcs(a, s)
+
+    if verbose:
+        print
+        print "input:  ", a
+        print "sorted: ", s
+
+        print 'cost:', cost
+        print
+        for (a,b) in alignment:
+            print '  %16s => %s' % (a,b)
+        print
+
+    return [a for (a,b) in alignment if a is not None and b is not None]
 
 
 if __name__ == '__main__':
-
-    def test():
-        costfn = lambda a,b: 1.5 if (a is None or b is None) else float(a != b)
-
-        cost, _ = LCS('121', '212', costfn=costfn)
-        assert cost == 3.0
-
-        a = 'The man saw a small dog with the telescope.'.split()
-        b = 'The man saw the smelly dog with the telescope.'.split()
-        cost, alignment = LCS(a, b, costfn=costfn)
-        assert cost == 2.0
-        assert len(alignment) == len(a)
-
-        import doctest
-        locals()['pprint_alignment'] = pprint_alignment
-        doctest.run_docstring_examples("""
-        >>> pprint_alignment(alignment)
-                     'The' -> 'The'
-                     'man' -> 'man'
-                     'saw' -> 'saw'
-                       'a' -> 'the'
-                   'small' -> 'smelly'
-                     'dog' -> 'dog'
-                    'with' -> 'with'
-                     'the' -> 'the'
-              'telescope.' -> 'telescope.'
-        """, locals(), verbose=0)
-
-        doctest.testmod()
-
-        print 'passed tests.'
-
-    test()
+    assert lcs('abc', '') == (3.0, [('a', None), ('b', None), ('c', None)])
+    assert lcs('', 'abc') == (3.0, [(None, 'a'), (None, 'b'), (None, 'c')])
+    assert lcs('abc', 'abc') == (0.0, [('a', 'a'), ('b', 'b'), ('c', 'c')])
+    assert lcs('abcd', 'obce') == (4.0, [('a', None),
+                                         (None, 'o'),
+                                         ('b', 'b'),
+                                         ('c', 'c'), 
+                                         ('d', None),
+                                         (None, 'e')])
+    assert longest_increasing_subsequence([1, 10, 2, 2, 3, -1, 4, -5]) == [1, 2, 2, 3, 4]
+    assert longest_increasing_subsequence([20, 1, 2, 2, 3, -1, 4]) == [1, 2, 2, 3, 4]
+    
+    print 'passed tests.'

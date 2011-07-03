@@ -1,7 +1,7 @@
 """
 File system utilities
 """
-import re, os, tempfile
+import re, os, tempfile, shutil
 from contextlib import contextmanager
 from fnmatch import fnmatch
 from iterextras import atmost
@@ -22,6 +22,12 @@ def ensure_dir(f, verbose=False):
             print '[ensuredir] created', d
     return d
 
+def clear_dir(d):
+    try:
+        shutil.rmtree(d)
+    except:
+        pass
+    os.mkdir(d)
 
 @contextmanager
 def cd(d=None):
@@ -146,6 +152,30 @@ def secure_filename(filename):
         filename = '_' + filename
 
     return filename
+
+
+def find_new_title(d, filename):
+    """If file *filename* exists in directory `d`, adds or changes the
+    end of the file title until a name is found that doesn't yet exist.
+    Returns the new file name (without directory).
+    For instance, if file "Image (01).jpg" exists,
+    returns "Image (02).jpg".
+    """
+    rx = re.compile(r"\((\d{1,5})\)$")
+    p = os.path.join(d, filename)
+    while os.path.exists(p):
+        base = os.path.basename(p)
+        (root, ext) = os.path.splitext(base)
+        m = rx.search(root)
+        if m == None:
+            replacement = "(001)"
+        else:
+            increment = int(m.group(1)) + 1
+            replacement = "(%03d)" % increment
+            root = root[:m.start(1)-1]
+        f = root + replacement + ext
+        p = os.path.join(d, f)
+    return p
 
 
 def files(d, abspath=False):

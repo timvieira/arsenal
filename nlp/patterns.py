@@ -7,7 +7,7 @@ URL_RE = re.compile("""
   # Match the leading part (proto://hostname, or just hostname)
   (
     # http://, https:// or ftp leading part
-    (ftp|https?)://[-\\w]+(\\.\\w[-\\w]*)+
+    (file|ftp|https?)://[-\\w]+(\\.\\w[-\\w]*)+
   |
     # or, try to find a hostname with more specific sub-expression
     (?: [a-z0-9] (?:[-a-z0-9]*[a-z0-9])? \\. )+ # sub domains
@@ -74,12 +74,12 @@ EMAIL_RE = re.compile("""
 
 # the ending .com part
 (?:
-   [A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum
+   com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|edu|[A-Z]{2}
 )
 """, re.IGNORECASE|re.VERBOSE)
 
 # This pattern is more for validation
-EMAIL_STRICT = re.compile('[A-Z0-9._%+-]+@[A-Z0-9.-]+\.(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)', re.IGNORECASE)
+EMAIL_STRICT = re.compile('[A-Z0-9._%+-]+@[A-Z0-9.-]+\.(?:com|edu|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|[A-Z]{2})', re.IGNORECASE)
 
 
 DATE_RE = re.compile("""
@@ -131,7 +131,7 @@ DATE_RE = re.compile("""
 
     (?: [0-3][0-9] | [0-9] )?  (?:(?:st|nd|rd|th|)\\b)?   # the word splitter will always keep numbers ord-suffix together
 
-    \s*  (?: of | , | ) \s+
+    \s*  (?: of | , | ) \s*
 
     (?:  [0-9][0-9][0-9][0-9] | [0-9][0-9] )? \\b
 
@@ -144,7 +144,6 @@ if __name__ == '__main__':
     def test_sentence(x, target=''):
         print
         print 'input: ', x
-
         output = DATE_RE.findall(x)[0]
         print 'output:', output
         print 'target:', target
@@ -155,6 +154,7 @@ if __name__ == '__main__':
     test_sentence('I was born on Monday, March 18, 1986.', 'Monday, March 18, 1986')
     test_sentence('I was born on March 18 1986 .',         'March 18 1986')
     test_sentence('I was born on Mon. March 18, 86 .',     'Mon. March 18, 86')
+    test_sentence('I was born on Mon. March 1, 86 .',      'Mon. March 1, 86')
     test_sentence('I was born on March 18, 86 .',          'March 18, 86')
     test_sentence('I was born on March, 86 .',             'March, 86')
     test_sentence('I was born on March 86 .',              'March 86')

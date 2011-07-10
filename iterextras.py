@@ -395,7 +395,7 @@ def sliding_window(iterable, k):
     iterators = tee(iterable, k)
     for i, it in enumerate(iterators):
         # advance iterator, 'it',  by i steps
-        for j in xrange(i):
+        for _ in xrange(i):
             try:
                 it.next()    # advance by one
             except StopIteration:

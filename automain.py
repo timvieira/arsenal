@@ -1,6 +1,6 @@
 import sys
 from inspect import isfunction, ismethod, getargs, getargspec, formatargspec
-from optparse import OptionParser
+from optparse import OptionParser   # TODO: use argparse
 from pprint import pprint
 from collections import defaultdict
 
@@ -70,7 +70,10 @@ def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False,
     except ImportError:
         pass
 
-    names = list(sorted(available or [x for x in dir(mod) if x not in ('automain', 'usage', 'call_signature')]))
+    def filterfn(x):
+        return x not in ('automain', 'usage', 'call_signature') and not x.startswith('_')
+
+    names = list(sorted(available or [x for x in dir(mod) if filterfn(x)]))
 
     # should we print the module's docstring in the help?
     def show_help():
@@ -116,10 +119,10 @@ def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False,
                 #        parser.add_option(longname, action="store_false", default=True)
                 #else:
                 parser.add_option(longname, default=default)
-                
+
         (kw, args) = parser.parse_args(args)
 
-        # TODO: need a better usage message with shows positional arguments
+        # TODO: need a better usage message which shows positional arguments
 
         # minimum non keyword args
         if len(args) < len(spec.args) - len(spec.defaults or []):
@@ -154,4 +157,3 @@ if __name__ == '__main__':
         execfile(sys.argv[0])
         # TODO: remove automain from the list
         automain()
-

@@ -11,13 +11,9 @@ programming/**/.coverage
 *.ERRORLOG
 log/*
 tmp/*
-junk/*
-crap/*
-NOT_READY/*
 *~
 semantic.cache
-
-
+sandbox/*
 
 # regex:
 syntax: regexp

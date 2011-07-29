@@ -1,4 +1,4 @@
-import re, os
+import os
 from urllib2 import urlopen
 from fsutils import ensure_dir
 #from urlparse import urlparse

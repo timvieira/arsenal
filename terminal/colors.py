@@ -10,6 +10,7 @@ light_black, light_red, light_green, light_yellow, light_blue, light_magenta, li
 bg_black, bg_red, bg_green, bg_yellow, bg_blue, bg_magenta, bg_cyan, bg_white = \
     map('\033[4%sm%%s\033[0m'.__mod__, range(8))
 
+
 underline = '\033[4m%s\033[0m'
 
 def test():

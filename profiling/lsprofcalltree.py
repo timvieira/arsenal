@@ -84,3 +84,20 @@ class KCacheGrind(object):
 
         totaltime = int(subentry.totaltime * 1000)
         print >> out_file, '%d %d' % (lineno, totaltime)
+
+if __name__ == '__main__':
+    out = 'profile.kgrind'
+
+    p = cProfile.Profile()
+    p.run(cmd)
+
+    # Get the stats in a form kcachegrind can use and save it
+    k = KCacheGrind(p)
+    with file(out, 'wb') as f:
+        k.output(f)
+
+    import os
+    os.system("kcachegrind %s &" % out)
+
+
+

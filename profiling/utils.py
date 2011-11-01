@@ -40,11 +40,35 @@ def kcachegrind(cmd, out='profile.kgrind'):
     os.system("kcachegrind %s &" % out)
 
 
+
+def main():
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.allow_interspersed_args = False
+    parser.add_option('-o', '--outfile', dest="outfile",
+                      help="Save stats to <outfile>", default=None)
+
+    if not sys.argv[1:]:
+        parser.print_usage()
+        sys.exit(2)
+
+    (options, args) = parser.parse_args()
+
+    viz = kcachegrind
+
+    import os
+    sys.path = [os.getcwd()] + sys.path
+
+    if (len(args) > 0):
+        sys.argv[:] = args
+        sys.path.insert(0, os.path.dirname(sys.argv[0]))
+        viz('execfile(%r)' % sys.argv[0], out=options.outfile)
+    else:
+        parser.print_usage()
+    return parser
+
+
 if __name__ == '__main__':
-    viz = profile_viz
-    if '--kgrind' in sys.argv:
-        viz = kcachegrind
-        sys.argv.remove('--kgrind')  # hack sys.argv
-    if len(sys.argv) > 1:
-        sys.argv.pop(0)  # hack sys.argv
-        viz('execfile(%r)' % sys.argv[0])
+    main()
+
+

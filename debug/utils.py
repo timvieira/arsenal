@@ -9,11 +9,15 @@ import traceback
 
 from debug.edit import emacs
 
+# new IPython
+# import IPython
+# debugger = lambda: IPython.InteractiveShell().debugger(force=True)
+
 # try to use IPython's fancy debugger if available
+
 try:
-    #from IPython import ipapi
-    from IPython.Shell import IPShellEmbed
-    ip = __IPYTHON__ = IPShellEmbed([])
+
+    from IPython import embed as ip
 
     #def set_trace(frame=None):
     #    # get frame
@@ -28,13 +32,19 @@ try:
     #    p.reset()
     #    p.interaction(None, sys.last_traceback)
 
-
 except ImportError:
-    # if ipython is unavailable, use interactive console
-    from code import InteractiveConsole
-    def ip():
-        frame = sys._getframe().f_back
-        InteractiveConsole(frame).interact()
+
+    try:
+        from IPython.Shell import IPShellEmbed
+        ip = __IPYTHON__ = IPShellEmbed([])
+
+    except ImportError:
+    
+        # if ipython is unavailable, use interactive console
+        from code import InteractiveConsole
+        def ip():
+            frame = sys._getframe().f_back
+            InteractiveConsole(frame).interact()
 
 
 #from IPython.Debugger import Pdb

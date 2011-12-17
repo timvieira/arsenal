@@ -403,7 +403,7 @@ def sliding_window(iterable, k):
     return izip(*iterators)
 
 
-def iterview(x, every_k=10, length=None):
+def iterview(x, every=10, length=None):
     """
     iterator which prints its progress to *stderr*.
     """
@@ -448,7 +448,7 @@ def iterview(x, every_k=10, length=None):
     if lenx == 0:
         raise StopIteration
     for n, y in enumerate(x):
-        if every_k is None or n % every_k == 0:
+        if every is None or n % every == 0:
             sys.stderr.write('\r' + fmt(starttime, n, lenx))
         yield y
     sys.stderr.write('\r' + fmt(starttime, n+1, lenx) + '\n')
@@ -575,7 +575,7 @@ if __name__ == "__main__":
         assert recombined == test
     
         def example_iterview():
-            for x in iterview(xrange(400), every_k=20):
+            for _ in iterview(xrange(400), every=20):
                 time.sleep(0.01)
         #example_iterview()
     

@@ -1,67 +1,80 @@
-# Priority dictionary using binary heaps
-# David Eppstein, UC Irvine, 8 Mar 2002
+from heapq import heapify, heappush, heappop
 
-from __future__ import generators
+class prioritydict(dict):
+    """Dictionary that can be used as a priority queue.
 
-class PriorityDict(dict):
-    def __init__(self):
-        '''Initialize PriorityDict by creating binary heap
-        of pairs (value,key).  Note that changing or removing a dict entry will
-        not remove the old pair from the heap until it is found by smallest() or
-        until the heap is rebuilt.'''
-        self.__heap = []
-        dict.__init__(self)
+    Keys of the dictionary are items to be put into the queue, and values
+    are their respective priorities. All dictionary methods work as expected.
+    The advantage over a standard heapq-based priority queue is
+    that priorities of items can be efficiently updated (amortized O(1))
+    using code as 'thedict[item] = new_priority.'
+
+    The 'smallest' method can be used to return the object with lowest
+    priority, and 'pop_smallest' also removes it.
+
+    The 'sorted_iter' method provides a destructive sorted iterator.
+    """
+    
+    def __init__(self, *args, **kwargs):
+        super(prioritydict, self).__init__(*args, **kwargs)
+        self._rebuild_heap()
+
+    def _rebuild_heap(self):
+        self._heap = [(v, k) for k, v in self.iteritems()]
+        heapify(self._heap)
 
     def smallest(self):
-        '''Find smallest item after removing deleted items from heap.'''
-        if len(self) == 0:
-            raise IndexError, "smallest of empty PriorityDict"
-        heap = self.__heap
-        while heap[0][1] not in self or self[heap[0][1]] != heap[0][0]:
-            lastItem = heap.pop()
-            insertionPoint = 0
-            while 1:
-                smallChild = 2*insertionPoint+1
-                if smallChild+1 < len(heap) and \
-                        heap[smallChild] > heap[smallChild+1]:
-                    smallChild += 1
-                if smallChild >= len(heap) or lastItem <= heap[smallChild]:
-                    heap[insertionPoint] = lastItem
-                    break
-                heap[insertionPoint] = heap[smallChild]
-                insertionPoint = smallChild
-        return heap[0][1]
-	
-    def __iter__(self):
-        '''Create destructive sorted iterator of PriorityDict.'''
-        def iterfn():
-            while len(self) > 0:
-                x = self.smallest()
-                yield x
-                del self[x]
-        return iterfn()
-	
-    def __setitem__(self,key,val):
-        '''Change value stored in dict and add corresponding
-        pair to heap.  Rebuilds the heap if the number of deleted items grows
-        too large, to avoid memory leakage.'''
-        dict.__setitem__(self,key,val)
-        heap = self.__heap
-        if len(heap) > 2 * len(self):
-            self.__heap = [(v,k) for k,v in self.iteritems()]
-            self.__heap.sort()  # builtin sort likely faster than O(n) heapify
+        """Return the item with the lowest priority.
+
+        Raises IndexError if the object is empty.
+        """
+        
+        heap = self._heap
+        v, k = heap[0]
+        while k not in self or self[k] != v:
+            heappop(heap)
+            v, k = heap[0]
+        return k
+
+    def pop_smallest(self):
+        """Return the item with the lowest priority and remove it.
+
+        Raises IndexError if the object is empty.
+        """
+        
+        heap = self._heap
+        v, k = heappop(heap)
+        while k not in self or self[k] != v:
+            v, k = heappop(heap)
+        del self[k]
+        return k
+
+    def __setitem__(self, key, val):
+        # We are not going to remove the previous value from the heap,
+        # since this would have a cost O(n).
+        
+        super(prioritydict, self).__setitem__(key, val)
+        
+        if len(self._heap) < 2 * len(self):
+            heappush(self._heap, (val, key))
         else:
-            newPair = (val,key)
-            insertionPoint = len(heap)
-            heap.append(None)
-            while insertionPoint > 0 and \
-                    newPair < heap[(insertionPoint-1)//2]:
-                heap[insertionPoint] = heap[(insertionPoint-1)//2]
-                insertionPoint = (insertionPoint-1)//2
-            heap[insertionPoint] = newPair
-	
-    def setdefault(self,key,val):
-        '''Reimplement setdefault to call our customized __setitem__.'''
-        if key not in self:
-            self[key] = val
-        return self[key]
+            # When the heap grows larger than 2 * len(self), we rebuild it
+            # from scratch to avoid wasting too much memory.
+            self._rebuild_heap()
+
+    setdefault = None
+    update = None
+
+#    def setdefault(self, key, val):
+#        if key not in self:
+#            self[key] = val
+#            return val
+#        return self[key]
+
+#    def update(self, *args, **kwargs):
+#        # Reimplementing dict.update is tricky -- see e.g.
+#        # http://mail.python.org/pipermail/python-ideas/2007-May/000744.html
+#        # We just rebuild the heap from scratch after passing to super.       
+#        super(priority_dict, self).update(*args, **kwargs)
+#        self._rebuild_heap()
+

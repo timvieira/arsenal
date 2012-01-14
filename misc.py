@@ -12,6 +12,26 @@ from threading import Thread
 # python-extras imports
 from terminal import colors
 
+class logger(object):
+
+    def __init__(self, filename, clean=True, quiet=False):
+        if clean:
+            os.system('rm -f ' + filename)
+        self.f = file(filename, 'wb')
+        self.quiet = quiet
+
+    def write(self, x):
+        self.f.write(x)
+        if not self.quiet:
+            sys.__stdout__.write(x)
+
+    @staticmethod
+    def start(*args, **kw):
+        """ redirect stdout and stderr to logger """
+        log = logger(*args, **kw)
+        sys.stderr = sys.stdout = log
+        return log
+
 def force(g):
     """ force evaluation of generator `g`. """
     @wraps(g)

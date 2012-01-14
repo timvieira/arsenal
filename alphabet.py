@@ -76,6 +76,10 @@ class Alphabet(object):
         for k in x:
             yield self.lookup(k)
 
+    def __contains__(self, k):
+        assert isinstance(k, basestring)
+        return k in self._mapping
+
     def __getitem__(self, k):
         try:
             return self._mapping[k]

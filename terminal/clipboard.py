@@ -1,8 +1,26 @@
-""" Utilities for accessing the platform's clipboard.
+"""
+Taken from the IPython project http://ipython.org
+
+Used under the terms of the BSD license
 """
 
 import subprocess
 import sys
+
+def clipboard_get():
+    """ Get text from the clipboard.
+    """
+    if sys.platform == 'win32':
+        try:
+            return win32_clipboard_get()
+        except Exception:
+            pass
+    elif sys.platform == 'darwin':
+        try:
+            return osx_clipboard_get()
+        except Exception:
+            pass
+    return tkinter_clipboard_get()
 
 def win32_clipboard_get():
     """ Get the current clipboard's text on Windows.
@@ -14,11 +32,11 @@ def win32_clipboard_get():
     except ImportError:
         message = ("Getting text from the clipboard requires the pywin32 "
             "extensions: http://sourceforge.net/projects/pywin32/")
-        raise ImportError(message)
-    win32clipboard.OpenClipboard() 
-    text = win32clipboard.GetClipboardData(win32clipboard.CF_TEXT) 
+        raise Exception(message)
+    win32clipboard.OpenClipboard()
+    text = win32clipboard.GetClipboardData(win32clipboard.CF_TEXT)
     # FIXME: convert \r\n to \n?
-    win32clipboard.CloseClipboard() 
+    win32clipboard.CloseClipboard()
     return text
 
 def osx_clipboard_get():
@@ -41,15 +59,11 @@ def tkinter_clipboard_get():
     try:
         import Tkinter
     except ImportError:
-        raise ImportError("Getting text from the clipboard on this platform requires Tkinter.")
+        message = ("Getting text from the clipboard on this platform "
+            "requires Tkinter.")
+        raise Exception(message)
     root = Tkinter.Tk()
     root.withdraw()
     text = root.clipboard_get()
     root.destroy()
     return text
-
-
-if __name__ == '__main__':
-    print tkinter_clipboard_get()
-
-

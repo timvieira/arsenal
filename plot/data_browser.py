@@ -7,24 +7,21 @@ class PointBrowser(object):
     point will be shown in the lower axes.  Use the 'n' and 'p' keys to browse
     through the next and pervious points
     """
-    def __init__(self, xs, ys, fig, ax, callback):
-        self.index = 0
+    def __init__(self, X, xcol, ycol, fig, ax, callback):
+        self.index = -1
         self.callback = callback
-        self.xs = xs
-        self.ys = ys
-        self.points, = ax.plot(xs, ys, 'o', picker=5)  # 5 points tolerance
-
+        self.X = X
+        self.xcol = xcol
+        self.ycol = ycol
+        self.idxs = list(self.X.T)
+        self.points, = ax.plot(X[xcol], X[ycol], 'o', picker=5)  # 5 points tolerance
+        self.points.set_markeredgewidth(0)
         self.ax = ax
         self.fig = fig
-
-        self.text = ax.text(0.01, 0.97, 'selected: none',
-                            transform=ax.transAxes, va='top')
-
+        self.text = ax.text(0.01, 0.97, '', transform=ax.transAxes, va='top')
         self.selected = None
-
         fig.canvas.mpl_connect('pick_event', self.onpick)
         fig.canvas.mpl_connect('key_press_event', self.onpress)
-
 
     def select_point(self, x, y):
         if self.selected is None:
@@ -41,7 +38,7 @@ class PointBrowser(object):
             inc = -1
         else:
             return
-        self.index = (self.index + inc) % len(self.xs)
+        self.index = (self.index + inc) % len(self.idxs)
         self.update()
 
     def onpick(self, event):
@@ -49,22 +46,23 @@ class PointBrowser(object):
         if event.artist != self.points: return True
         N = len(event.ind)
         if not N: return True
-
-        # the click locations
+        # determine click location. there may be more than one point with-in the
+        # 5pt tolerance; we'll take the closest
         x, y = event.mouseevent.xdata, event.mouseevent.ydata
-
-        # find closest point
-        distances = np.hypot(x - self.xs[event.ind], y - self.ys[event.ind])
-        self.index = event.ind[distances.argmin()]
-
+        distances = np.hypot(x - self.X[self.xcol][event.ind], y - self.X[self.ycol][event.ind])
+        idx = distances.argmin()
+        self.index = event.ind[idx]
         self.update()
 
     def update(self):
         i = self.index
-        self.select_point(self.xs[i], self.ys[i])
-        self.callback(self, i)
+        idx = self.idxs[i]
+        picked = self.X.ix[idx]
+        self.select_point(picked[self.xcol], picked[self.ycol])
+        self.callback(self, picked)
         self.fig.canvas.draw()
 
+"""
 def main():
     X = np.random.rand(100, 200)
     xs = np.mean(X, axis=1)
@@ -104,3 +102,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+"""

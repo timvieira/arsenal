@@ -29,6 +29,7 @@ class PointBrowser(object):
                                            color='yellow', visible=False)
         self.selected.set_visible(True)
         self.selected.set_data(x, y)
+        keep_in_view(self.ax, x, y)
 
     def onpress(self, event):
         if self.index is None: return
@@ -61,6 +62,22 @@ class PointBrowser(object):
         self.select_point(picked[self.xcol], picked[self.ycol])
         self.callback(self, picked)
         self.fig.canvas.draw()
+
+
+def keep_in_view(ax, x, y):
+    "Adjust axis limits to keep point (x,y) in view while keeping width the same."
+    xmin, xmax = ax.get_xlim()
+    w = xmax - xmin
+    if x < xmin:
+        ax.set_xlim(x, x + w)
+    if x > xmax:
+        ax.set_xlim(x - w, x)
+    ymin, ymax = ax.get_ylim()
+    w = ymax - ymin
+    if y < ymin:
+        ax.set_ylim(y, y + w)
+    if y > ymax:
+        ax.set_ylim(y - w, y)
 
 """
 def main():

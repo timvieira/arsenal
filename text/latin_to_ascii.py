@@ -3,34 +3,34 @@
 latin1_to_ascii -- The UNICODE Hammer -- AKA "The Stupid American"
 
 This takes a UNICODE string and replaces Latin-1 characters with
-something equivalent in 7-bit ASCII. This returns a plain ASCII string. 
-This function makes a best effort to convert Latin-1 characters into 
+something equivalent in 7-bit ASCII. This returns a plain ASCII string.
+This function makes a best effort to convert Latin-1 characters into
 ASCII equivalents. It does not just strip out the Latin1 characters.
-All characters in the standard 7-bit ASCII range are preserved. 
-In the 8th bit range all the Latin-1 accented letters are converted to 
-unaccented equivalents. Most symbol characters are converted to 
+All characters in the standard 7-bit ASCII range are preserved.
+In the 8th bit range all the Latin-1 accented letters are converted to
+unaccented equivalents. Most symbol characters are converted to
 something meaningful. Anything not converted is deleted.
 
 Background:
 
-One of my clients gets address data from Europe, but most of their systems 
+One of my clients gets address data from Europe, but most of their systems
 cannot handle Latin-1 characters. With all due respect to the umlaut,
-scharfes s, cedilla, and all the other fine accented characters of Europe, 
+scharfes s, cedilla, and all the other fine accented characters of Europe,
 all I needed to do was to prepare addresses for a shipping system.
-After getting headaches trying to deal with this problem using Python's 
+After getting headaches trying to deal with this problem using Python's
 built-in UNICODE support I gave up and decided to use some brute force.
-This function converts all accented letters to their unaccented equivalents. 
+This function converts all accented letters to their unaccented equivalents.
 I realize this is dirty, but for my purposes the mail gets delivered.
 """
 
 def latin1_to_ascii (unicrap):
     """This takes a UNICODE string and replaces Latin-1 characters with
-        something equivalent in 7-bit ASCII. It returns a plain ASCII string. 
-        This function makes a best effort to convert Latin-1 characters into 
+        something equivalent in 7-bit ASCII. It returns a plain ASCII string.
+        This function makes a best effort to convert Latin-1 characters into
         ASCII equivalents. It does not just strip out the Latin-1 characters.
-        All characters in the standard 7-bit ASCII range are preserved. 
-        In the 8th bit range all the Latin-1 accented letters are converted 
-        to unaccented equivalents. Most symbol characters are converted to 
+        All characters in the standard 7-bit ASCII range are preserved.
+        In the 8th bit range all the Latin-1 accented letters are converted
+        to unaccented equivalents. Most symbol characters are converted to
         something meaningful. Anything not converted is deleted.
     """
     xlate={0xc0:'A', 0xc1:'A', 0xc2:'A', 0xc3:'A', 0xc4:'A', 0xc5:'A',
@@ -55,7 +55,7 @@ def latin1_to_ascii (unicrap):
         0xad:'-', 0xae:'{R}', 0xaf:'_', 0xb0:'{degrees}',
         0xb1:'{+/-}', 0xb2:'{^2}', 0xb3:'{^3}', 0xb4:"'",
         0xb5:'{micro}', 0xb6:'{paragraph}', 0xb7:'*', 0xb8:'{cedilla}',
-        0xb9:'{^1}', 0xba:'{^o}', 0xbb:'>>', 
+        0xb9:'{^1}', 0xba:'{^o}', 0xbb:'>>',
         0xbc:'{1/4}', 0xbd:'{1/2}', 0xbe:'{3/4}', 0xbf:'?',
         0xd7:'*', 0xf7:'/'
         }
@@ -71,16 +71,6 @@ def latin1_to_ascii (unicrap):
     return r
 
 if __name__ == '__main__':
-    s = unicode('','latin-1')
-    for c in range(32,256):
-        if c != 0x7f:
-            s = s + unicode(chr(c),'latin-1')
-    plain_ascii = latin1_to_ascii(s)
-    
-    print 'INPUT type:', type(s)
-    print 'INPUT:'
-    print s.encode('latin-1')
-    print
-    print 'OUTPUT type:', type(plain_ascii)
-    print 'OUTPUT:'
-    print plain_ascii
+    from sys import stdin, stdout
+    for line in stdin:
+        stdout.write(latin1_to_ascii(line))

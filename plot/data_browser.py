@@ -1,21 +1,27 @@
 import numpy as np
 import pylab as P
 
+try:
+    from debug import ip
+except ImportError:
+    pass
+
 class PointBrowser(object):
     """
     Click on a point to select and highlight it -- the data that generated the
     point will be shown in the lower axes.  Use the 'n' and 'p' keys to browse
     through the next and pervious points
     """
-    def __init__(self, X, xcol, ycol, fig, ax, callback):
+    def __init__(self, points, X, xcol, ycol, fig, ax, callback):
         self.index = -1
         self.callback = callback
         self.X = X
         self.xcol = xcol
         self.ycol = ycol
         self.idxs = list(self.X.T)
-        self.points, = ax.plot(X[xcol], X[ycol], 'o', picker=5)  # 5 points tolerance
-        self.points.set_markeredgewidth(0)
+
+        self.points = points
+
         self.ax = ax
         self.fig = fig
         self.text = ax.text(0.01, 0.97, '', transform=ax.transAxes, va='top')
@@ -43,8 +49,11 @@ class PointBrowser(object):
         self.update()
 
     def onpick(self, event):
+
+        print event
+
         # filter-out irrelevant events
-        if event.artist != self.points: return True
+        if event.artist != self.points and event.artist not in self.points: return True
         N = len(event.ind)
         if not N: return True
         # determine click location. there may be more than one point with-in the

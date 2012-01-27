@@ -111,6 +111,11 @@ class Alphabet(object):
     def plaintext(self):
         return '\n'.join(self)
 
+    @classmethod
+    def load(cls, filename):
+        with file(filename) as f:
+            return cls.from_iterable(l.strip() for l in f)
+
 
 if __name__ == '__main__':
     import doctest

@@ -1,5 +1,6 @@
 import numpy as np
 import pylab as P
+from matplotlib.text import Annotation
 
 try:
     from debug import ip
@@ -8,10 +9,15 @@ except ImportError:
 
 class PointBrowser(object):
     """
-    Click on a point to select and highlight it -- the data that generated the
-    point will be shown in the lower axes.  Use the 'n' and 'p' keys to browse
-    through the next and pervious points
+    Click on a point to select and highlight it and trigger callback
+
+    Use the 'n' and 'p' keys to browse through the next and pervious points
+
+    Use arrow keys to scroll along the x-axis
+
+    Use -/+ to zoom along x-axis
     """
+
     def __init__(self, points, X, xcol, ycol, fig, ax, callback):
         self.index = 0
         self.callback = callback
@@ -26,7 +32,7 @@ class PointBrowser(object):
         self.selected = None
         self.update()
         fig.canvas.mpl_connect('pick_event', self.onpick)
-        fig.canvas.mpl_connect('key_press_event', self.onpress)        
+        fig.canvas.mpl_connect('key_press_event', self.onpress)
 
     def select_point(self, x, y):
         if self.selected is None:
@@ -37,7 +43,7 @@ class PointBrowser(object):
         self.keep_in_view()
 
     def onpress(self, event):
-        if self.index is None: return        
+        if self.index is None: return
         if event.key in ('=', '+'):
             self.zoom(0.25)
         elif event.key in ('-', '_'):
@@ -45,11 +51,32 @@ class PointBrowser(object):
         elif event.key == 'right':
             self.ax.xaxis.pan(1)
         elif event.key == 'left':
-            self.ax.xaxis.pan(-1)        
+            self.ax.xaxis.pan(-1)
+        elif event.key == 'up':
+            self.ax.yaxis.pan(+1)
+        elif event.key == 'down':
+            self.ax.yaxis.pan(-1)
         elif event.key == 'n':
             self.next_point(+1)
         elif event.key == 'p':
             self.next_point(-1)
+        elif event.key == 'i':
+
+            idx = self.idxs[self.index]
+            picked = self.X.ix[idx]
+
+            l = picked['$item']
+            x = picked[self.xcol]
+            y = picked[self.ycol]
+
+            # todo: automatic placement of label -- need a way to avoiding collisions
+            a = self.ax.annotate(l, xy=(x, y),
+                                 xytext=(0, -30), textcoords='offset points',
+                                 arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10",
+                                                 color='k', alpha=0.5),
+                                 fontsize=9, rotation=90, color='k', alpha=0.5)
+            a.draggable(use_blit=True)
+            
         else:
             return
         self.draw()
@@ -77,6 +104,7 @@ class PointBrowser(object):
 
     def onpick(self, event):
         # filter-out irrelevant events
+        if isinstance(event.artist, Annotation): return True
         if event.artist != self.points and event.artist not in self.points: return True
         N = len(event.ind)
         if not N: return True

@@ -314,5 +314,6 @@ if __name__ == '__main__':
         test_redirect_io()
 
     run_tests()
+    print 'passed'
 
     doctest.testmod()

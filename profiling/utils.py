@@ -40,7 +40,6 @@ def kcachegrind(cmd, out='profile.kgrind'):
     os.system("kcachegrind %s &" % out)
 
 
-
 def main():
     from optparse import OptionParser
     parser = OptionParser()
@@ -56,7 +55,6 @@ def main():
 
     viz = kcachegrind
 
-    import os
     sys.path = [os.getcwd()] + sys.path
 
     if (len(args) > 0):

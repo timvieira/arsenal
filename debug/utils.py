@@ -15,10 +15,11 @@ from debug.edit import emacs
 
 # try to use IPython's fancy debugger if available
 
-try:
+#try:
 
-    from IPython import embed as ip
+from IPython import embed as ip
 
+"""
     #def set_trace(frame=None):
     #    # get frame
     #    frame = frame or sys._getframe().f_back
@@ -45,7 +46,7 @@ except ImportError:
         def ip():
             frame = sys._getframe().f_back
             InteractiveConsole(frame).interact()
-
+"""
 
 #from IPython.Debugger import Pdb
 from pdb import set_trace, pm, Pdb

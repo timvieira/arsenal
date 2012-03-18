@@ -16,7 +16,7 @@ from numpy.random import random
 ## TODO: maybe we should merge these two functions into something awesome.
 def faster_weighted_choice(p, n):
     """
-    Generate n samples of the indicies of the vector of probabilites p
+    Generate n samples of the indices of the vector of probabilites p
     sampled *indicies* are placed in an array of length n.
     """
     # uniformly distributed random vector of length n

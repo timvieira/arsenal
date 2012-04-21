@@ -2,8 +2,11 @@
 from pyPdf import PdfFileWriter, PdfFileReader
 
 def metadata(filename):
-    x = PdfFileReader(file(filename, 'rb'))
-    return x.getDocumentInfo()
+    try:
+        x = PdfFileReader(file(filename, 'rb'))
+        return x.getDocumentInfo()
+    except:
+        return {}
 
 if __name__ == '__main__':
     import sys
@@ -11,7 +14,6 @@ if __name__ == '__main__':
         print '--'
         filename = filename.strip()
         print filename
-
         try:
             m = metadata(filename)
             print m.title

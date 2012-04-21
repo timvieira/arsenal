@@ -1,16 +1,21 @@
 # pyPdf available at http://pybrary.net/pyPdf/
 from pyPdf import PdfFileWriter, PdfFileReader
-import sys
 
+def metadata(filename):
+    x = PdfFileReader(file(filename, 'rb'))
+    return x.getDocumentInfo()
 
-[filename] = sys.argv[1:]
+if __name__ == '__main__':
+    import sys
+    for filename in (sys.argv[1:] or sys.stdin):
+        print '--'
+        filename = filename.strip()
+        print filename
 
-x = PdfFileReader(file(filename, "rb"))
-
-m = x.getDocumentInfo()
-
-print '--'
-print filename
-print m.title
-print m.author
-print
+        try:
+            m = metadata(filename)
+            print m.title
+            print m.author
+            print
+        except:
+            print 'ERROR'

@@ -15,11 +15,10 @@ from debug.edit import emacs
 
 # try to use IPython's fancy debugger if available
 
-#try:
+try:
 
-from IPython import embed as ip
+    from IPython import embed as ip
 
-"""
     #def set_trace(frame=None):
     #    # get frame
     #    frame = frame or sys._getframe().f_back
@@ -35,12 +34,12 @@ from IPython import embed as ip
 
 except ImportError:
 
-    try:
-        from IPython.Shell import IPShellEmbed
-        ip = __IPYTHON__ = IPShellEmbed([])
+    from IPython.Shell import IPShellEmbed
+    ip = __IPYTHON__ = IPShellEmbed([])
 
+"""
     except ImportError:
-    
+
         # if ipython is unavailable, use interactive console
         from code import InteractiveConsole
         def ip():

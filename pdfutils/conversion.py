@@ -27,7 +27,7 @@ class file_specifier(object):
 def pdftotext(pdf, output=None, verbose=False, usecached=False):
     """Wraps a system call to pdftotext. """
     if not output:
-        output = '{pdf.noext}.d/pdftotext.txt'.format(pdf=file_specifier(pdf))
+        output = '{pdf.abspath}.d/pdftotext.txt'.format(pdf=file_specifier(pdf))
     output = os.path.abspath(output)
     outdir = os.path.dirname(output)
     # TODO: use fsutils.ensure_dir
@@ -50,9 +50,12 @@ def pdftotext(pdf, output=None, verbose=False, usecached=False):
                 print '[pdftotext] wrote "%s".' % (output,)
             else:
                 print '[pdftotext] "%s" exited with status %s' % (pdf, p.returncode)
-    # return contents of output file
-    with file(output, 'r') as f:
-        return f.read()
+    try:
+        # return contents of output file
+        with file(output, 'r') as f:
+            return f.read()
+    except IOError:
+        return ''
 
 
 ## TODO:

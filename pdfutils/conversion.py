@@ -65,7 +65,7 @@ def pdftotext(pdf, output=None, verbose=False, usecached=False):
 ##   timeout option
 ##   maybe a hook for pre/post-processing, useful for logging and zipping
 ##   check for success / failure
-def pdf2image(input_files, outputdir_fmt='{f.noext}.d', output_format='{f.noext}.page.%d.png',
+def pdf2image(input_files, outputdir_fmt='{f.abspath}.d', output_format='{f.noext}.page.%d.png',
               resolution=200, create_outputdir=True, testing=False, verbose=False):
     """
     Wraps a system call to ghostscript, which takes a pdf or postscript file

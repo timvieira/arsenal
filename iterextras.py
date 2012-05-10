@@ -3,6 +3,7 @@ import sys, time
 from operator import getitem, sub, mul
 from itertools import *
 from random import shuffle
+from collections import defaultdict
 
 # IDEAS:
 # * progress_meter: updates based on how much work was dones, e.g.,
@@ -11,6 +12,17 @@ from random import shuffle
 #     >> p.update(10)
 #     10.0%
 
+def groupby2(s, key=lambda x: x):
+    """
+    Eager version of groupby which does what you'd expect groupby to do.
+
+    >>> groupby2(range(10), lambda x: x % 2)
+    {0: [0, 2, 4, 6, 8], 1: [1, 3, 5, 7, 9]}
+    """
+    groups = defaultdict(list)
+    for x in s:
+        groups[key(x)].append(x)
+    return dict(groups)
 
 def atmost(k, seq):
     """
@@ -384,11 +396,11 @@ def roundrobin(*iterables):
             nexts = cycle(islice(nexts, pending))
 
 
-def sliding_window(iterable, k):
+def window(iterable, k):
     """
     s -> (s[0],...,s[k]) (s[1],...,s[k+1]) ... (s[i],...,s[i+k]) ... (s[n-1-k],...,s[n-1])
 
-    >>> [x+y+z for x,y,z in sliding_window('abcdef', 3)]
+    >>> [x+y+z for x,y,z in window('abcdef', 3)]
     ['abc', 'bcd', 'cde', 'def']
 
     """
@@ -401,6 +413,8 @@ def sliding_window(iterable, k):
             except StopIteration:
                 pass
     return izip(*iterators)
+
+sliding_window = window
 
 
 def iterview(x, every=10, length=None):
@@ -573,12 +587,12 @@ if __name__ == "__main__":
         assert a == a0 and b == b0 and c == c0
         recombined = zip(a, b, c)
         assert recombined == test
-    
+
         def example_iterview():
             for _ in iterview(xrange(400), every=20):
                 time.sleep(0.01)
         #example_iterview()
-    
+
         X = [[0 for i in xrange(4)] for j in xrange(4)]
         for (k,(i,j)) in enumerate(cross_lower_triangle(range(4))):
             X[i][j] = k+1
@@ -587,17 +601,17 @@ if __name__ == "__main__":
                   [2, 3, 0, 0],
                   [4, 5, 6, 0]]
         assert X == target
-    
+
         import numpy as np
         d = (np.random.rand(20, 3) - 0.5) * 100
         A = np.average(d, axis=0)
         a = last(rolling_average(d))
         assert np.linalg.norm(A - a) < 1e-10  # roughly zero difference
-    
+
         import doctest; doctest.testmod()
-    
+
         from time import sleep
         for _ in iterview(range(100), 1):
             sleep(.1)
-    
+
     test()

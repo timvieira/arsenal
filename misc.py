@@ -87,11 +87,11 @@ def attn(msg):
 ## # borrowed from whoosh
 ## def find_object(name, blacklist=None, whitelist=None):
 ##     """Imports and returns an object given a fully qualified name.
-## 
+##
 ##     >>> find_object("whoosh.analysis.StopFilter")
 ##     <class 'whoosh.analysis.StopFilter'>
 ##     """
-## 
+##
 ##     if blacklist:
 ##         for pre in blacklist:
 ##             if name.startswith(pre):
@@ -104,13 +104,13 @@ def attn(msg):
 ##                 break
 ##         if not passes:
 ##             raise TypeError("Can't instantiate %r" % name)
-## 
+##
 ##     lastdot = name.rfind(".")
-## 
+##
 ##     assert lastdot > -1, "Name %r must be fully qualified" % name
 ##     modname = name[:lastdot]
 ##     clsname = name[lastdot + 1:]
-## 
+##
 ##     mod = __import__(modname, fromlist=[clsname])
 ##     cls = getattr(mod, clsname)
 ##     return cls
@@ -178,6 +178,7 @@ def deprecated(use_instead=None):
 
     return wrapped
 
+from humanreadable import htime
 
 @contextmanager
 def timeit(msg="%.4f seconds", header=None):
@@ -186,7 +187,15 @@ def timeit(msg="%.4f seconds", header=None):
         print header
     b4 = time.time()
     yield
-    print msg % (time.time() - b4)
+
+    t = time.time() - b4
+    ht = htime(t)
+    if t < 60:
+        ht = t
+    try:
+        print msg % ht
+    except TypeError:
+        print msg, ht
 
 timesection = lambda x: timeit(header='%s...' % x,
                                msg=' -> %s took %%.2f seconds' % x)
@@ -317,3 +326,5 @@ if __name__ == '__main__':
     print 'passed'
 
     doctest.testmod()
+
+    attn('ATTENTION!')

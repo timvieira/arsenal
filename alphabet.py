@@ -116,6 +116,10 @@ class Alphabet(object):
         with file(filename) as f:
             return cls.from_iterable(l.strip() for l in f)
 
+    def save(self, filename):
+        with file(filename, 'wb') as f:
+            f.write(self.plaintext())
+
 
 if __name__ == '__main__':
     import doctest

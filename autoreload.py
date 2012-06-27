@@ -58,7 +58,6 @@ class watch(Thread):
         return False
 
 
-
 if __name__ == '__main__':
 
     def test():
@@ -89,10 +88,13 @@ if __name__ == '__main__':
             assert watch_me.f() == new
 
         finally:
+
+            print 'removing temporary files...'
             try:
                 os.remove('watch_me.py')
                 os.remove('watch_me.pyc')
             except OSError:
                 pass
+
         print 'done.'
     test()

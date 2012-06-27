@@ -19,7 +19,7 @@
 ##         if not passed:
 ##             msg = ' or '.join(e.__name__ if e is not None else 'None' for e in exc)
 ##             raise AssertionError('did not raise required %s. Got %s instead.' % (msg, got))
-## 
+##
 ## def assert_throws_dec(exc):
 ##     def wrap(f):
 ##         @wraps(f)
@@ -30,7 +30,7 @@
 ##     return wrap
 
 
-from contextdecorator import ContextDecorator
+from recipes.contextdecorator import ContextDecorator
 
 class assert_throws(ContextDecorator):
     """
@@ -41,19 +41,19 @@ class assert_throws(ContextDecorator):
 
       >>> with assert_throws(ZeroDivisionError):
       ...     1/0
-  
+
       >>> with assert_throws(None):
       ...     pass
-  
+
       >>> with assert_throws(None, ZeroDivisionError):
       ...     pass
-  
+
       >>> with assert_throws(ZeroDivisionError):
       ...     pass
       Traceback (most recent call last):
           ...
       AssertionError: did not raise required ZeroDivisionError. Got None instead.
-  
+
       >>> with assert_throws(AssertionError, ZeroDivisionError):
       ...     pass
       Traceback (most recent call last):
@@ -81,7 +81,7 @@ class assert_throws(ContextDecorator):
 
         if exc is None:
             if None not in self.expect:
-                raise AssertionError('did not raise required %s. Got %s instead.' % (msg, None))                
+                raise AssertionError('did not raise required %s. Got %s instead.' % (msg, None))
         else:
             if not issubclass(exc, self.expect):
                 raise AssertionError('did not raise required %s. Got %s instead.' % (msg, exc.__name__))
@@ -125,4 +125,3 @@ if __name__ == '__main__':
         print 'Passed basic tests.'
 
     test()
-

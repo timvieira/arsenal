@@ -48,7 +48,7 @@ class Alphabet(object):
     def keys(self):
         return self._mapping.iterkeys()
 
-    def map(self, seq, emit_none=False):
+    def imap(self, seq, emit_none=False):
         """
         Apply alphabet to sequence while filtering. By default, `None` is not
         emitted, so the Note that the output sequence may have fewer items.
@@ -61,6 +61,9 @@ class Alphabet(object):
                 x = self[s]
                 if x is not None:
                     yield x
+
+    def map(self, seq, *args, **kwargs):
+        return list(self.imap(seq, *args, **kwargs))
 
     def add_many(self, x):
         for k in x:

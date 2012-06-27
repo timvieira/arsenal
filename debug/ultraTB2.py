@@ -20,18 +20,18 @@ Here's approximately everything you need to know:
 """
 
 ## ultraTB.py -- Spice up your tracebacks!
-## 
+##
 ## * ColorTB
 ## I've always found it a bit hard to visually parse tracebacks in Python.  The
 ## ColorTB class is a solution to that problem.  It colors the different parts of a
 ## traceback in a manner similar to what you would expect from a syntax-highlighting
 ## text editor.
-## 
+##
 ## Installation instructions for ColorTB:
 ##     import sys,ultraTB
 ##     sys.excepthook = ultraTB.ColorTB()
-## 
-## * VerboseTB  
+##
+## * VerboseTB
 ## I've also included a port of Ka-Ping Yee's "cgitb.py" that produces all kinds
 ## of useful info when a traceback occurs.  Ping originally had it spit out HTML
 ## and intended it for CGI programmers, but why should they have all the fun?  I
@@ -39,42 +39,42 @@ Here's approximately everything you need to know:
 ## but kind of neat, and maybe useful for long-running programs that you believe
 ## are bug-free.  If a crash *does* occur in that type of program you want details.
 ## Give it a shot--you'll love it or you'll hate it.
-## 
+##
 ## Note:
-## 
+##
 ##   The Verbose mode prints the variables currently visible where the exception
 ##   happened (shortening their strings if too long). This can potentially be
 ##   very slow, if you happen to have a huge data structure whose string
 ##   representation is complex to compute. Your computer may appear to freeze for
 ##   a while with cpu usage at 100%. If this occurs, you can cancel the traceback
 ##   with Ctrl-C (maybe hitting it more than once).
-## 
+##
 ##   If you encounter this kind of situation often, you may want to use the
 ##   Verbose_novars mode instead of the regular Verbose, which avoids formatting
 ##   variables (but otherwise includes the information and context given by
 ##   Verbose).
-##   
-## 
+##
+##
 ## Installation instructions for ColorTB:
 ##     import sys,ultraTB
 ##     sys.excepthook = ultraTB.VerboseTB()
-## 
+##
 ## Note:  Much of the code in this module was lifted verbatim from the standard
 ## library module 'traceback.py' and Ka-Ping Yee's 'cgitb.py'.
-## 
+##
 ## * Color schemes
 ## The colors are defined in the class TBTools through the use of the
 ## ColorSchemeTable class. Currently the following exist:
-## 
+##
 ##   - NoColor: allows all of this module to be used in any terminal (the color
 ##   escapes are just dummy blank strings).
-## 
+##
 ##   - Linux: is meant to look good in a terminal like the Linux console (black
 ##   or very dark background).
-## 
+##
 ##   - LightBG: similar to Linux but swaps dark/light colors to be more readable
 ##   in light background terminals.
-## 
+##
 ## You can implement other color schemes easily, the syntax is fairly
 ## self-explanatory. Please send back new schemes you develop to the author for
 ## possible inclusion in future releases.
@@ -119,9 +119,60 @@ except ImportError:
     #print "IPython's debugger is not available"
     pass
 
-import pycolorize
-#from IPython.genutils import Term, error, info
 
+
+#import pycolorize
+
+
+
+
+
+#______
+# <PyColorize>
+
+# -*- coding: utf-8 -*-
+"""
+Class and program to colorize python source code for ANSI terminals.
+
+Based on an HTML code highlighter by Jurgen Hermann found at:
+http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52298
+
+Modifications by Fernando Perez (fperez@colorado.edu).
+
+Information on the original HTML highlighter follows:
+
+MoinMoin - Python Source Parser
+
+Title: Colorize Python source using the built-in tokenizer
+
+Submitter: Jurgen Hermann
+Last Updated:2001/04/06
+
+Version no:1.2
+
+Description:
+
+This code is part of MoinMoin (http://moin.sourceforge.net/) and converts
+Python source code to HTML markup, rendering comments, keywords,
+operators, numeric and string literals in different colors.
+
+It shows how to use the built-in keyword, token and tokenize modules to
+scan Python source code and re-emit it with no changes to its original
+formatting (which is the hard part).
+"""
+
+__all__ = ['ANSICodeColors','Parser']
+
+#_scheme_default = 'LightBG'
+_scheme_default = 'Linux'
+
+# Imports
+import cStringIO
+import keyword
+import os
+import sys
+import token
+import tokenize
 
 import os
 
@@ -129,10 +180,12 @@ def make_color_table(in_class):
     """Build a set of color attributes in a class.
 
     Helper function for building the *TermColors classes."""
-    
+
     color_templates = (
         # Dark colors
-        ("Black"       , "0;30"),
+#        ("Black"       , "0;30"),
+        ("Black"       , "0;37"),  # black is actually white
+
         ("Red"         , "0;31"),
         ("Green"       , "0;32"),
         ("Brown"       , "0;33"),
@@ -148,7 +201,7 @@ def make_color_table(in_class):
         ("LightBlue"   , "1;34"),
         ("LightPurple" , "1;35"),
         ("LightCyan"   , "1;36"),
-        ("White"       , "1;37"),  
+        ("White"       , "1;37"),
         # Blinking colors.  Probably should not be used in anything serious.
         ("BlinkBlack"  , "5;30"),
         ("BlinkRed"    , "5;31"),
@@ -166,13 +219,13 @@ def make_color_table(in_class):
 class TermColors:
     """Color escape sequences.
 
-    This class defines the escape sequences for all the standard (ANSI?) 
+    This class defines the escape sequences for all the standard (ANSI?)
     colors in terminals. Also defines a NoColor escape which is just the null
     string, suitable for defining 'dummy' color schemes in terminals which get
     confused by color escapes.
 
     This class should be used as a mixin for building color schemes."""
-    
+
     NoColor = ''  # for color schemes in color-less terminals.
     Normal = '\033[0m'   # Reset normal coloring
     _base  = '\033[%sm'  # Template for all other colors
@@ -188,13 +241,13 @@ class InputTermColors:
     can wrap lines accordingly.  Use this class for any colored text which
     needs to be used in input prompts, such as in calls to raw_input().
 
-    This class defines the escape sequences for all the standard (ANSI?) 
+    This class defines the escape sequences for all the standard (ANSI?)
     colors in terminals. Also defines a NoColor escape which is just the null
     string, suitable for defining 'dummy' color schemes in terminals which get
     confused by color escapes.
 
     This class should be used as a mixin for building color schemes."""
-    
+
     NoColor = ''  # for color schemes in color-less terminals.
 
     if os.name == 'nt' and os.environ.get('TERM','dumb') == 'emacs':
@@ -214,7 +267,7 @@ class ColorScheme:
         self.name = __scheme_name_
         if colordict is None:
             #self.colors = Struct(**colormap)
-	    self.colors = dict(**colormap)
+            self.colors = dict(**colormap)
         else:
             #self.colors = Struct(colordict)
             self.colors = dict(colordict)
@@ -224,13 +277,13 @@ class ColorScheme:
         if name is None:
             name = self.name
         return ColorScheme(name,self.colors.__dict__)
-        
+
 class ColorSchemeTable(dict):
     """General class to handle tables of color schemes.
 
     It's basically a dict of color schemes with a couple of shorthand
     attributes and some convenient methods.
-    
+
     active_scheme_name -> obvious
     active_colors -> actual color table of the active scheme"""
 
@@ -241,11 +294,11 @@ class ColorSchemeTable(dict):
         created with a list of valid color schemes AND the specification for
         the default active scheme.
         """
-        
+
         # create object attributes to be set later
         self.active_scheme_name = ''
         self.active_colors = None
-        
+
         if scheme_list:
             if default_scheme == '':
                 raise ValueError,'you must specify the default color scheme'
@@ -262,7 +315,379 @@ class ColorSchemeTable(dict):
         if not isinstance(new_scheme,ColorScheme):
             raise ValueError,'ColorSchemeTable only accepts ColorScheme instances'
         self[new_scheme.name] = new_scheme
-        
+
+    def set_active_scheme(self,scheme,case_sensitive=0):
+        """Set the currently active scheme.
+
+        Names are by default compared in a case-insensitive way, but this can
+        be changed by setting the parameter case_sensitive to true."""
+
+        scheme_names = self.keys()
+        if case_sensitive:
+            valid_schemes = scheme_names
+            scheme_test = scheme
+        else:
+            valid_schemes = [s.lower() for s in scheme_names]
+            scheme_test = scheme.lower()
+        try:
+            scheme_idx = valid_schemes.index(scheme_test)
+        except ValueError:
+            raise ValueError,'Unrecognized color scheme: ' + scheme + \
+                  '\nValid schemes: '+str(scheme_names).replace("'', ",'')
+        else:
+            active = scheme_names[scheme_idx]
+            self.active_scheme_name = active
+            self.active_colors = self[active].colors
+            # Now allow using '' as an index for the current active scheme
+            self[''] = self[active]
+
+
+
+#############################################################################
+### Python Source Parser (does Hilighting)
+#############################################################################
+
+_KEYWORD = token.NT_OFFSET + 1
+_TEXT    = token.NT_OFFSET + 2
+
+#****************************************************************************
+# Builtin color schemes
+
+Colors = TermColors  # just a shorthand
+
+# Build a few color schemes
+NoColor = ColorScheme(
+    'NoColor',{
+    token.NUMBER     : Colors.NoColor,
+    token.OP         : Colors.NoColor,
+    token.STRING     : Colors.NoColor,
+    tokenize.COMMENT : Colors.NoColor,
+    token.NAME       : Colors.NoColor,
+    token.ERRORTOKEN : Colors.NoColor,
+
+    _KEYWORD         : Colors.NoColor,
+    _TEXT            : Colors.NoColor,
+
+    'normal'         : Colors.NoColor  # color off (usu. Colors.Normal)
+    }  )
+
+LinuxColors = ColorScheme(
+    'Linux',{
+    token.NUMBER     : Colors.LightCyan,
+    token.OP         : Colors.Yellow,
+    token.STRING     : Colors.LightBlue,
+    tokenize.COMMENT : Colors.LightRed,
+    token.NAME       : Colors.White,
+    token.ERRORTOKEN : Colors.Red,
+
+    _KEYWORD         : Colors.LightGreen,
+    _TEXT            : Colors.Yellow,
+
+    'normal'         : Colors.Normal  # color off (usu. Colors.Normal)
+    } )
+
+LightBGColors = ColorScheme(
+    'LightBG',{
+    token.NUMBER     : Colors.Cyan,
+    token.OP         : Colors.Blue,
+    token.STRING     : Colors.Blue,
+    tokenize.COMMENT : Colors.Red,
+    token.NAME       : Colors.Black,
+    token.ERRORTOKEN : Colors.Red,
+
+    _KEYWORD         : Colors.Green,
+    _TEXT            : Colors.Blue,
+
+    'normal'         : Colors.Normal  # color off (usu. Colors.Normal)
+    }  )
+
+# Build table of color schemes (needed by the parser)
+ANSICodeColors = ColorSchemeTable([NoColor,LinuxColors,LightBGColors], _scheme_default)
+
+class Parser:
+    """ Format colored Python source.
+    """
+
+    def __init__(self, color_table=None,out = sys.stdout):
+        """ Create a parser with a specified color table and output channel.
+
+        Call format() to process code.
+        """
+        self.color_table = color_table and color_table or ANSICodeColors
+        self.out = out
+
+    def format(self, raw, out = None, scheme = ''):
+        return self.format2(raw, out, scheme)[0]
+
+    def format2(self, raw, out = None, scheme = ''):
+        """ Parse and send the colored source.
+
+        If out and scheme are not specified, the defaults (given to
+        constructor) are used.
+
+        out should be a file-type object. Optionally, out can be given as the
+        string 'str' and the parser will automatically return the output in a
+        string."""
+
+        string_output = 0
+        if out == 'str' or self.out == 'str' or \
+           isinstance(self.out,cStringIO.OutputType):
+            # XXX - I don't really like this state handling logic, but at this
+            # point I don't want to make major changes, so adding the
+            # isinstance() check is the simplest I can do to ensure correct
+            # behavior.
+            out_old = self.out
+            self.out = cStringIO.StringIO()
+            string_output = 1
+        elif out is not None:
+            self.out = out
+
+        # Fast return of the unmodified input for NoColor scheme
+        if scheme == 'NoColor':
+            error = False
+            self.out.write(raw)
+            if string_output:
+                return raw,error
+            else:
+                return None,error
+
+        # local shorthands
+        colors = self.color_table[scheme].colors
+        self.colors = colors # put in object so __call__ sees it
+
+        # Remove trailing whitespace and normalize tabs
+        self.raw = raw.expandtabs().rstrip()
+
+        # store line offsets in self.lines
+        self.lines = [0, 0]
+        pos = 0
+        raw_find = self.raw.find
+        lines_append = self.lines.append
+        while 1:
+            pos = raw_find('\n', pos) + 1
+            if not pos: break
+            lines_append(pos)
+        lines_append(len(self.raw))
+
+        # parse the source and write it
+        self.pos = 0
+        text = cStringIO.StringIO(self.raw)
+
+        error = False
+        try:
+            tokenize.tokenize(text.readline, self)
+        except tokenize.TokenError, ex:
+            msg = ex[0]
+            line = ex[1][0]
+            self.out.write("%s\n\n*** ERROR: %s%s%s\n" %
+                           (colors[token.ERRORTOKEN],
+                            msg, self.raw[self.lines[line]:],
+                            colors['normal'])
+                           )
+            error = True
+        self.out.write(colors['normal']+'\n')
+        if string_output:
+            output = self.out.getvalue()
+            self.out = out_old
+            return (output, error)
+        return (None, error)
+
+    def __call__(self, toktype, toktext, (srow,scol), (erow,ecol), line):
+        """ Token handler, with syntax highlighting."""
+
+        # local shorthands
+        colors = self.colors
+        owrite = self.out.write
+
+        # line separator, so this works across platforms
+        linesep = os.linesep
+
+        # calculate new positions
+        oldpos = self.pos
+        newpos = self.lines[srow] + scol
+        self.pos = newpos + len(toktext)
+
+        # handle newlines
+        if toktype in [token.NEWLINE, tokenize.NL]:
+            owrite(linesep)
+            return
+
+        # send the original whitespace, if needed
+        if newpos > oldpos:
+            owrite(self.raw[oldpos:newpos])
+
+        # skip indenting tokens
+        if toktype in [token.INDENT, token.DEDENT]:
+            self.pos = newpos
+            return
+
+        # map token type to a color group
+        if token.LPAR <= toktype and toktype <= token.OP:
+            toktype = token.OP
+        elif toktype == token.NAME and keyword.iskeyword(toktext):
+            toktype = _KEYWORD
+        color = colors.get(toktype, colors[_TEXT])
+
+        #print '<%s>' % toktext,    # dbg
+
+        # Triple quoted strings must be handled carefully so that backtracking
+        # in pagers works correctly. We need color terminators on _each_ line.
+        if linesep in toktext:
+            toktext = toktext.replace(linesep, '%s%s%s' %
+                                      (colors['normal'],linesep,color))
+
+        # send text
+        owrite('%s%s%s' % (color,toktext,colors['normal']))
+
+
+# </PyColorize>
+
+
+
+
+#from IPython.genutils import Term, error, info
+
+
+import os
+
+def make_color_table(in_class):
+    """Build a set of color attributes in a class.
+
+    Helper function for building the *TermColors classes."""
+
+    color_templates = (
+        # Dark colors
+        ("Black"       , "0;30"),
+        ("Red"         , "0;31"),
+        ("Green"       , "0;32"),
+        ("Brown"       , "0;33"),
+        ("Blue"        , "0;34"),
+        ("Purple"      , "0;35"),
+        ("Cyan"        , "0;36"),
+        ("LightGray"   , "0;37"),
+        # Light colors
+        ("DarkGray"    , "1;30"),
+        ("LightRed"    , "1;31"),
+        ("LightGreen"  , "1;32"),
+        ("Yellow"      , "1;33"),
+        ("LightBlue"   , "1;34"),
+        ("LightPurple" , "1;35"),
+        ("LightCyan"   , "1;36"),
+        ("White"       , "1;37"),
+        # Blinking colors.  Probably should not be used in anything serious.
+        ("BlinkBlack"  , "5;30"),
+        ("BlinkRed"    , "5;31"),
+        ("BlinkGreen"  , "5;32"),
+        ("BlinkYellow" , "5;33"),
+        ("BlinkBlue"   , "5;34"),
+        ("BlinkPurple" , "5;35"),
+        ("BlinkCyan"   , "5;36"),
+        ("BlinkLightGray", "5;37"),
+        )
+
+    for name,value in color_templates:
+        setattr(in_class,name,in_class._base % value)
+
+class TermColors:
+    """Color escape sequences.
+
+    This class defines the escape sequences for all the standard (ANSI?)
+    colors in terminals. Also defines a NoColor escape which is just the null
+    string, suitable for defining 'dummy' color schemes in terminals which get
+    confused by color escapes.
+
+    This class should be used as a mixin for building color schemes."""
+
+    NoColor = ''  # for color schemes in color-less terminals.
+    Normal = '\033[0m'   # Reset normal coloring
+    _base  = '\033[%sm'  # Template for all other colors
+
+# Build the actual color table as a set of class attributes:
+make_color_table(TermColors)
+
+class InputTermColors:
+    """Color escape sequences for input prompts.
+
+    This class is similar to TermColors, but the escapes are wrapped in \001
+    and \002 so that readline can properly know the length of each line and
+    can wrap lines accordingly.  Use this class for any colored text which
+    needs to be used in input prompts, such as in calls to raw_input().
+
+    This class defines the escape sequences for all the standard (ANSI?)
+    colors in terminals. Also defines a NoColor escape which is just the null
+    string, suitable for defining 'dummy' color schemes in terminals which get
+    confused by color escapes.
+
+    This class should be used as a mixin for building color schemes."""
+
+    NoColor = ''  # for color schemes in color-less terminals.
+
+    if os.name == 'nt' and os.environ.get('TERM','dumb') == 'emacs':
+        # (X)emacs on W32 gets confused with \001 and \002 so we remove them
+        Normal = '\033[0m'   # Reset normal coloring
+        _base  = '\033[%sm'  # Template for all other colors
+    else:
+        Normal = '\001\033[0m\002'   # Reset normal coloring
+        _base  = '\001\033[%sm\002'  # Template for all other colors
+
+# Build the actual color table as a set of class attributes:
+make_color_table(InputTermColors)
+
+class ColorScheme:
+    """Generic color scheme class. Just a name and a Struct."""
+    def __init__(self,__scheme_name_,colordict=None,**colormap):
+        self.name = __scheme_name_
+        if colordict is None:
+            #self.colors = Struct(**colormap)
+            self.colors = dict(**colormap)
+        else:
+            #self.colors = Struct(colordict)
+            self.colors = dict(colordict)
+
+    def copy(self,name=None):
+        """Return a full copy of the object, optionally renaming it."""
+        if name is None:
+            name = self.name
+        return ColorScheme(name,self.colors.__dict__)
+
+class ColorSchemeTable(dict):
+    """General class to handle tables of color schemes.
+
+    It's basically a dict of color schemes with a couple of shorthand
+    attributes and some convenient methods.
+
+    active_scheme_name -> obvious
+    active_colors -> actual color table of the active scheme"""
+
+    def __init__(self,scheme_list=None,default_scheme=''):
+        """Create a table of color schemes.
+
+        The table can be created empty and manually filled or it can be
+        created with a list of valid color schemes AND the specification for
+        the default active scheme.
+        """
+
+        # create object attributes to be set later
+        self.active_scheme_name = ''
+        self.active_colors = None
+
+        if scheme_list:
+            if default_scheme == '':
+                raise ValueError,'you must specify the default color scheme'
+            for scheme in scheme_list:
+                self.add_scheme(scheme)
+            self.set_active_scheme(default_scheme)
+
+    def copy(self):
+        """Return full copy of object"""
+        return ColorSchemeTable(self.values(),self.active_scheme_name)
+
+    def add_scheme(self,new_scheme):
+        """Add a new color scheme to the table."""
+        if not isinstance(new_scheme,ColorScheme):
+            raise ValueError,'ColorSchemeTable only accepts ColorScheme instances'
+        self[new_scheme.name] = new_scheme
+
     def set_active_scheme(self,scheme,case_sensitive=0):
         """Set the currently active scheme.
 
@@ -305,7 +730,7 @@ def exception_colors():
     >>> print ec.active_colors
     None
 
-    Now we activate a color scheme:    
+    Now we activate a color scheme:
     >>> ec.set_active_scheme('NoColor')
     >>> ec.active_scheme_name
     'NoColor'
@@ -314,7 +739,7 @@ def exception_colors():
     'filename', 'linenoEm', 'excName', 'lineno', 'valEm', 'filenameEm',
     'nameEm', 'line', 'topline']
     """
-    
+
     ex_colors = ColorSchemeTable()
 
 
@@ -362,7 +787,7 @@ def exception_colors():
         name = C.Purple,
         vName = C.Cyan,
         val = C.Green,
-        em = C.Cyan,        
+        em = C.Cyan,
         # Emphasized colors for the last frame of the traceback
         normalEm = C.Cyan,
         filenameEm = C.Green,
@@ -501,7 +926,7 @@ def findsource(object):
         while lnum > 0:
             if pmatch(lines[lnum]): break
             lnum -= 1
- 
+
         return lines, lnum
     raise IOError('could not find code object')
 
@@ -570,8 +995,8 @@ def _fixed_getinnerframes(etb, context=1,tb_offset=0):
 # can be recognized properly by ipython.el's py-traceback-line-re
 # (SyntaxErrors have to be treated specially because they have no traceback)
 
-_parser = pycolorize.Parser()
-    
+_parser = Parser()
+
 def _formatTracebackLines(lnum, index, lines, Colors, lvals=None, scheme='LightBG'):
     numbers_width = INDENT_SIZE - 1
     res = []
@@ -589,7 +1014,7 @@ def _formatTracebackLines(lnum, index, lines, Colors, lvals=None, scheme='LightB
     for line in lines:
         new_line, err = _line_format(line,'str',scheme)
         if not err: line = new_line
-        
+
         if i == lnum:
             # This is the line with the error
             pad = numbers_width - len(str(i))
@@ -603,11 +1028,11 @@ def _formatTracebackLines(lnum, index, lines, Colors, lvals=None, scheme='LightB
                 marker = ''
             num = marker + str(i)
 
-            line = '%s%s%s %s%s' %(Colors['linenoEm'], num, 
+            line = '%s%s%s %s%s' %(Colors['linenoEm'], num,
                                    Colors['line'], line, Colors['Normal'])
         else:
             num = '%*s' % (numbers_width,i)
-            line = '%s%s%s %s' %(Colors['lineno'], num, 
+            line = '%s%s%s %s' %(Colors['lineno'], num,
                                  Colors['Normal'], line)
 
         res.append(line)
@@ -651,7 +1076,7 @@ class TBTools:
 
     def color_toggle(self):
         """Toggle between the currently active color scheme and NoColor."""
-        
+
         if self.color_scheme_table.active_scheme_name == 'NoColor':
             self.color_scheme_table.set_active_scheme(self.old_scheme)
             self.Colors = self.color_scheme_table.active_colors
@@ -663,7 +1088,7 @@ class TBTools:
 #---------------------------------------------------------------------------
 class ListTB(TBTools):
     """Print traceback information from a traceback list, with optional color.
-        
+
     Calling: requires 3 arguments:
       (etype, evalue, elist)
     as would be obtained by:
@@ -682,7 +1107,7 @@ class ListTB(TBTools):
 
     def __init__(self,color_scheme='LightBG'):
         TBTools.__init__(self, color_scheme=color_scheme, call_pdb=0)
-        
+
     def __call__(self, etype, value, elist):
         Term.cout.flush()
         print >> Term.cerr, self.text(etype,value,elist)
@@ -712,7 +1137,7 @@ class ListTB(TBTools):
         same index in the argument list.  Each string ends in a newline;
         the strings may contain internal newlines as well, for those items
         whose source text line is not None.
-        
+
         Lifted almost verbatim from traceback.py
         """
 
@@ -720,7 +1145,7 @@ class ListTB(TBTools):
         list = []
         for filename, lineno, name, line in extracted_list[:-1]:
             item = '  File %s"%s"%s, line %s%d%s, in %s%s%s\n' % \
-                    (Colors['filename'], filename, Colors['Normal'], 
+                    (Colors['filename'], filename, Colors['Normal'],
                      Colors['lineno'], lineno, Colors['Normal'],
                      Colors['name'], name, Colors['Normal'])
             if line:
@@ -739,7 +1164,7 @@ class ListTB(TBTools):
                                             Colors['Normal'])
         list.append(item)
         return list
-        
+
     def _format_exception_only(self, etype, value):
         """Format the exception part of a traceback.
 
@@ -750,7 +1175,7 @@ class ListTB(TBTools):
         printed) display detailed information about where the syntax error
         occurred.  The message indicating which exception occurred is the
         always last string in the list.
-        
+
         Also lifted nearly verbatim from traceback.py
         """
 
@@ -782,7 +1207,7 @@ class ListTB(TBTools):
                         while i < len(line) and line[i].isspace():
                             i = i+1
                         list.append('%s    %s%s\n' % (Colors['line'],
-                                                      line.strip(), 
+                                                      line.strip(),
                                                       Colors['Normal']))
                         if offset is not None:
                             s = '    '
@@ -822,7 +1247,7 @@ class ListTB(TBTools):
 # @author timv
 def enable(color_scheme='LightBG', tb_offset=0, long_header=0, call_pdb=0, include_vars=1):
     """ register VerboseTB as the system exception handler """
-    h = VerboseTB(color_scheme=color_scheme, 
+    h = VerboseTB(color_scheme=color_scheme,
                   tb_offset=tb_offset,
                   long_header=long_header,
                   call_pdb=call_pdb,
@@ -916,7 +1341,7 @@ class VerboseTB(TBTools):
             # Header with the exception type, python version, and date
             pyver = 'Python ' + string.split(sys.version)[0] + ': ' + sys.executable
             date = time.ctime(time.time())
-            
+
             head = '%s%s%s\n%s%s%s\n%s' % (Colors['topline'], '-'*75, ColorsNormal,
                                            exc, ' '*(75-len(str(etype))-len(pyver)),
                                            pyver, string.rjust(date, 75) )
@@ -988,7 +1413,7 @@ class VerboseTB(TBTools):
                 inspect_error()
                 traceback.print_exc(file=Term.cerr)
                 print "\nIPython's exception reporting continues...\n"
-                
+
             if func == '?':
                 call = ''
             else:
@@ -1023,7 +1448,7 @@ class VerboseTB(TBTools):
                 there is no way to disambguate partial dotted structures until
                 the full list is known.  The caller is responsible for pruning
                 the final list of duplicates before using it."""
-                
+
                 # build composite names
                 if token == '.':
                     try:
@@ -1071,7 +1496,7 @@ class VerboseTB(TBTools):
                       "The following traceback may be corrupted or invalid\n"
                       "The error message is: %s\n" % msg)
                 print _m
-            
+
             # prune names list of duplicates, but keep the right order
             unique_names = uniq_stable(names)
 
@@ -1149,7 +1574,7 @@ class VerboseTB(TBTools):
 #             if ipinst is not None:
 #                 ipinst.IP.hooks.synchronize_with_editor(filepath, lnum, 0)
         # vds: <<
-                
+
         # return all our info assembled as a single string
         return '%s\n\n%s\n%s' % (head,'\n'.join(frames),''.join(exception[0]) )
 
@@ -1196,7 +1621,7 @@ class VerboseTB(TBTools):
                 self.pdb.interaction(self.tb.tb_frame, self.tb)
             finally:
                 sys.displayhook = dhook
-            
+
         if hasattr(self,'tb'):
             del self.tb
 
@@ -1232,7 +1657,7 @@ class FormattedTB(VerboseTB, ListTB):
     one needs to remove a number of topmost frames from the traceback (such as
     occurs with python programs that themselves execute other python code,
     like Python shells).  """
-    
+
     def __init__(self, mode = 'Plain', color_scheme='LightBG',
                  tb_offset = 0, long_header=0, call_pdb=0, include_vars=0):
 
@@ -1243,7 +1668,7 @@ class FormattedTB(VerboseTB, ListTB):
         VerboseTB.__init__(self, color_scheme, tb_offset, long_header,
                            call_pdb=call_pdb, include_vars=include_vars)
         self.set_mode(mode)
-        
+
     def _extract_tb(self,tb):
         if tb:
             return traceback.extract_tb(tb)
@@ -1305,7 +1730,7 @@ class AutoFormattedTB(FormattedTB):
     It will find out about exceptions by itself.
 
     A brief example:
-    
+
     AutoTB = AutoFormattedTB(mode='Verbose', color_scheme='Linux')
     try:
       ...
@@ -1321,7 +1746,7 @@ class AutoFormattedTB(FormattedTB):
           - tb_offset: the number of frames to skip over in the stack, on a
           per-call basis (this overrides temporarily the instance's tb_offset
           given at initialization time.  """
-        
+
         if out is None:
             out = Term.cerr
         Term.cout.flush()
@@ -1373,7 +1798,7 @@ if __name__ == "__main__":
     except:
         traceback.print_exc()
     print ''
-    
+
     handler = ColorTB()
     print '*** ColorTB ***'
     try:
@@ -1397,6 +1822,5 @@ if __name__ == "__main__":
         print spam(1, (2, 3))
     except:
         apply(handler, sys.exc_info() )
-    print ''
 
-
+print _scheme_default

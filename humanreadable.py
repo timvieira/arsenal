@@ -202,3 +202,64 @@ if __name__ == '__main__':
     test()
 
 
+# borrowed from girzzled https://github.com/bmc/grizzled-python/blob/master/grizzled/text/__init__.py
+def str2bool(s):
+    """
+    Convert a string to a boolean value. The supported conversions are:
+
+        +--------------+---------------+
+        | String       | Boolean value |
+        +==============+===============+
+        | "false"      | False         |
+        +--------------+---------------+
+        | "true"       | True          |
+        +--------------+---------------+
+        | "f"          | False         |
+        +--------------+---------------+
+        | "t"          + True          |
+        +--------------+---------------+
+        | "0"          | False         |
+        +--------------+---------------+
+        | "1"          + True          |
+        +--------------+---------------+
+        | "n"          | False         |
+        +--------------+---------------+
+        | "y"          + True          |
+        +--------------+---------------+
+        | "no"         | False         |
+        +--------------+---------------+
+        | "yes"        + True          |
+        +--------------+---------------+
+        | "off"        | False         |
+        +--------------+---------------+
+        | "on"         + True          |
+        +--------------+---------------+
+
+    Strings are compared in a case-blind fashion.
+
+    **Note**: This function is not currently localizable.
+
+    :Parameters:
+        s : str
+            The string to convert to boolean
+
+    :rtype: bool
+    :return: the corresponding boolean value
+
+    :raise ValueError: unrecognized boolean string
+    """
+    try:
+        return {'false' : False,
+                'true'  : True,
+                'f'     : False,
+                't'     : True,
+                '0'     : False,
+                '1'     : True,
+                'no'    : False,
+                'yes'   : True,
+                'y'     : False,
+                'n'     : True,
+                'off'   : False,
+                'on'    : True}[s.lower()]
+    except KeyError:
+        raise ValueError, 'Unrecognized boolean string: "%s"' % s

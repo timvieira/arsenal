@@ -1,0 +1,126 @@
+import re
+from sys import stdout, stderr, stdin
+from glob import glob
+
+
+def print_parse(t, out=stdout.write):
+    "Print parse formatted as an s-expression."
+    def pp(t):
+        if isinstance(t, basestring):                    # base case
+            return out(t)
+        if len(t) == 1:
+            if t[0]:
+                pp(t[0])
+            return
+        label, children = t[0], t[1:]
+        assert isinstance(label, basestring)
+        out('(%s ' % label)
+        n = len(children)
+        for i, child in enumerate(children):
+            pp(child)   # first child already indented
+            if i != n-1:                                 # no space after last child
+                out(' ')
+        out(')')
+    pp(t)
+    out('\n')
+
+
+
+def sexpr(s, add_root=True):
+    """
+
+    Example usage:
+
+      >>> sexpr('(S (NP Papa) (VP (V ate) (NP (Det the) (N caviar))))')
+      ['S', ['NP', 'Papa'], ['VP', ['V', 'ate'], ['NP', ['Det', 'the'], ['N', 'caviar']]]]
+
+
+    TO match the Penn tree bank we add a ROOT symbol in the following case
+
+      >>> sexpr('((S (NP Papa) (VP (V ate) (NP (Det the) (N caviar)))))')
+      ['ROOT', ['S', ['NP', 'Papa'], ['VP', ['V', 'ate'], ['NP', ['Det', 'the'], ['N', 'caviar']]]]]
+
+    """
+
+
+    s = s[s.find('('):]
+    tree = []
+    stack = []  # top of stack (index -1) points to current node in tree
+    stack.append(tree)
+    curtok = ""
+    depth = 0
+    for c in s:
+        if c=='(':
+            new = []
+            stack[-1].append(new)
+            stack.append(new)
+            curtok = ""
+            depth += 1
+        elif c==')':
+            if curtok:
+                stack[-1].append(curtok)
+                curtok = ""
+            stack.pop()
+            curtok = ""
+            depth -= 1
+        #elif c.isspace():
+        elif c in (' ','\t','\r','\n'):  ## dont want funny unicode ones?
+            if curtok:
+                stack[-1].append(curtok)
+                curtok = ""
+        else:
+            curtok += c
+        if depth < 0:
+            raise BadSexpr("Too many closing parens")
+    if depth > 0:
+        raise BadSexpr("Didn't close all parens, depth %d" % depth)
+    root = tree[0]
+    # weird, treebank parses have an extra, unlabeled node on top
+    if isinstance(root[0], list) and add_root:
+        root = ["ROOT"] + root
+    return root
+
+class BadSexpr(Exception):
+    pass
+
+
+
+def features(t):
+    print 'S, NP, VP'
+
+
+def main():
+
+    for filename in glob('/home/timv/projects/ldp/data/LDC99T42/treebank_3/parsed/mrg/wsj/*/*.mrg'):
+        #print >> stderr, filename
+        print >> stderr, '.',
+
+        with file(filename) as f:
+            contents = f.read()
+            chunks = contents.split('( (')
+
+        # parse file using sexpr
+        for chunk in chunks:
+
+            if not chunk.strip():
+                continue
+
+            chunk = '( (' + chunk
+
+            print chunk
+
+            try:
+                tree = sexpr(chunk)
+            except BadSexpr:
+                print >> stderr
+                print >> stderr, 'failed to parse tree'
+                print >> stderr, chunk
+                continue
+
+            print tree
+            features(tree)
+
+
+
+if __name__ == '__main__':
+    main()

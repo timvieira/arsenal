@@ -14,7 +14,7 @@ class prioritydict(dict):
 
     The 'sorted_iter' method provides a destructive sorted iterator.
     """
-    
+
     def __init__(self, *args, **kwargs):
         super(prioritydict, self).__init__(*args, **kwargs)
         self._rebuild_heap()
@@ -28,7 +28,7 @@ class prioritydict(dict):
 
         Raises IndexError if the object is empty.
         """
-        
+
         heap = self._heap
         v, k = heap[0]
         while k not in self or self[k] != v:
@@ -41,7 +41,7 @@ class prioritydict(dict):
 
         Raises IndexError if the object is empty.
         """
-        
+
         heap = self._heap
         v, k = heappop(heap)
         while k not in self or self[k] != v:
@@ -52,9 +52,8 @@ class prioritydict(dict):
     def __setitem__(self, key, val):
         # We are not going to remove the previous value from the heap,
         # since this would have a cost O(n).
-        
         super(prioritydict, self).__setitem__(key, val)
-        
+
         if len(self._heap) < 2 * len(self):
             heappush(self._heap, (val, key))
         else:
@@ -74,7 +73,6 @@ class prioritydict(dict):
 #    def update(self, *args, **kwargs):
 #        # Reimplementing dict.update is tricky -- see e.g.
 #        # http://mail.python.org/pipermail/python-ideas/2007-May/000744.html
-#        # We just rebuild the heap from scratch after passing to super.       
+#        # We just rebuild the heap from scratch after passing to super.
 #        super(priority_dict, self).update(*args, **kwargs)
 #        self._rebuild_heap()
-

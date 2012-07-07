@@ -2,9 +2,9 @@
 
 TODO:
 
- - sometimes we accidently activate some strange thing from "matplotlib's
-   interative toolbar"(e.g. the grabber hand to move things), disabling the
-   cursor, which means that we can't click on points... this is annoying.
+ - Sometimes we accidently activate some strange things from "matplotlib's
+   interative toolbar" (e.g. the grabber hand), disabling the cursor, which
+   means that we can't click on points... this is annoying.
 
  - I'd like better arrow-key exploration of point clouds. Priniciple of least
    surprise. I don't believe this is a trivial problem (with out something crazy
@@ -225,14 +225,13 @@ def main():
                           'color': uniform(0, 1, size=n)})
 
     # payload some random information we'd like to plot in the other subplot.
-    payload_domain = np.arange(0, 10, 0.1)
-    m['payload'] = [a*np.sin(payload_domain) for a in m['x']]
+    m['payload'] = [a*np.sin(np.arange(0, 10, 0.1)) for a in m['x']]
 
     def callback(row):
         print
         print row
         ax2.clear()
-        ax2.plot(payload_domain, row['payload'])
+        ax2.plot(row['payload'])
 
     ax1 = pl.subplot(211)
     ax2 = pl.subplot(212)
@@ -245,7 +244,6 @@ def main():
 
     b = PointBrowser(m, callback=callback, ax=ax1, plot=plot)
     pl.show()
-
 
 if __name__ == '__main__':
     main()

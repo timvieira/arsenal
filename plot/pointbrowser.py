@@ -2,18 +2,23 @@
 
 TODO:
 
- - Sometimes we accidently activate some strange things from "matplotlib's
-   interative toolbar" (e.g. the grabber hand), disabling the cursor, which
-   means that we can't click on points... this is annoying.
+ - Accidental keystrokes: accidental activatation of strange interaction modes
+   from "matplotlib's interative toolbar" (e.g. the grabber hand or log-scale),
+   disabling the cursor, which means that we can't click on points.
 
- - I'd like better arrow-key exploration of point clouds. Priniciple of least
-   surprise. I don't believe this is a trivial problem (with out something crazy
-   like eye tracking software).
+ - Point cloud navigation: I'd like intuitive arrow-key exploration of point
+   clouds. Adhering to the priniciple of least surprise appears to be
+   nontrivial.
 
    Things which seem relevant.
     * proximity to current selection
     * history of previous points
     * all points ought to be reachable (no cycles)
+
+ - Interaction with plots. Ideally, we can apply these interaction features to
+   any axis so that matplotlib feels more like Wolfram Mathematica plots.
+    * Pan: click-and-drag on background (maybe with modifier key like shift).
+    * Zoo: double-click on background
 
 """
 
@@ -126,19 +131,20 @@ class PointBrowser(object):
 #   they keep the same absolute position on the screen even though they should
 #   have moved along with the point.
 #------------------------------------------------------------------------------
-#        elif event.key == 'i' and self.labelcol:
-#            idx = self.idxs[self.index]
-#            picked = self.X.ix[idx]
-#            l = picked[self.labelcol]
-#            x = picked[self.xcol]
-#            y = picked[self.ycol]
-#            a = self.ax.annotate(l, xy=(x, y),
-#                                 xytext=(0, -30), textcoords='offset points',
-#                                 arrowprops=dict(arrowstyle="->",
-#                                 connectionstyle="angle,angleA=0,angleB=90,rad=10",
-#                                                 color='k', alpha=0.5),
-#                                 fontsize=9, rotation=90, color='k', alpha=0.5)
-#            a.draggable(use_blit=True)
+        elif event.key == 'i':
+            idx = self.idxs[self.index]
+            picked = self.X.ix[idx]
+            x = picked[self.xcol]
+            y = picked[self.ycol]
+            l = 'Point(%.2f,%.2f)' % (x, y)
+            a = self.ax.annotate(l, xy=(x, y),
+                                 xytext=(0, -30), textcoords='offset points',
+                                 arrowprops=dict(arrowstyle="->",
+                                 connectionstyle="angle,angleA=0,angleB=90,rad=10",
+                                                 color='k', alpha=0.5),
+                                 fontsize=9, #rotation=90,
+                                 color='k', alpha=0.5)
+            a.draggable(use_blit=True)
 #------------------------------------------------------------------------------
 
         self.draw()
@@ -179,7 +185,7 @@ class PointBrowser(object):
         idx = self.idxs[i]
         picked = self.selected_row = self.X.ix[idx]
         self.select_point(picked[self.xcol], picked[self.ycol])
-        self.callback(picked)
+        self.callback(self, picked)
         self.draw()
 
 
@@ -227,22 +233,35 @@ def main():
     # payload some random information we'd like to plot in the other subplot.
     m['payload'] = [a*np.sin(np.arange(0, 10, 0.1)) for a in m['x']]
 
-    def callback(row):
+    def callback(browser, row):
         print
         print row
         ax2.clear()
         ax2.plot(row['payload'])
 
-    ax1 = pl.subplot(211)
-    ax2 = pl.subplot(212)
+    if 1:
+        ax1 = pl.subplot(211)
+        ax2 = pl.subplot(212)
 
-    #plot = None
-    plot = ax1.scatter(m['x'], m['y'], c=m['color'], s=m['size'])
-    #[plot] = ax1.plot(m['x'], m['y'], lw=2,
-    #                  marker='o', markersize=5, markerfacecolor='b',
-    #                  linewidth=0.5, c='r')
+        # pass in your own plot
+        if 1:
+            # try both types of plots: scatter and line
+            if 1:
+                plot = ax1.scatter(m['x'], m['y'], c=m['color'], s=m['size'])
+            else:
+                [plot] = ax1.plot(m['x'], m['y'], lw=2,
+                                  marker='o', markersize=5, markerfacecolor='b',
+                                  linewidth=0.5, c='r')
 
-    b = PointBrowser(m, callback=callback, ax=ax1, plot=plot)
+            b = PointBrowser(m, callback=callback, plot=plot)
+
+        else:
+            # stick default plot on ax1
+            b = PointBrowser(m, callback=callback, ax=ax1)
+
+    else:
+        b = PointBrowser(m)
+
     pl.show()
 
 if __name__ == '__main__':

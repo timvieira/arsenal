@@ -1,4 +1,33 @@
-from numpy.core import array, exp, log, dot, abs as np_abs, multiply
+from __future__ import division
+import numpy as np
+from numpy import array, exp, log, dot, abs as np_abs, multiply
+
+def normalize_zscore(data):
+    """
+    Shift and rescale data to be zero-mean and unit-variance along axis 0.
+    """
+    shift = data.mean(axis=0)
+    rescale = data.std(axis=0)
+    rescale[rescale == 0] = 1.0   # avoid divide by zero
+    return (data - shift) / rescale
+
+def normalize_interval(data):
+    """
+    Shift and rescale data so that it lies in the range [0,1].
+    """
+    shift = data.min(axis=0)
+    rescale = data.max(axis=0) - shift
+    rescale[rescale == 0] = 1.0  # avoid divide by zero
+    return (data - shift) / rescale
+
+def normalize(p):
+    return (1.0 / p.sum()) * p
+
+def lidstone(p, delta):
+    """
+    Lidstone smoothing is a generalized of Laplace smoothing.
+    """
+    return normalize(p + delta)
 
 def logsumexp(a):
     """
@@ -29,7 +58,7 @@ def kl_divergence(p, q):
 #          = Entropy(p) + CrossEntropy(p,q)
 
 # timv: do we need to specify all three things?
-# 
+#
 #  P(x) = sum_y P(x,y) by law of total probabilty
 def mutual_information(joint):
     """
@@ -41,7 +70,7 @@ def mutual_information(joint):
     p = p(x)
     q = q(y)
 
-    relationships: 
+    relationships:
       MI(x,y) is the expected PMI(x,y) wrt p(x,y)
       MI(x,y) = KL( p(x,y) || p(x) p(y) )
 
@@ -54,7 +83,6 @@ def mutual_information(joint):
     independent = multiply.outer(px, py)
     assert joint.shape == independent.shape
     return kl_divergence(array(joint.flat), array(independent.flat))
-
 
 def cross_entropy(p, q):
     """ Cross Entropy of two vectors,
@@ -73,13 +101,6 @@ def assert_isdistr(p):
     assert (p >= 0).all()
     assert (p <= 1).all()
     assert abs(p.sum() - 1.0) < 0.000001
-
-def normalize(p):
-    return (1.0 / p.sum()) * p
-
-# Lidstone smoothing is a generalization of Laplace smoothing.
-def lidstone(p, delta):
-    return normalize(p + delta)
 
 def equal(a, b, tol=1e-10):
     "L_{\inf}(a - b) < tol"
@@ -115,8 +136,7 @@ if __name__ == '__main__':
 
         # Mutual Information tests
         #Pjoint = array([[0.25, 0.25], [0.25, 0.25]])
- 
-        import numpy as np
+
         Pjoint = normalize(np.random.rand(4,10))
         assert_equal(mutual_information(Pjoint),
                      mutual_information(Pjoint.T))

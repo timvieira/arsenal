@@ -2,11 +2,16 @@ import os
 import smtplib
 import mimetypes
 import email
-from email import MIMEMultipart
-from email import MIMEBase, MIMEText
-from email import MIMEAudio
-from email import MIMEImage
-from email import encode_base64
+#from email import MIMEMultipart
+#from email import MIMEBase, MIMEText
+#from email import MIMEAudio
+#from email import MIMEImage
+#from email import encode_base64
+
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.utils import formatdate
+
 
 from getpass import getpass
 
@@ -57,7 +62,7 @@ def get_attachment(attachmentFilePath):
         else:
             attachment = MIMEBase(mainType, subType)
         attachment.set_payload(f.read())
-        encode_base64(attachment)
+        #encode_base64(attachment)
 
     attachment.add_header('Content-Disposition', 'attachment', filename=os.path.basename(attachmentFilePath))
     return attachment
@@ -66,5 +71,5 @@ def get_attachment(attachmentFilePath):
 if __name__ == '__main__':
     send_gmail(gmail_user='timsfanmail',
                recipient='tim.f.vieira@gmail.com',
-               subject='test subject', 
+               subject='test subject',
                body='test body.')

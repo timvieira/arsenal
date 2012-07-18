@@ -249,17 +249,13 @@ def str2bool(s):
     :raise ValueError: unrecognized boolean string
     """
     try:
-        return {'false' : False,
-                'true'  : True,
-                'f'     : False,
-                't'     : True,
-                '0'     : False,
-                '1'     : True,
-                'no'    : False,
-                'yes'   : True,
-                'y'     : False,
-                'n'     : True,
-                'off'   : False,
-                'on'    : True}[s.lower()]
+        return {
+            'true' : True,  'false': False,
+            't'    : True,  'f'    : False,
+            '1'    : True,  '0'    : False,
+            'yes'  : True,  'no'   : False,
+            'y'    : True,  'n'    : False,
+            'on'   : True,  'off'  : False,
+        }[s.lower()]
     except KeyError:
         raise ValueError, 'Unrecognized boolean string: "%s"' % s

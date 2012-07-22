@@ -3,6 +3,8 @@ import time
 from threading import Thread
 from functools import wraps
 
+# TODO: add verbose argument to timelimit and retry
+
 class dispatch(Thread):
     def __init__(self, f, *args, **kwargs):
         Thread.__init__(self)

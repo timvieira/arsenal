@@ -1,9 +1,6 @@
 # stdlib
-import re, os, sys, time
-import warnings
-import BaseHTTPServer
-import webbrowser
-import subprocess, tempfile
+import re, os, sys, time, traceback, warnings, webbrowser
+import subprocess, tempfile, BaseHTTPServer
 from functools import wraps
 from StringIO import StringIO
 from contextlib import contextmanager
@@ -11,6 +8,25 @@ from threading import Thread
 
 # python-extras imports
 from terminal import colors
+
+
+@contextmanager
+def ignore_error(color='red'):
+    try:
+        yield
+    except:
+        etype, evalue, tb = sys.exc_info()
+        tb = '\n'.join(traceback.format_exception(etype, evalue, tb))
+
+        if color is not None:
+            color = getattr(colors, color)
+        else:
+            color = '%s'
+
+        print color % '*'*80
+        print color % tb
+        print color % '*'*80
+
 
 class logger(object):
 

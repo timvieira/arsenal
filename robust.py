@@ -71,9 +71,11 @@ def retry_apply(fn, args, kwargs=None, tries=2, pause=0.1, suppress=(Exception,)
     `allow`:    exceptions which will not be suppressed; this helps avoid
                 stupid mistakes such as NameErrors and NotImplementedErrors.
     """
+    if kwargs is None:
+        kwargs = {}
     for i in xrange(tries):
         try:
-            return fn(*args, **(kwargs or {}))
+            return fn(*args, **kwargs)
         except allow:          # raise these exceptions
             raise
         except suppress:

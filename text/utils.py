@@ -1,9 +1,8 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import re
-import codecs
 from text import markup
-from xml.sax.saxutils import escape as xmlescape, unescape as xmlunescape
 
 
 # Borrowed from: http://www.codigomanso.com/en/2010/05/una-de-python-force_unicode/
@@ -67,18 +66,20 @@ _recodings = {'ae': ['ä', u'ä', '&auml;', '\u00E4', u'\u00E4', '\u0308a', '\xc
 """
 
 # taken from NLTK
-def clean_html(html):
+def htmltotext(x):
     """ Remove HTML markup from the given string. """
     # remove inline JavaScript / CSS
-    x = re.sub(r'(?is)<(script|style).*?>.*?(</\1>)', '', html.strip())
+    x = re.compile('<script.*?>[\w\W]*?</script>', re.IGNORECASE).sub('', x)
+    x = re.compile('<style.*?>[\w\W]*?</style>', re.IGNORECASE).sub('', x)
     # remove html comments. must be done before removing regular tags since comments can contain '>' characters.
-    x = re.sub(r'(?s)<!--(.*?)-->[\n]?', '', x)
+    x = re.sub(r'<!--([\w\W]*?)-->', '', x)
     # remove the remaining tags
     x = re.sub(r'(?s)<.*?>', ' ', x)
     # remove html entities
     x = markup.remove_entities(x)
     # clean up whitespace
-    x = re.sub(r'[ ]+', ' ', x)
+    x = re.sub('[ ]+', ' ', x)
+    x = re.compile('(\n\n+)', re.MULTILINE).sub('\n', x)
     return x
 
 
@@ -153,13 +154,34 @@ LATIN2ASCII = {
     u'\u00ff': 'y:',
 }
 
+
+LIGATURES_MAP = dict([
+    (u'ﬀ', 'ff'),
+    (u'ﬁ', 'fi', ),
+    (u'—', '--'),
+    (u'ﬃ', 'ffi'),
+    (u'“', '"'),
+    (u'”', '"'),
+    (u'\u00c6', 'AE'),
+    (u'\u00e6', 'ae'),
+    (u'\u0152', 'OE'),
+    (u'\u0153', 'oe'),
+    (u'\u0132', 'IJ'),
+    (u'\u0133', 'ij'),
+    (u'\u1d6b', 'ue'),
+    (u'\ufb00', 'ff'),
+    (u'\ufb01', 'fi'),
+    (u'\ufb02', 'fl'),
+    (u'\ufb03', 'ffi'),
+    (u'\ufb04', 'ffl'),
+    (u'\ufb05', 'ft'),
+    (u'\ufb06', 'st'),
+])
+
+LIGATURES = re.compile('(%s)' % '|'.join(LIGATURES_MAP.keys()))
+
 def remove_ligatures(text):
-    for plain, funny in (('AE','\u00c6'), ('ae','\u00e6'), ('OE','\u0152'), ('oe','\u0153'),
-                         ('IJ','\u0132'), ('ij','\u0133'), ('ue','\u1d6b'), ('ff','\ufb00'),
-                         ('fi','\ufb01'), ('fl','\ufb02'), ('ffi','\ufb03'), ('ffl','\ufb04'),
-                         ('ft','\ufb05'), ('st','\ufb06')):
-        text = text.replace(funny, plain)
-    return text
+    return LIGATURES.sub(lambda m: LIGATURES_MAP[m.group(1)], text)
 
 def convert_special_html_escapes(text):
     for plain, funny in (('ä','&auml;'), ('ö','&ouml;'), ('ü','&uuml;'), ('Ä','&Auml;'), ('Ö','&Ouml;'),
@@ -587,14 +609,13 @@ if __name__ == '__main__':
         sys.exit(1)
 
     x = sys.stdin.read()
-    x = clean_html(x)
-    x = markup.remove_entities(x)
+    x = htmltotext(x)
 
     print x
 
     if 0:
         no_ent = markup.remove_entities(XXX)
-    
+
         for orig, line in zip(XXX.split('\n'), (x.strip().split() for x in no_ent.split('\n'))):
             if not line:
                 print
@@ -613,4 +634,3 @@ if __name__ == '__main__':
     if 0:
         B = remove_accents(XXX)
         print B
-

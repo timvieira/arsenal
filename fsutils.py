@@ -5,11 +5,18 @@ import re, os, tempfile, shutil
 from contextlib import contextmanager
 from fnmatch import fnmatch
 from iterextras import atmost
+from subprocess import Popen, PIPE
 
 
-def ensure_dir(f, verbose=False):
+def filetype(f):
+    try:
+        return Popen(['file', '-ib', f], stdout=PIPE).communicate()[0].split(';')[0]
+    except TypeError:
+        return 'unknown'
+
+
+def mkdir(d, verbose=False):
     """ Ensure  directories need to create a file exist. """
-    d = os.path.abspath(os.path.dirname(f))
     try:
         os.makedirs(d)
     except OSError as e:
@@ -22,12 +29,21 @@ def ensure_dir(f, verbose=False):
             print '[ensuredir] created', d
     return d
 
+
+def ensure_dir(f, verbose=False):
+    """ Ensure  directories need to create a file exist. """
+    d = os.path.abspath(os.path.dirname(f))
+    mkdir(d, verbose=verbose)
+    return d
+
+
 def clear_dir(d):
     try:
         shutil.rmtree(d)
     except:
         pass
     os.mkdir(d)
+
 
 @contextmanager
 def cd(d=None):
@@ -246,4 +262,3 @@ if __name__ == '__main__':
         print 'done.'
 
     run_tests()
-

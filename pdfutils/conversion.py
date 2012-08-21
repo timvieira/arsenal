@@ -24,13 +24,12 @@ class file_specifier(object):
         return 'file_specifier {\n%s\n}' % ('\n'.join(map('  %8s: %s'.__mod__, self.__dict__.iteritems())))
 
 
-def pdftotext(pdf, output=None, verbose=False, usecached=False):
+def pdftotext(pdf, output=None, verbose=False, usecached=True):
     """Wraps a system call to pdftotext. """
     if not output:
         output = '{pdf.abspath}.d/pdftotext.txt'.format(pdf=file_specifier(pdf))
     output = os.path.abspath(output)
     outdir = os.path.dirname(output)
-    # TODO: use fsutils.ensure_dir
     # check if output directory exists
     if outdir and not os.path.exists(os.path.dirname(output)):
         if verbose:

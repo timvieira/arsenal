@@ -3,23 +3,18 @@ from inspect import isfunction, ismethod, getargs, getargspec, formatargspec
 from optparse import OptionParser   # TODO: use argparse
 from pprint import pprint
 from collections import defaultdict
-
-'''
-if obj.__doc__ is None:
-    doc = '...'
-else:
-    if verbose:
-        doc = obj.__doc__.strip()
-    else:
-        doc = obj.__doc__.strip().split('\n')[0]   # use first line
-print '   ', doc
-'''
+from debug import ip
 
 def usage(obj):
-    name = obj.__name__
+    name = obj.__name__.split('.')[-1]
     signature = call_signature(obj) or '%s(???)' % name
-    doc = '    ' + (getattr(obj, '__doc__', '...') or '...').strip()
+    doc = '    ' + getdoc(obj)   # todo: indent
     return '\n'.join([signature, doc])
+
+
+def getdoc(obj, indent=0):
+    return (getattr(obj, '__doc__', '') or '').strip()
+
 
 def call_signature(obj, oname=''):
     """
@@ -70,38 +65,38 @@ def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False,
     except ImportError:
         pass
 
-    def filterfn(x):
-        return x not in ('automain', 'usage', 'call_signature') and not x.startswith('_')
 
-    names = list(sorted(available or [x for x in dir(mod) if filterfn(x)]))
+    if available:
+        filterfn = None
+    else:
+        def filterfn(obj):
+            try:
+                if not obj.__module__ == '__main__':
+                    return False
+                if not hasattr(obj, '__call__'):
+                    return False
+            except AttributeError:
+                return False
+            else:
+                name = obj.__name__
+                return name not in ('automain', 'usage', 'call_signature') and not name.startswith('_')
+        available = dir(mod)
+    objects = [getattr(mod, x) if isinstance(x, basestring) else x for x in available]
+    objects = list(sorted(filter(filterfn, objects), key=lambda x: x.__name__))
+
 
     # should we print the module's docstring in the help?
-    def show_help():
-        print 'what do you want to do?'
+    def show_help(objects):
         print
-        for name in names:
-            try:
-                # we might have been passed objects instead of names
-                if isinstance(name, basestring):
-                    obj = getattr(mod, name)
-                else:
-                    obj = name
-                    name = obj.__name__
-                if not obj.__module__ == '__main__':
-                    continue
-                if not hasattr(obj, '__call__'):
-                    continue
-            except AttributeError:
-                continue
-            else:
-                print usage(obj)
-                print
+        for obj in objects:
+            print usage(obj)
+            print
 
     try:
         action = getattr(mod, argv[1])
         assert hasattr(action, '__call__')
     except (IndexError, AttributeError, AssertionError):
-        show_help()
+        show_help(objects)
     else:
         args = list(argv[2:])
 
@@ -109,7 +104,7 @@ def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False,
         #parser.allow_interspersed_args = False
         spec = getargspec(action)
 
-        if spec.defaults is not None:
+        if spec.defaults:
             for default, arg in zip(reversed(spec.defaults), reversed(spec.args)):  # args with default values
                 longname = '--' + arg
                 #if isinstance(default, bool):   # XXX: this not the right semantics.
@@ -120,18 +115,24 @@ def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False,
                 #else:
                 parser.add_option(longname, default=default)
 
+        parser.usage = '%s [options] %s' % (action.__name__, ' '.join(spec.args)) \
+            + '\n\n    ' + getdoc(action)
+
         (kw, args) = parser.parse_args(args)
 
         # TODO: need a better usage message which shows positional arguments
 
-        # minimum non keyword args
+        # minimum non-keyword args
         if len(args) < len(spec.args) - len(spec.defaults or []):
             parser.print_help()
             return
 
         kw = kw.__dict__
 
+        # call function
         out = action(*args, **kw)
+
+        # pretty-print result
         if isinstance(out, basestring):
             print out
 
@@ -152,8 +153,7 @@ def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False,
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1].endswith('py'):
+    if len(sys.argv) > 1 and sys.argv[1].endswith('.py'):
         sys.argv = sys.argv[1:]
         execfile(sys.argv[0])
-        # TODO: remove automain from the list
         automain()

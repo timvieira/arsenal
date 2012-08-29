@@ -60,7 +60,7 @@ def log(x):
         return math_log(x)
 
 def argmax(f, seq):
-    """ 
+    """
     >>> argmax(lambda x: -x**2 + 1, range(-10,10))
     0
     """
@@ -119,9 +119,9 @@ def normalize_inplace(x):
 
 def exp_normalize(A):
     """
-    Exponentiate elements of the array, and then normalize them to sum to one. 
+    Exponentiate elements of the array, and then normalize them to sum to one.
 
-    exp(xi) / (exp(x1) + ... + exp(xn)) 
+    exp(xi) / (exp(x1) + ... + exp(xn))
          = exp(xi-B)*exp(B) / (exp(B)*(exp(x1-B) + ... + exp(xn-B)))  for any B
          = exp(xi-B) / (exp(x1-B) + ... + exp(xn-B))                  for any B
     """
@@ -169,10 +169,10 @@ def logsumexp(x):
     The log-sum-exp trick:
       log(sum(exp(xi) for xi in X)) <=> log(sum(exp(xi-B) for xi in X)) + B   for any B
 
-    picking B = max(X), can help prevent problems with numerical overflow. 
+    picking B = max(X), can help prevent problems with numerical overflow.
     """
     B = max(x)
-    return log(sum(x-B for x in x if x > NEG_INF)) + B
+    return log(sum(exp(x-B) for x in x if x > NEG_INF)) + B
 
 
 @deprecated("numpy.logaddexp.")
@@ -182,24 +182,28 @@ def sum_two_log_probs(a, b):
        sumLogProb = log (e^a + e^b)
                   = log e^a(1 + e^(b-a))
                   = a + log (1 + e^(b-a))
-   
+
     By exponentiating (b-a), we obtain better numerical precision than
     we would if we calculated e^a or e^b directly.
     """
-    if (b < a):
+    if b < a:
         return a + log(1 + exp(b-a))
     else:
         return b + log(1 + exp(a-b))
 
-@deprecated("numpy.logaddexp *with NEGATIVE numbers* instead.")
+
 def subtract_log_prob(a, b):
     """ Returns the difference of two doubles expressed in log space """
-    return a + log(1 - exp(b-a))
+    if b < a:
+        return a + log(1 - exp(b-a))
+    else:
+        return b + log(1 - exp(a-b))
+
 
 def sum_log_prob(vals):
     """
     Sums an array of numbers [log(x1), ..., log(xn)] returns log(x1+x2+...+xn)
-   
+
     This saves some of unnecessary calls to log in the two-argument version.
 
     usage:
@@ -240,4 +244,3 @@ if __name__ == '__main__':
     assert entropy((0.5, 0.5)) == 1.0
     assert abs(entropy((0.75, 0.25)) - 0.8112781244) < 1e-10
     assert abs(entropy((0.1, 0.1, 0.8)) == 0.9219280948) < 1e-10
-

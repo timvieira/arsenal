@@ -6,9 +6,9 @@ def metadata(filename):
         x = PdfFileReader(file(filename, 'rb'))
         return x.getDocumentInfo()
     except:
-        return {}
+        return
 
-if __name__ == '__main__':
+def main():
     import sys
     for filename in (sys.argv[1:] or sys.stdin):
         print '--'
@@ -21,3 +21,7 @@ if __name__ == '__main__':
             print
         except:
             print 'ERROR'
+
+
+if __name__ == '__main__':
+    main()

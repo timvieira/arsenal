@@ -1,9 +1,10 @@
-import sys, time
+import sys
+from time import time, sleep
 
 from operator import getitem, sub, mul
 from itertools import *
 from random import shuffle
-from collections import defaultdict
+from collections import defaultdict, deque
 
 # IDEAS:
 # * progress_meter: updates based on how much work was dones, e.g.,
@@ -451,22 +452,33 @@ def iterview(x, every=10, length=None):
             end = '     '
         else:
             end = ' ETA '
-        end += eta(time.time() - starttime, n, lenx)
+        end += eta(time() - starttime, n, lenx)
         out += bars(WIDTH - len(out) - len(end), n, lenx)
         out += end
         return out
 
-    starttime = time.time()
+    starttime = time()
     lenx = length or len(x)
     n = lenx
     if lenx == 0:
         raise StopIteration
+
+    #history = []
     for n, y in enumerate(x):
         if every is None or n % every == 0:
             sys.stderr.write('\r' + fmt(starttime, n, lenx))
+
+        #b4 = time()
         yield y
+
+        #history.append(time() - b4)
+        #pylab.ion()
+        #pylab.hist(history, bins=50)
+        #pylab.draw()
+
     sys.stderr.write('\r' + fmt(starttime, n+1, lenx) + '\n')
 
+#import pylab
 
 #_______________________________________________________________________________
 #
@@ -476,7 +488,7 @@ def consume(iterator, n):
     # The technique uses objects that consume iterators at C speed.
     if n is None:
         # feed the entire iterator into a zero-length deque
-        collections.deque(iterator, maxlen=0)
+        deque(iterator, maxlen=0)
     else:
         # advance to the emtpy slice starting at position n
         next(islice(iterator, n, n), None)
@@ -590,7 +602,7 @@ if __name__ == "__main__":
 
         def example_iterview():
             for _ in iterview(xrange(400), every=20):
-                time.sleep(0.01)
+                sleep(0.01)
         #example_iterview()
 
         X = [[0 for i in xrange(4)] for j in xrange(4)]
@@ -610,7 +622,6 @@ if __name__ == "__main__":
 
         import doctest; doctest.testmod()
 
-        from time import sleep
         for _ in iterview(range(100), 1):
             sleep(.1)
 

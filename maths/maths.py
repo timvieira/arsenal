@@ -174,8 +174,6 @@ def logsumexp(x):
     B = max(x)
     return log(sum(exp(x-B) for x in x if x > NEG_INF)) + B
 
-
-@deprecated("numpy.logaddexp.")
 def sum_two_log_probs(a, b):
     """
     Returns the sum of two doubles expressed in log space
@@ -191,14 +189,12 @@ def sum_two_log_probs(a, b):
     else:
         return b + log(1 + exp(a-b))
 
-
 def subtract_log_prob(a, b):
     """ Returns the difference of two doubles expressed in log space """
     if b < a:
         return a + log(1 - exp(b-a))
     else:
         return b + log(1 - exp(a-b))
-
 
 def sum_log_prob(vals):
     """

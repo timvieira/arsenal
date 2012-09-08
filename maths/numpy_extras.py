@@ -29,12 +29,55 @@ def lidstone(p, delta):
     """
     return normalize(p + delta)
 
-def logsumexp(a):
+#def logsumexp(a):
+#    """
+#    Compute the log of the sum of exponentials of an array ``a``, :math:`\log(\exp(a_0) + \exp(a_1) + ...)`
+#   """
+#    b = a.max()
+#   return b + log((exp(a-b)).sum())
+
+# based on implementation from scikits-learn
+def logsumexp(arr, axis=0):
+    """Computes the sum of arr assuming arr is in the log domain.
+
+    Returns log(sum(exp(arr))) while minimizing the possibility of
+    over/underflow.
+
+    Examples
+    --------
+
+    >>> a = np.arange(10)
+    >>> log(sum(exp(a)))
+    9.4586297444267107
+    >>> logsumexp(a)
+    9.4586297444267107
     """
-    Compute the log of the sum of exponentials of an array ``a``, :math:`\log(\exp(a_0) + \exp(a_1) + ...)`
+    arr = np.rollaxis(arr, axis)
+    # Use the max to normalize, as with the log this is what accumulates the
+    # less errors
+    vmax = arr.max(axis=0)
+    out = log(exp(arr - vmax).sum(axis=0))
+    out += vmax
+    return out
+
+
+def exp_normalize(x, T=1.0):
     """
-    b = a.max()
-    return b + log((exp(a-b)).sum())
+    >>> x = [1, -10, 100, .5]
+    >>> exp_normalize(x)
+    array([  1.01122149e-43,   1.68891188e-48,   1.00000000e+00,
+             6.13336839e-44])
+    >>> exp(x) / exp(x).sum()
+    array([  1.01122149e-43,   1.68891188e-48,   1.00000000e+00,
+             6.13336839e-44])
+    """
+    y = array(x)      # creates copy
+    y /= T
+    y -= y.max()
+    y = exp(y)
+    y /= y.sum()
+    return y
+
 
 log_of_2 = log(2)
 

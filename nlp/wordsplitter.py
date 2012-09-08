@@ -1,6 +1,11 @@
-import re, sys
+# -*- coding: utf-8 -*-
 
-# -*- encoding: utf-8 -*-
+"""
+The wordsplitting is based on the wordsplitting perl script provided by the
+Cognitive Computation Group at the University of Illinois at Champaign-Urbana.
+"""
+
+import re
 
 ###
 # IDEAS/TODO:
@@ -16,8 +21,6 @@ def numbers_words(m):
         return '%s %s' % (a,b)
 
 
-#from unicode_annoyances import LATIN2ASCII
-
 def wordsplit_sentence(sentence):
     # Convert some special characters to ASCII to ensure they aren't lost later.
     sentence = re.sub('(\xe2\x82\xac|%u20AC)', 'Euros', sentence)
@@ -30,7 +33,7 @@ def wordsplit_sentence(sentence):
     sentence = re.sub('[^\x20-\x7E]', '', sentence)   ####### <<<< KILL non-nice chars.
 
     sentence = re.sub('@', 'AAATTT', sentence)
-    
+
     # ASCII HACKS!
     #for hexcode, ascii in LATIN2ASCII.iteritems():
     #    try:
@@ -46,7 +49,7 @@ def wordsplit_sentence(sentence):
 
     ###########################################
     # fix escape codes
-    sentence = re.sub('%u2013', '-', sentence)    
+    sentence = re.sub('%u2013', '-', sentence)
     ###########################################
 
     before = ''
@@ -169,5 +172,3 @@ if __name__ == '__main__':
         print t
         print wordsplit_sentence(t)
         print
-
-

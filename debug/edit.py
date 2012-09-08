@@ -66,9 +66,8 @@ def edit(obj, verbose=True):
 
 
 def emacs(filename, line=0, column=0):
-    r = os.system('emacsclient -n +%d:%d "%s" 2>/dev/null' % (line, column, filename))
-    if r != 0:
-        os.system('emacs --quick -f server-start +%d:%d "%s"' % (line, column, filename))
+    # emacsclient -n +%d:%d "%s" 2>/dev/null
+    os.system('visit +%d:%d "%s" 2>/dev/null' % (line, column, filename))
 
 
 if __name__ == '__main__':
@@ -87,4 +86,3 @@ if __name__ == '__main__':
         print '%s <module> or %s <module> <object>' % (sys.argv[0], sys.argv[0])
         sys.exit(1)
     edit(X['THING'])
-    

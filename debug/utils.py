@@ -20,6 +20,11 @@ try:
 
     from IPython import embed as ip
 
+    # TODO: look IPython's debugging stuff..
+    # http://ipython.org/ipython-doc/dev/api/generated/IPython.core.debugger.html
+    from IPython.core.debugger import Tracer
+    set_trace = lambda: Tracer()()
+
     #def set_trace(frame=None):
     #    # get frame
     #    frame = frame or sys._getframe().f_back

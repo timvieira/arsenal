@@ -20,8 +20,8 @@
 
 
 import sys, signal
-from contextlib import contextmanager
-from debug.utils import ip, set_trace
+from arsenal.contextlib import contextmanager
+from arsenal.debug.utils import ip, set_trace
 
 _breakin_signal_number = None
 _breakin_signal_name = None

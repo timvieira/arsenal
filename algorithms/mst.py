@@ -1,4 +1,4 @@
-from datastructures.unionfind import UnionFind
+from arsenal.datastructures.unionfind import UnionFind
 
 '''
 def mst(G):

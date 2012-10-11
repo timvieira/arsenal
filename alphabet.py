@@ -72,7 +72,7 @@ class Alphabet(object):
     def lookup(self, i):
         if i is None:
             return None
-        assert isinstance(i, int)
+#        assert isinstance(i, int)
         return self._flip[i]
 
     def lookup_many(self, x):

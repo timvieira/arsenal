@@ -4,7 +4,7 @@ File system utilities
 import re, os, tempfile, shutil
 from contextlib import contextmanager
 from fnmatch import fnmatch
-from iterextras import atmost
+from arsenal.iterextras import atmost
 from subprocess import Popen, PIPE
 
 

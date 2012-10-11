@@ -7,8 +7,7 @@ import sys
 import inspect
 import traceback
 
-from debug.edit import emacs
-import saverr  # registers hook
+from arsenal.debug import saverr  # registers hook
 
 # new IPython
 # import IPython

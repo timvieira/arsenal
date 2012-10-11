@@ -11,22 +11,20 @@
 
 
 
-import urllib
+
+from urllib import quote
+
+from web.download import urlread
 
 
 def get_pagerank(url):
     hsh = check_hash(hash_url(url))
-    gurl = 'http://www.google.com/search?client=navclient-auto&features=Rank:&q=info:%s&ch=%s' % (urllib.quote(url), hsh)
-    try:
-        f = urllib.urlopen(gurl)
-        rank = f.read().strip()[9:]
-    except Exception:
-        rank = 'N/A'
-    if rank == '':
-        rank = '0'
+    gurl = 'http://www.google.com/search?client=navclient-auto&features=Rank:&q=info:%s&ch=%s' % (quote(url), hsh)
+    _, _, contents = urlread(gurl)
+    rank = contents.strip()[9:]
     return rank
-    
-    
+
+
 def  int_str(string, integer, factor):
     for i in range(len(string)) :
         integer *= factor
@@ -88,6 +86,3 @@ if __name__ == '__main__':
         print get_pagerank(sys.argv[1])
     else:
         print 'usage: python %s <URL>\n' % sys.argv[0]
-
-
-

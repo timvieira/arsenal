@@ -1,3 +1,8 @@
+from fabulous import color
+
+# TODO: Consider using fabulous for most of this. It supports a wider variety of
+# colors and might do a better job with other macs.
+
 normal = '\033[0m%s\033[0m'
 bold = '\033[1m%s\033[0m'
 
@@ -36,6 +41,18 @@ def test():
         print globals()['bg_' + c] % c
 
     print underline % 'underline'
+
+
+# TODO: needs some work, but it's pretty fun to use
+def color01(x, fmt='%.10f'):
+    "Colorize numbers in [0,1] based on value; darker means smaller value."
+    if not (0 <= x <= 1 + 1e-10):
+        return red % fmt % x
+    a, b = 238, 255   # 232, 255
+    w = b - a
+    offset = x*w
+    offset = int(round(offset))
+    return color.fg256(a + offset, fmt % x)
 
 if __name__ == '__main__':
     test()

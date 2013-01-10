@@ -18,6 +18,15 @@ from arsenal.debug import saverr  # registers hook
 try:
 
     from IPython import embed as ip
+    from IPython.frontend.terminal.embed import InteractiveShellEmbed
+    #_ip = InteractiveShellEmbed(banner1='')
+
+#    def ip():
+#        import pylab as pl
+#        pl.ion()
+#        pl.show()
+#        #_ip()
+#        embed()
 
     # TODO: look IPython's debugging stuff..
     # http://ipython.org/ipython-doc/dev/api/generated/IPython.core.debugger.html

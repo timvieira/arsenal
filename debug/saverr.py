@@ -11,19 +11,24 @@ from os.path import join, isabs, realpath
 
 __all__ = ('invoke_editor',)
 
+import atexit
+
+def enable(editor=False):
+    atexit.register(atexit_handler)
+    if editor:
+        atexit.register(invoke_editor)
+
 
 def get_filename():
     return join(os.environ.get('HOME', '/tmp'), '.python_last_exception')
 
 
 def atexit_handler():
-
     if not hasattr(sys, 'last_traceback'):
         return
     else:
         cwd = os.environ.get('PWD', '')
         fn = get_filename()
-
         f = open(fn, 'w')
         f.write(cwd + '\n')
         traceback.print_tb(sys.last_traceback, file=f)
@@ -88,7 +93,3 @@ if __name__ == '__main__':
         example()
     else:
         sys.exit(invoke_editor())
-
-else:
-    import atexit
-    atexit.register(atexit_handler)

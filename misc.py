@@ -79,7 +79,8 @@ def force(g):
 
 # by George Sakkis (gsakkis at rutgers.edu)
 # http://mail.python.org/pipermail/python-list/2005-March/312004.html
-def parse_sexpr(expression):
+def parse_sexpr(expression, multiple=False):
+    "If multiple s-expressions expected as output, set multiple to True."
     subexpressions,stack = [],[]
     for token in re.split(r'([()])|\s+', expression):
         if token == '(':
@@ -101,7 +102,7 @@ def parse_sexpr(expression):
                 raise ValueError("Unenclosed subexpression (near %s)" % token)
     if stack:
         raise ValueError("Unbalanced left parenthesis: %s" % expression)
-    if len(subexpressions) > 1:
+    if len(subexpressions) > 1 and not multiple:
         raise ValueError("Single s-expression expected (%d given)" % len(subexpressions))
     return subexpressions[0]
 

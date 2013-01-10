@@ -36,13 +36,15 @@ def call_signature(obj, oname=''):
 
 
 def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False,
-             timemsg=False, available=None):
+             timemsg=False, available=None, mod=None, main_only=False):
     """
     Automatically create a very simple command-line interface.
 
     Note: All functions must take string arguments
     """
-    import __main__ as mod
+
+    if not mod:
+        import __main__ as mod
     argv = argv or sys.argv
 
     try:
@@ -71,7 +73,7 @@ def automain(argv=None, verbose=False, breakin=False, ultraTB=False, pdb=False,
     else:
         def filterfn(obj):
             try:
-                if not obj.__module__ == '__main__':
+                if not obj.__module__ == '__main__' and main_only:
                     return False
                 if not hasattr(obj, '__call__'):
                     return False

@@ -5,6 +5,11 @@ import re
 from text import markup
 
 
+_whitespace_cleanup = re.compile('[ ]*\n', re.MULTILINE)
+def whitespace_cleanup(x):
+    return _whitespace_cleanup.sub('\n', x)
+
+
 # Borrowed from: http://www.codigomanso.com/en/2010/05/una-de-python-force_unicode/
 def force_unicode(s, encoding='utf-8', errors='ignore'):
     """

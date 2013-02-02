@@ -1,5 +1,5 @@
 import re
-from misc import force
+from arsenal.misc import force
 from itertools import imap
 
 class ParseError(Exception):

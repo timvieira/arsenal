@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from text import markup
+from arsenal.text import markup
 
 
 _whitespace_cleanup = re.compile('[ ]*\n', re.MULTILINE)

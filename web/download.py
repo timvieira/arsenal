@@ -1,7 +1,7 @@
 import os
-from fsutils import mkdir, secure_filename
-from robust import timelimit, retry
-from misc import ignore_error
+from arsenal.fsutils import mkdir, secure_filename
+from arsenal.robust import timelimit, retry
+from arsenal.misc import ignore_error
 from urllib2 import Request, build_opener
 
 

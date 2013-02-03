@@ -1,4 +1,7 @@
-from fabulous import color
+try:
+    from fabulous import color
+except ImportError:
+    pass
 
 # TODO: Consider using fabulous for most of this. It supports a wider variety of
 # colors and might do a better job with other macs.

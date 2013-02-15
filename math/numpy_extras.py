@@ -21,11 +21,11 @@ def normalize_interval(data):
     return (data - shift) / rescale
 
 def normalize(p):
-    return (1.0 / p.sum()) * p
+    return p / p.sum()
 
 def lidstone(p, delta):
     """
-    Lidstone smoothing is a generalized of Laplace smoothing.
+    Lidstone smoothing is a generalization of Laplace smoothing.
     """
     return normalize(p + delta)
 

@@ -2,83 +2,21 @@ from __future__ import division
 from numpy import array, empty, zeros
 import math
 from math import exp as math_exp, log as math_log
-from operator import itemgetter
 
-from misc import deprecated
-
-INF = float('infinity')
-NEG_INF = float('-infinity')
-
-'''
-from math import sqrt
-
-def naive_hypot(x,y):
-    return sqrt(x*x + y*y)
-
-@deprecated("numpy.hypot")
-def robust_hypot(x,y):
-    """
-    Compute sqrt(x*x + y*y) without risking overflow.
-
-    Lets pick a pick number:
-      >>> big = 1e300
-      >>> big            # still representable
-      1e300
-      >>> big*big        # but not "squarable"
-      inf
-
-    Obviously, naive `hypot` can't handle this one:
-      >>> hypot(1e300, 1.0e300)
-      inf
-
-    But what about `robust_hypot`:
-      >>> c = robust_hypot(big, big)
-      >>> c
-      1.4142135623730952e+300
-      >>> c == big*sqrt(2)    # 2*b*b == c*2  =>  c = sqrt(2)*b
-      True
-
-    Success!
-    """
-    M = max(abs(x), abs(y))
-    m = min(abs(x), abs(y))
-    r = m / M
-    return M*sqrt(1 + r*r)
-'''
+inf = float('infinity')
+ninf = float('-infinity')
 
 def exp(x):
     try:
         return math_exp(x)
     except OverflowError:
-        return INF
+        return inf
 
-# should use scipy.maxentropy.robustlog
 def log(x):
     if x < 1e-10:
         return 0.0
     else:
         return math_log(x)
-
-def argmax(f, seq):
-    """
-    >>> argmax(lambda x: -x**2 + 1, range(-10,10))
-    0
-    """
-    return argmax2(f,seq)[1]
-
-def argmax2(f, seq):
-    """
-    >>> argmax2(lambda x: -x**2 + 1, range(-10,10))
-    (1, 0)
-    """
-    return max(((f(x),x) for x in seq), key=itemgetter(0))
-
-def argmin(f, seq):
-    return argmin2(f,seq)[1]
-
-def argmin2(f, seq):
-    return min(((f(x),x) for x in seq), key=itemgetter(0))
-
 
 log_of_2 = math.log(2)
 
@@ -172,7 +110,7 @@ def logsumexp(x):
     picking B = max(X), can help prevent problems with numerical overflow.
     """
     B = max(x)
-    return log(sum(exp(x-B) for x in x if x > NEG_INF)) + B
+    return log(sum(exp(x-B) for x in x if x > ninf)) + B
 
 def sum_two_log_probs(a, b):
     """
@@ -214,7 +152,7 @@ def sum_log_prob(vals):
     """
     LOGTOLERANCE = 30.0
     N = len(vals)
-    M = -INF
+    M = -inf
     maxidx = 0
     for i in xrange(N):
         if vals[i] > M:

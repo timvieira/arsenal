@@ -1,6 +1,7 @@
 import csv
 from collections import namedtuple
 from operator import itemgetter
+from path import path
 
 # countrylist.csv take from:
 #   http://www.andrewpatton.com/countrylist.html
@@ -23,15 +24,16 @@ rename = [
     ('IANA Country Code TLD',    'www_country_code'),
 ]
 
-Country = namedtuple('Country', map(itemgetter(1), rename), verbose=True)
+Country = namedtuple('Country', map(itemgetter(1), rename))
 
 countries = []
-with file('countrylist.csv') as f:
+with file(path(__file__).dirname() / 'countrylist.csv') as f:
     d = iter(csv.reader(f))
     d.next()  # first row is the fieldnames
     for row in d:
         c = Country(*row)
         countries.append(c)
 
-for c in countries:
-    print c.common_name
+if __name__ == '__main__':
+    for c in countries:
+        print c.common_name

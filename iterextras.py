@@ -5,6 +5,7 @@ from operator import getitem, sub, mul
 from itertools import *
 from random import shuffle
 from collections import defaultdict, deque
+from operator import itemgetter
 
 # IDEAS:
 # * progress_meter: updates based on how much work was dones, e.g.,
@@ -12,6 +13,26 @@ from collections import defaultdict, deque
 #     0.0%
 #     >> p.update(10)
 #     10.0%
+
+def argmax(f, seq):
+    """
+    >>> argmax(lambda x: -x**2 + 1, range(-10,10))
+    0
+    """
+    return argmax2(f,seq)[1]
+
+def argmax2(f, seq):
+    """
+    >>> argmax2(lambda x: -x**2 + 1, range(-10,10))
+    (1, 0)
+    """
+    return max(((f(x),x) for x in seq), key=itemgetter(0))
+
+def argmin(f, seq):
+    return argmin2(f,seq)[1]
+
+def argmin2(f, seq):
+    return min(((f(x),x) for x in seq), key=itemgetter(0))
 
 def groupby2(s, key=lambda x: x):
     """

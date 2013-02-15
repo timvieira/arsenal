@@ -1,3 +1,8 @@
+"""
+I strongly reccomend using jellyfish from sunlightlabs - it is orders of
+magnitude faster than these functions and has many more similarity functions
+including Jaro-Winkler and Soundex.
+"""
 
 def levenshtein(a,b):
     "Calculates the Levenshtein distance between a and b."
@@ -6,7 +11,7 @@ def levenshtein(a,b):
         # Make sure n <= m, to use O(min(n,m)) space
         a,b = b,a
         n,m = m,n
-        
+
     current = range(n+1)
     for i in xrange(1,m+1):
         previous, current = current, [i]+[0]*n
@@ -16,7 +21,7 @@ def levenshtein(a,b):
             if a[j-1] != b[i-1]:
                 change = change + 1
             current[j] = min(add, delete, change)
-            
+
     return current[n]
 
 
@@ -57,6 +62,3 @@ def damerau_levenshtein(a, b):
                     thisrow[y] = min(thisrow[y], twoago[y-2] + 1)
 
     return thisrow[len(b) - 1]
-
-
-

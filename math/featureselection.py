@@ -2,7 +2,7 @@
 
 import sys
 from numpy import zeros, fromiter, int32
-from arsenal.math.numpy_extras import kl_divergence, normalize, lidstone
+from arsenal.math import kl_divergence, normalize, lidstone
 from arsenal.alphabet import Alphabet
 from collections import defaultdict
 

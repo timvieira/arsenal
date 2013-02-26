@@ -25,6 +25,29 @@ def print_parse(t, out=stdout.write):
     out('\n')
 
 
+def pprint(t, out=stdout.write):
+    "Pretty print tree as a tabbified s-expression."
+    def pp(t, indent=0, indentme=True):
+        if indentme:
+            out(' '*indent)
+        if isinstance(t, basestring):                    # base case
+            return out(t)
+        if len(t) == 1:
+            if t[0]:
+                pp(t[0], indent, indentme)
+            return
+        label, children = t[0], t[1:]
+        assert isinstance(label, basestring)
+        out('(%s ' % label)
+        n = len(children)
+        for i, child in enumerate(children):
+            pp(child, indent + len(label) + 2, i != 0)   # first child already indented
+            if i != n-1:                                 # no newline after last child
+                out('\n')
+        out(')')
+    pp(t)
+    out('\n')
+
 
 def sexpr(s, add_root=True):
     """
@@ -85,8 +108,8 @@ class BadSexpr(Exception):
 
 
 
-def features(t):
-    print 'S, NP, VP'
+#def features(t):
+#    print 'S, NP, VP'
 
 
 def main():
@@ -118,7 +141,7 @@ def main():
                 continue
 
             print tree
-            features(tree)
+#            features(tree)
 
 
 

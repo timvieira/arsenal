@@ -1,6 +1,6 @@
 import re
 
-from nlp import gazetteers
+from arsenal.nlp import gazetteers
 
 class pattern(object):
     """

@@ -14,7 +14,7 @@ def read_tab_file(f):
     """
     for line in f:
         line = line.strip()
-        line = line.split()
+        line = line.split('\t')
         if len(line) <= 1:
             continue
         yield line[0], line[1:]
@@ -122,4 +122,4 @@ def kl_filter(data, verbose=True, progress=False, out=sys.stdout):
 
 
 if __name__ == '__main__':
-    kl_filter(read_tab_file(file(sys.argv[1]) if len(sys.argv) == 2 else sys.stdin))
+    list(kl_filter(read_tab_file(file(sys.argv[1]) if len(sys.argv) == 2 else sys.stdin)))

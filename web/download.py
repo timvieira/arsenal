@@ -57,7 +57,7 @@ def urlread(url):
 #    return _f1
 
 
-def download(url, usecache=True, cachedir='cache~/', cachedonly=False, **opts):
+def download(url, usecache=True, cached=None, cachedir='cache~/', cachedonly=False, **opts):
     """
     Download (or cache) ``url`` to file. On success: return file name of stored
     contents. Upon failure: return None.
@@ -71,11 +71,12 @@ def download(url, usecache=True, cachedir='cache~/', cachedonly=False, **opts):
     will simply return the cached filename if it exists.
     """
 
-    if cachedir:
-        mkdir(cachedir)
-        cached = os.path.join(cachedir, secure_filename(url))
-    else:
-        assert not usecache, 'must specify cachedir'
+    if not cached:
+        if cachedir:
+            mkdir(cachedir)
+            cached = os.path.join(cachedir, secure_filename(url))
+        else:
+            assert not usecache, 'must specify cachedir'
 
     # only return something for cached files
     if cachedonly and not os.path.exists(cached):

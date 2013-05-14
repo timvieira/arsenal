@@ -107,7 +107,9 @@ def logsumexp(x):
     The log-sum-exp trick:
       log(sum(exp(xi) for xi in X)) <=> log(sum(exp(xi-B) for xi in X)) + B   for any B
 
-    picking B = max(X), can help prevent problems with numerical overflow.
+    picking B = max(X) ensures that the largest value you exponentiate will be
+    zero. So there definitely won't be overflow. Even if the rest underflow
+    you'll still get a reasonable value.
     """
     B = max(x)
     return log(sum(exp(x-B) for x in x if x > ninf)) + B

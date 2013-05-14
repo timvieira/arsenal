@@ -1,13 +1,13 @@
 # stdlib
-import re, os, sys, time, traceback, warnings, webbrowser
+import re, os, sys, traceback, warnings, webbrowser
 import subprocess, tempfile, BaseHTTPServer
 from functools import wraps
 from StringIO import StringIO
 from contextlib import contextmanager
 from threading import Thread
 
-# python-extras imports
-from terminal import colors
+from arsenal.terminal import colors
+from arsenal.timer import timeit, timesection
 
 
 import keyring
@@ -77,6 +77,44 @@ def force(g):
         return list(g(*args, **kw))
     return wrap
 
+
+
+'''
+timv: put this utility somewhere else. I have several variants on it. Should
+consolidate modifications...
+
+def parse_sexpr(e):
+    """
+    Parse a string representing an s-expressions into lists-of-lists.
+
+    based on implementation by George Sakkis
+    http://mail.python.org/pipermail/python-list/2005-March/312004.html
+    """
+    e = re.compile('^\s*;.*?\n', re.M).sub('', e)  # remove comments
+
+    es, stack = [], []
+    for token in re.split(r'([()])|\s+', e):
+        if token == '(':
+            new = []
+            if stack:
+                stack[-1].append(new)
+            else:
+                es.append(new)
+            stack.append(new)
+        elif token == ')':
+            try:
+                stack.pop()
+            except IndexError:
+                raise ValueError("Unbalanced right parenthesis: %s" % e)
+        elif token:
+            try:
+                stack[-1].append(token)
+            except IndexError:
+                raise ValueError("Unenclosed subexpression (near %s)" % token)
+    return es
+'''
+
+'''
 # by George Sakkis (gsakkis at rutgers.edu)
 # http://mail.python.org/pipermail/python-list/2005-March/312004.html
 def parse_sexpr(expression, multiple=False):
@@ -105,7 +143,7 @@ def parse_sexpr(expression, multiple=False):
     if len(subexpressions) > 1 and not multiple:
         raise ValueError("Single s-expression expected (%d given)" % len(subexpressions))
     return subexpressions[0]
-
+'''
 
 def attn(msg):
     """ Display a dialog which is sure to get my attention. """
@@ -216,28 +254,6 @@ def deprecated(use_instead=None):
         return new_func
 
     return wrapped
-
-from humanreadable import htime
-
-@contextmanager
-def timeit(msg="%.4f seconds", header=None):
-    """Context Manager which prints the time it took to run code block."""
-    if header is not None:
-        print header
-    b4 = time.time()
-    yield
-
-    t = time.time() - b4
-    ht = htime(t)
-    if t < 60:
-        ht = t
-    try:
-        print msg % ht
-    except TypeError:
-        print msg, ht
-
-timesection = lambda x: timeit(header='%s...' % x,
-                               msg=' -> %s took %%.2f seconds' % x)
 
 
 def browser(html):

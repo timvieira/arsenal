@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+"""
+Find most informative features ranked by information gain (i.e. the ID3 hueristic for decision trees).
+
+Input: a tab-delimited file where each line starts with a label followed by features. 
+Output: a sorted list of the most informative features.
+"""
 
 import sys
 from numpy import zeros, fromiter, int32

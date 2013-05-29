@@ -136,43 +136,6 @@ def subtract_log_prob(a, b):
     else:
         return b + log(1 - exp(a-b))
 
-def sum_log_prob(vals):
-    """
-    Sums an array of numbers [log(x1), ..., log(xn)] returns log(x1+x2+...+xn)
-
-    This saves some of unnecessary calls to log in the two-argument version.
-
-    usage:
-        >>> x = [0.7, 0.1, 0.2]
-        >>> abs(sum_log_prob(map(log, x)) - log(sum(x))) < 1e-7
-        True
-
-    NOTE: this implementation IGNORES elements of the input array that are more
-    than LOGTOLERANCE (currently 30.0) less than the maximum element.
-
-    CREDIT: this function has been adapted from Stanford NLP package, SloppyMath.java
-    """
-    LOGTOLERANCE = 30.0
-    N = len(vals)
-    M = -inf
-    maxidx = 0
-    for i in xrange(N):
-        if vals[i] > M:
-            M = vals[i]
-            maxidx = i
-    anyAdded = False
-    intermediate = 0.0
-    cutoff = M - LOGTOLERANCE
-    for i in xrange(maxidx):
-        if vals[i] >= cutoff:
-            anyAdded = True
-            intermediate += exp(vals[i] - M)
-    for i in xrange(maxidx + 1, N):
-        if vals[i] >= cutoff:
-            anyAdded = True
-            intermediate += exp(vals[i] - M)
-    return M + log(1.0 + intermediate) if anyAdded else M
-
 
 if __name__ == '__main__':
     import doctest; doctest.testmod()

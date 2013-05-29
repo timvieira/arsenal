@@ -29,12 +29,14 @@ def lidstone(p, delta):
     """
     return normalize(p + delta)
 
-#def logsumexp(a):
-#    """
-#    Compute the log of the sum of exponentials of an array ``a``, :math:`\log(\exp(a_0) + \exp(a_1) + ...)`
-#   """
-#    b = a.max()
-#   return b + log((exp(a-b)).sum())
+'''
+def logsumexp(a):
+    """
+    Compute the log of the sum of exponentials of an array ``a``, :math:`\log(\exp(a_0) + \exp(a_1) + ...)`
+    """
+    b = a.max()
+    return b + log((exp(a-b)).sum())
+'''
 
 # based on implementation from scikits-learn
 def logsumexp(arr, axis=0):
@@ -91,8 +93,7 @@ def kl_divergence(p, q):
     """ Compute KL divergence of two vectors, K(p || q).
     NOTE: If any value in q is 0.0 then the KL-divergence is infinite.
     """
-    assert len(p) == len(q)
-    p = p[p > 0]
+#    p = p[p > 0]
     return dot(p, log(p / q)) / log_of_2
 
 # KL(p||q) = sum_i p[i] log(p[i] / q[i])

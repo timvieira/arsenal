@@ -9,6 +9,25 @@ _whitespace_cleanup = re.compile('[ ]*\n', re.MULTILINE)
 def whitespace_cleanup(x):
     return _whitespace_cleanup.sub('\n', x)
 
+def common_prefix(m):
+    """
+    Longest common prefix.
+
+    >>> common_prefix(['prefix-a', \
+                       'prefix-b', \
+                       'prefix-c'])
+    'prefix-'
+
+    """
+    if not m:
+        return ''
+    s1 = min(m)
+    s2 = max(m)
+    for i, c in enumerate(s1):
+        if c != s2[i]:
+            return s1[:i]
+    return s1
+
 
 # Borrowed from: http://www.codigomanso.com/en/2010/05/una-de-python-force_unicode/
 def force_unicode(s, encoding='utf-8', errors='ignore'):

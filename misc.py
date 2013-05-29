@@ -309,16 +309,17 @@ def ctx_redirect_io(f=None):
     """
     target = f or StringIO()
 
-    # Redirect IO to target.
-    original_stdout = sys.stdout
-    sys.stdout = target
-
-    # provide an entry point for the procedure we are wrapping
-    # as well as a reference to target
-    yield target
-
-    # Restore stdio and close the file.
-    sys.stdout = original_stdout
+    with f:
+        # Redirect IO to target.
+        original_stdout = sys.stdout
+        try:
+            sys.stdout = target
+            # provide an entry point for the procedure we are wrapping as well
+            # as a reference to target
+            yield target
+        finally:
+            # Restore stdio
+            sys.stdout = original_stdout
 
 
 def redirect_io(f):

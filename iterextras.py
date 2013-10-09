@@ -58,11 +58,13 @@ def atmost(k, seq):
     False
     """
     count = 0
+    if count > k:
+        return False
     for x in seq:
         if x:
             count += 1
-        if count > k:
-            return False
+            if count > k:
+                return False
     return True
 
 def partition(data, proportion):

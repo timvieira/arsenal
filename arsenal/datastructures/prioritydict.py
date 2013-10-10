@@ -33,7 +33,7 @@ class prioritydict(dict):
 
     The 'sorted_iter' method provides a destructive sorted iterator.
     """
-    
+
     def __init__(self, *args, **kwargs):
         super(prioritydict, self).__init__(*args, **kwargs)
         self._rebuild_heap()
@@ -42,12 +42,13 @@ class prioritydict(dict):
         self._heap = [(v, k) for k, v in self.iteritems()]
         heapify(self._heap)
 
-    def smallest(self):
-        """Return the item with the lowest priority.
+    def peek(self):
+        """
+        Return the item with the lowest priority.
 
         Raises IndexError if the object is empty.
         """
-        
+
         heap = self._heap
         v, k = heap[0]
         while k not in self or self[k] != v:
@@ -56,11 +57,12 @@ class prioritydict(dict):
         return k
 
     def pop_smallest(self):
-        """Return the item with the lowest priority and remove it.
+        """
+        Return the item with the lowest priority and remove it.
 
         Raises IndexError if the object is empty.
         """
-        
+
         heap = self._heap
         v, k = heappop(heap)
         while k not in self or self[k] != v:
@@ -71,9 +73,9 @@ class prioritydict(dict):
     def __setitem__(self, key, val):
         # We are not going to remove the previous value from the heap,
         # since this would have a cost O(n).
-        
+
         super(prioritydict, self).__setitem__(key, val)
-        
+
         if len(self._heap) < 2 * len(self):
             heappush(self._heap, (val, key))
         else:
@@ -93,7 +95,6 @@ class prioritydict(dict):
 #    def update(self, *args, **kwargs):
 #        # Reimplementing dict.update is tricky -- see e.g.
 #        # http://mail.python.org/pipermail/python-ideas/2007-May/000744.html
-#        # We just rebuild the heap from scratch after passing to super.       
+#        # We just rebuild the heap from scratch after passing to super.
 #        super(prioritydict, self).update(*args, **kwargs)
 #        self._rebuild_heap()
-

@@ -1,0 +1,25 @@
+other usefull software:
+  gdata
+  pep8
+  feedparser
+  pyparsing
+
+cleanup:
+  - datastructures - lots of useless and/or slow crap
+    - should probably throw alphabet in there
+  - sendmail - lots of junk
+  - might want to create a "dev" package where we can throw debug utils and diagrams in there.
+
+get rid of the stuff we've ripped out of IPython, now that it is pretty
+standard, easy to install, and has probably improve a great deal.
+
+remove pycolorized
+
+create a separate package for nlp utils
+
+are there other packages for wordnet? installing nltk is a big too big and
+complicate (especially b/c it requires getting the datasets), I don't want to
+maintain this thing.
+
+
+autoreload: there have got to be better solutions to this problem...

@@ -30,7 +30,7 @@ def profile_viz(cmd, global_dict=None, local_dict=None, img='profile.png', out='
 
 
 def kcachegrind(cmd, out='profile.kgrind'):
-    from profiling.lsprofcalltree import KCacheGrind
+    from arsenal.profiling.lsprofcalltree import KCacheGrind
     p = cProfile.Profile()
     p.run(cmd)
     # Get the stats in a form kcachegrind can use and save it

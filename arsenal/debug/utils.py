@@ -15,11 +15,11 @@ from arsenal.debug import saverr  # registers hook
 
 # try to use IPython's fancy debugger if available
 
-try:
 
-    from IPython import embed as ip
-    from IPython.frontend.terminal.embed import InteractiveShellEmbed
-    #_ip = InteractiveShellEmbed(banner1='')
+from IPython import embed as ip
+#from IPython.frontend.terminal.embed import InteractiveShellEmbed
+#_ip = InteractiveShellEmbed(banner1='')
+
 
 #    def ip():
 #        import pylab as pl
@@ -28,10 +28,10 @@ try:
 #        #_ip()
 #        embed()
 
-    # TODO: look IPython's debugging stuff..
-    # http://ipython.org/ipython-doc/dev/api/generated/IPython.core.debugger.html
-    from IPython.core.debugger import Tracer
-    set_trace = lambda: Tracer()()
+# TODO: look IPython's debugging stuff..
+# http://ipython.org/ipython-doc/dev/api/generated/IPython.core.debugger.html
+from IPython.core.debugger import Tracer
+set_trace = lambda: Tracer()()
 
     #def set_trace(frame=None):
     #    # get frame
@@ -45,11 +45,6 @@ try:
     #    p = Pdb()
     #    p.reset()
     #    p.interaction(None, sys.last_traceback)
-
-except ImportError:
-
-    from IPython.Shell import IPShellEmbed
-    ip = __IPYTHON__ = IPShellEmbed([])
 
 """
     except ImportError:

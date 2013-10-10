@@ -6,30 +6,12 @@ from StringIO import StringIO
 from contextlib import contextmanager
 from threading import Thread
 
+try:
+    from arsenal.passwords import *
+except ImportError:
+    pass
+
 from arsenal.terminal import colors
-from arsenal.timer import timeit, timesection
-
-
-import keyring
-from getpass import getpass
-
-def set_password(service, user, pw=None):
-    print 'Set password:'
-    if pw is None:
-        pw = getpass()
-        print 'Type password again (for verification):'
-        if pw != getpass():
-            print 'Error: passwords did not match. Try again.'
-            set_password(service, user)
-    keyring.set_password(service, user, pw)
-    return pw
-
-
-def password(service, user):
-    pw = keyring.get_password(service, user)
-    if pw is None:
-        pw = set_password(service, user)
-    return pw
 
 
 @contextmanager
@@ -309,17 +291,16 @@ def ctx_redirect_io(f=None):
     """
     target = f or StringIO()
 
-    with f:
-        # Redirect IO to target.
-        original_stdout = sys.stdout
-        try:
-            sys.stdout = target
-            # provide an entry point for the procedure we are wrapping as well
-            # as a reference to target
-            yield target
-        finally:
-            # Restore stdio
-            sys.stdout = original_stdout
+    # Redirect IO to target.
+    original_stdout = sys.stdout
+    try:
+        sys.stdout = target
+        # provide an entry point for the procedure we are wrapping as well
+        # as a reference to target
+        yield target
+    finally:
+        # Restore stdio
+        sys.stdout = original_stdout
 
 
 def redirect_io(f):

@@ -347,33 +347,33 @@ def k_fold_cross_validation(X, K, randomize=False):
         training = chain(*(fold for j, fold in enumerate(folds) if j != k))
         yield training, folds[k]
 
-
-def xCross(sets, *more):
-    """
-    Take the cartesian product of two or more iterables.
-    The input can be either one argument, a collection of iterables xCross([it1,it2,...]),
-    or several arguments, each one an iterable xCross(it1, itb, ...).
-
-    >>> [(x,y,z) for x,y,z in xCross([1,2], 'AB', [5])]
-    [(1, 'A', 5), (1, 'B', 5), (2, 'A', 5), (2, 'B', 5)]
-
-    """
-    if more:
-        sets = chain((sets,), more)
-    sets = list(sets)
-    wheels = map(iter, sets) # wheels like in an odometer
-    digits = [it.next() for it in wheels]
-    while True:
-        yield digits[:]
-        for i in range(len(digits)-1, -1, -1):
-            try:
-                digits[i] = wheels[i].next()
-                break
-            except StopIteration:
-                wheels[i] = iter(sets[i])
-                digits[i] = wheels[i].next()
-        else:
-            break
+#deprecated use itertools.product instead
+#def xCross(sets, *more):
+#    """
+#    Take the cartesian product of two or more iterables.
+#    The input can be either one argument, a collection of iterables xCross([it1,it2,...]),
+#    or several arguments, each one an iterable xCross(it1, itb, ...).
+#
+#    >>> [(x,y,z) for x,y,z in xCross([1,2], 'AB', [5])]
+#    [(1, 'A', 5), (1, 'B', 5), (2, 'A', 5), (2, 'B', 5)]
+#
+#    """
+#    if more:
+#        sets = chain((sets,), more)
+#    sets = list(sets)
+#    wheels = map(iter, sets) # wheels like in an odometer
+#    digits = [it.next() for it in wheels]
+#    while True:
+#        yield digits[:]
+#        for i in range(len(digits)-1, -1, -1):
+#            try:
+#                digits[i] = wheels[i].next()
+#                break
+#            except StopIteration:
+#                wheels[i] = iter(sets[i])
+#                digits[i] = wheels[i].next()
+#        else:
+#            break
 
 
 def cross_product(A,B):

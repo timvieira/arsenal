@@ -37,6 +37,18 @@ class Timer(object):
             print '%s is %gx faster' % (self.name, other.avg / self.avg)
         else:
             other.compare(self)
+    def compare_many(self, *others):
+        self.compare(self)
+        for x in others:
+            self.compare(x)
+
+    def plot(self, *others):
+        import pylab as pl
+        pl.plot(self.times)
+        for x in others:
+            pl.plot(x.times)
+        pl.show()
+
 
 
 @contextmanager

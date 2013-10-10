@@ -113,7 +113,8 @@ def robust_download(url, filename, tries=3, pause=0.1, timeout=30, verbose=True)
     returns ``None`` upon failure and ``filename`` on success.
     """
 
-    if verbose: print 'trying to download', url, 'to', filename
+    if verbose:
+        print 'trying to download %s to file://%s' % (url, filename)
 
     @retry(tries=tries, pause=pause)
     @timelimit(timeout=timeout)

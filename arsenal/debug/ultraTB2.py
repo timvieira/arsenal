@@ -1822,5 +1822,3 @@ if __name__ == "__main__":
         print spam(1, (2, 3))
     except:
         apply(handler, sys.exc_info() )
-
-print _scheme_default

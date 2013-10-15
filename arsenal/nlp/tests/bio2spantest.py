@@ -1,4 +1,4 @@
-from nlp.annotation import bio2span, Span
+from arsenal.nlp.annotation import bio2span, Span
 
 def test_bio2span():
 

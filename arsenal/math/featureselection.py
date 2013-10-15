@@ -67,7 +67,7 @@ def kl_filter(data, verbose=True, progress=False, out=sys.stdout):
     M = len(F)
 
     if progress:
-        from iterextras import iterview
+        from arsenal.iterextras import iterview
     else:
         iterview = lambda x, *a, **kw: x
 

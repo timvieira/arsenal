@@ -6,4 +6,4 @@ setup(name='arsenal',
       author='Tim Vieira',
       url='https://github.com/timvieira/arsenal/',
       packages=['arsenal'],
-      install_requires=['whoosh', 'pdfminer', 'pandas', 'numpy'])
+      install_requires=['numpy'])

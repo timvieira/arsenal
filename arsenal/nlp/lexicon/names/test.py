@@ -1,6 +1,6 @@
 from itertools import imap, ifilter
 
-from nlp.lexicon.englishwords import englishwords as dictionary
+from arsenal.nlp.lexicon.englishwords import englishwords as dictionary
 
 def overlap(collection):
     for w in ifilter(dictionary.__contains__, collection):

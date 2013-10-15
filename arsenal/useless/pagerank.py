@@ -14,7 +14,7 @@
 
 from urllib import quote
 
-from web.download import urlread
+from arsenal.web.download import urlread
 
 
 def get_pagerank(url):

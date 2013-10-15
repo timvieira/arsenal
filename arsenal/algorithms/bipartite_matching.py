@@ -333,16 +333,15 @@ class Munkres:
         self.marked = None
         self.path = None
 
-    @staticmethod
-    def make_cost_matrix(profit_matrix, inversion_function):
-        """
-        **DEPRECATED**
-
-        Please use the module function ``make_cost_matrix()``.
-        """
-        import munkres
-        return munkres.make_cost_matrix(profit_matrix, inversion_function)
-
+#    @staticmethod
+#    def make_cost_matrix(profit_matrix, inversion_function):
+#        """
+#        **DEPRECATED**
+#
+#        Please use the module function ``make_cost_matrix()``.
+#        """
+#        import arsenal.algorithms.bipartite_matching as munkres
+#        return munkres.make_cost_matrix(profit_matrix, inversion_function)
 
     def pad_matrix(self, matrix, pad_value=0):
         """
@@ -804,4 +803,3 @@ if __name__ == '__main__':
             print '(%d, %d) -> %d' % (r, c, x)
         print 'lowest cost=%d' % total_cost
         assert expected_total == total_cost
-

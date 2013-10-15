@@ -30,7 +30,7 @@
 ##     return wrap
 
 
-from recipes.contextdecorator import ContextDecorator
+from arsenal.recipes.contextdecorator import ContextDecorator
 
 class assert_throws(ContextDecorator):
     """

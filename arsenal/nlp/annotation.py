@@ -196,7 +196,7 @@ def bio2span(seq, tagger=None, include_O=True):
 
 
 if __name__ == '__main__':
-    from misc import piped
+    from arsenal.misc import piped
     def main():
         for line in piped() or []:
             for (label, w) in sgml2bio(line):

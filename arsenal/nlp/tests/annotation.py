@@ -1,6 +1,6 @@
 import re
 
-from nlp.annotation import sgml2bio, line_groups, bio2span
+from arsenal.nlp.annotation import sgml2bio, line_groups, bio2span
 
 def equals_mod_whitespace(a,b):
     """ check if strings are equal ignoring differences in whitespace. """

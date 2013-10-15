@@ -20,8 +20,8 @@ class ondemand(property):
             pass
 
 
-from cache.lazy import lazy
-from misc import deprecated
+from arsenal.cache.lazy import lazy
+from arsenal.misc import deprecated
 @deprecated(lazy)
 def cachedproperty(*args, **kw):
     return lazy(*args, **kw)
@@ -98,7 +98,7 @@ if __name__ == '__main__':
             ll = x.my_lazy_list
             assert ll == range(10), ll
             assert ll is x.my_lazy_list
-            
+
             print x.log
             assert all(v == 1 for v in x.log.values())
 

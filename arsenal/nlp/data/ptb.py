@@ -1,7 +1,7 @@
 import re
 from sys import stdout, stderr, stdin
 from glob import glob
-
+from cStringIO import StringIO
 
 def print_parse(t, out=stdout.write):
     "Print parse formatted as an s-expression."
@@ -47,6 +47,13 @@ def pprint(t, out=stdout.write):
         out(')')
     pp(t)
     out('\n')
+
+
+def pformat(t):
+    "Pretty print tree as a tabbified s-expression."
+    y = StringIO()
+    pprint(t, out=y)
+    return y.getvalue()
 
 
 def sexpr(s, add_root=True):

@@ -95,7 +95,7 @@ class ShelfBasedCache(object):
             self.cache.sync()
         return value
 
-def persistent_cache(key, None_is_bad=False):
+def persistent_cache(key=lambda x: x, None_is_bad=False):
     def wrap(f):
         return ShelfBasedCache(f, key, None_is_bad=None_is_bad)
     return wrap

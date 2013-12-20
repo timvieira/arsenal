@@ -2,7 +2,7 @@
 """
 Find most informative features ranked by information gain (i.e. the ID3 hueristic for decision trees).
 
-Input: a tab-delimited file where each line starts with a label followed by features. 
+Input: a tab-delimited file where each line starts with a label followed by features.
 Output: a sorted list of the most informative features.
 """
 
@@ -31,6 +31,28 @@ def integerize(data):
     Integerize dataset
     returns a triple (label alphabet, feature alphabet, integerized dataset)
     """
+    F = Alphabet()
+    L = Alphabet()
+    I = [(L[label], fromiter(F.map(features), dtype=int32)) for label, features in data]
+    return (L, F, I)
+
+
+
+def kl_filter(data,
+              verbose=True,
+              progress=False,
+              out=sys.stdout,
+              feature_label_cuttoff=0,
+              feature_count_cuttoff=0,
+              do_label_count=False):
+    """
+    data = (label, [features ...])
+
+    KL is a synonym for Information Gain
+
+    KL( p(label) || p(label|feature) )
+    """
+    (L, F, data) = integerize(data)
 
     if do_label_count:
         label_count = defaultdict(int)
@@ -42,26 +64,6 @@ def integerize(data):
         for k,v in label_count:
             print '%20s => %s' % (k, v)
         sys.exit(0)
-
-    F = Alphabet()
-    L = Alphabet()
-    I = [(L[label], fromiter(F.map(features), dtype=int32)) for label, features in data]
-    return (L, F, I)
-
-
-feature_label_cuttoff = 0
-feature_count_cuttoff = 0
-do_label_count = False
-
-def kl_filter(data, verbose=True, progress=False, out=sys.stdout):
-    """
-    data = (label, [features ...])
-
-    KL is a synonym for Information Gain
-
-    KL( p(label) || p(label|feature) )
-    """
-    (L, F, data) = integerize(data)
 
     K = len(L)
     M = len(F)
@@ -81,8 +83,12 @@ def kl_filter(data, verbose=True, progress=False, out=sys.stdout):
 
     feature_counts = counts.sum(axis=0)
 
-    if feature_count_cuttoff:
+    if feature_count_cuttoff > 0:
         cut = feature_counts < feature_count_cuttoff
+
+        #if verbose:
+        print >> sys.stderr, '%s of %s below cutoff of %s' \
+            % (cut.sum(), len(feature_counts), feature_count_cuttoff)
 
         if progress:
             print >> sys.stderr, '%s / %s (%.2f%%) features below cuttoff' % \
@@ -109,12 +115,18 @@ def kl_filter(data, verbose=True, progress=False, out=sys.stdout):
 
     KL = zeros(M)
     for f in iterview(xrange(M), every=5000):
-        label_given_f = lidstone(counts[:,f], 0.00001)   # avoids divide-by-zero
+        label_given_f = lidstone(counts[:,f], 0.0001)   # avoids divide-by-zero
         KL[f] = -kl_divergence(label_prior, label_given_f)
 
     # print KL-feature, most-informative first
     for i in KL.argsort():
-        p = counts[:,i] * 1.0 / counts[:,i].sum()
+
+        z = counts[:,i].sum()
+
+        if z == 0:
+            continue
+
+        p = counts[:,i] * 1.0 / z
 
         l = [(v, k) for k,v in zip(L, p) if v > 0]
         l.sort()
@@ -122,7 +134,7 @@ def kl_filter(data, verbose=True, progress=False, out=sys.stdout):
         z = (-KL[i], F.lookup(i), l)
 
         if verbose:
-            print >> out, '%8.6f\t%s' % (-KL[i], F.lookup(i)), '\t\033[32m', ' '.join('%s(%s)' % (k,v) for v, k in l), '\033[0m'
+            print >> out, '%8.6f\t%s\t%s' % (-KL[i], int(counts[:,i].sum()), F.lookup(i)), '\t\033[32m', ' '.join('%s(%s)' % (k,v) for v, k in l), '\033[0m'
 
         yield z
 

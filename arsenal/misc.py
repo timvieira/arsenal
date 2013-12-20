@@ -14,6 +14,19 @@ except ImportError:
 from arsenal.terminal import colors
 
 
+class ddict(dict):
+    """
+    Variation on collections.defaultdict which allows default value callback to
+    inspect missing key.
+    """
+    def __init__(self, f):
+        self.f = f
+
+    def __missing__(self, key):
+        self[key] = c = self.f(key)
+        return c
+
+
 @contextmanager
 def ignore_error(color='red'):
     try:

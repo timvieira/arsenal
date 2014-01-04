@@ -441,7 +441,7 @@ def window(iterable, k):
 sliding_window = window
 
 
-def iterview(x, every=10, length=None):
+def iterview(x, every=10, length=None, msg=''):
     """
     iterator which prints its progress to *stderr*.
     """
@@ -470,7 +470,10 @@ def iterview(x, every=10, length=None):
         return '%02d:%02d:%02d' % (hrs, mins, secs)
 
     def fmt(starttime, n, lenx):
-        out = plainformat(n, lenx) + ' '
+        out = ''
+        if msg:
+            out += msg + ' '
+        out += plainformat(n, lenx) + ' '
         if n == lenx:
             end = '     '
         else:

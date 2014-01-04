@@ -31,6 +31,9 @@ class Alphabet(object):
         self._frozen = False
         self._growing = True
 
+    def __repr__(self):
+        return 'Alphabet(size=%s,frozen=%s)' % (len(self), self._frozen)
+
     def freeze(self):
         self._frozen = True
 

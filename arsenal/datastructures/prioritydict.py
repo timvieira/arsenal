@@ -32,29 +32,25 @@ class prioritydict(dict):
     priority, and 'pop_smallest' also removes it.
 
     The 'sorted_iter' method provides a destructive sorted iterator.
+
+    This implemented is based on:
+
+      Matteo Dell'Amico's implementation
+      http://code.activestate.com/recipes/522995-priority-dict-a-priority-queue-with-updatable-prio/
+
+         which is based on David Eppstein's implementation
+         http://code.activestate.com/recipes/117228/
+
     """
 
     def __init__(self, *args, **kwargs):
         super(prioritydict, self).__init__(*args, **kwargs)
+        self._heap = None
         self._rebuild_heap()
 
     def _rebuild_heap(self):
         self._heap = [(v, k) for k, v in self.iteritems()]
         heapify(self._heap)
-
-    def peek(self):
-        """
-        Return the item with the lowest priority.
-
-        Raises IndexError if the object is empty.
-        """
-
-        heap = self._heap
-        v, k = heap[0]
-        while k not in self or self[k] != v:
-            heappop(heap)
-            v, k = heap[0]
-        return k
 
     def pop_smallest(self):
         """
@@ -63,38 +59,28 @@ class prioritydict(dict):
         Raises IndexError if the object is empty.
         """
 
+        # Implementation note: Since we don't eagerly remove an element when
+        # it's priority changes, we need to filter our pops to make sure the
+        # priority isn't stale.
+
         heap = self._heap
         v, k = heappop(heap)
-        while k not in self or self[k] != v:
+        while k not in self or self[k] != v:   # while `k` is stale
             v, k = heappop(heap)
         del self[k]
         return k
 
     def __setitem__(self, key, val):
-        # We are not going to remove the previous value from the heap,
-        # since this would have a cost O(n).
-
+        # We are not going to remove the previous value from the heap, since
+        # this would have a cost O(n).
         super(prioritydict, self).__setitem__(key, val)
 
         if len(self._heap) < 2 * len(self):
             heappush(self._heap, (val, key))
         else:
-            # When the heap grows larger than 2 * len(self), we rebuild it
-            # from scratch to avoid wasting too much memory.
+            # When the heap grows larger than 2 * len(self), we rebuild it from
+            # scratch to avoid wasting too much memory.
             self._rebuild_heap()
 
     setdefault = None
     update = None
-
-#    def setdefault(self, key, val):
-#        if key not in self:
-#            self[key] = val
-#            return val
-#        return self[key]
-
-#    def update(self, *args, **kwargs):
-#        # Reimplementing dict.update is tricky -- see e.g.
-#        # http://mail.python.org/pipermail/python-ideas/2007-May/000744.html
-#        # We just rebuild the heap from scratch after passing to super.
-#        super(prioritydict, self).update(*args, **kwargs)
-#        self._rebuild_heap()

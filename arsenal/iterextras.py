@@ -441,7 +441,7 @@ def window(iterable, k):
 sliding_window = window
 
 
-def iterview(x, every=10, length=None, msg=''):
+def iterview(x, every=1, msg='', length=None):
     """
     iterator which prints its progress to *stderr*.
     """

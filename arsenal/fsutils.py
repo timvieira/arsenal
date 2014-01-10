@@ -146,6 +146,8 @@ def secure_filename(filename):
     'etc_passwd'
     >>> secure_filename(u'i contain cool \xfcml\xe4uts.txt')
     'i_contain_cool_umlauts.txt'
+    >>> secure_filename(u'no brackets [ ] allowed either.txt')
+    'no_brackets___allowed_either.txt'
 
     The function might return an empty filename.  It's your responsibility
     to ensure that the filename is unique and that you generate random
@@ -159,6 +161,7 @@ def secure_filename(filename):
             filename = filename.replace(sep, ' ')
     filename = str(_filename_ascii_strip_re.sub('', '_'.join(
                    filename.split()))).strip('._')
+    filename = re.sub('[\[\]]', '', filename)
 
     # on nt a couple of special files are present in each folder.  We
     # have to ensure that the target file is not such a filename.  In

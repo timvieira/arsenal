@@ -2,6 +2,18 @@ from __future__ import division
 import numpy as np
 from numpy import array, exp, log, dot, abs as np_abs, multiply
 
+
+def cumavg(x):
+    """
+    Cumulative average.
+
+    >>> cumavg([1,2,3,4,5])
+    array([ 1. ,  1.5,  2. ,  2.5,  3. ])
+
+    """
+    return np.cumsum(x) / np.arange(1.0, len(x)+1)
+
+
 def normalize_zscore(data):
     """
     Shift and rescale data to be zero-mean and unit-variance along axis 0.
@@ -10,6 +22,7 @@ def normalize_zscore(data):
     rescale = data.std(axis=0)
     rescale[rescale == 0] = 1.0   # avoid divide by zero
     return (data - shift) / rescale
+
 
 def normalize_interval(data):
     """
@@ -20,8 +33,10 @@ def normalize_interval(data):
     rescale[rescale == 0] = 1.0  # avoid divide by zero
     return (data - shift) / rescale
 
+
 def normalize(p):
     return p / p.sum()
+
 
 def lidstone(p, delta):
     """
@@ -89,12 +104,13 @@ def entropy(p):
     p = p[p.nonzero()]
     return -dot(p, log(p)) / log_of_2
 
+
 def kl_divergence(p, q):
     """ Compute KL divergence of two vectors, K(p || q).
     NOTE: If any value in q is 0.0 then the KL-divergence is infinite.
     """
-#    p = p[p > 0]
     return dot(p, log(p / q)) / log_of_2
+
 
 # KL(p||q) = sum_i p[i] log(p[i] / q[i])
 #          = sum_i p[i] (log p[i] - log q[i])
@@ -128,6 +144,7 @@ def mutual_information(joint):
     assert joint.shape == independent.shape
     return kl_divergence(array(joint.flat), array(independent.flat))
 
+
 def cross_entropy(p, q):
     """ Cross Entropy of two vectors,
 
@@ -141,21 +158,26 @@ def cross_entropy(p, q):
     p = p[p > 0]
     return -dot(p, log(q)) / log_of_2
 
+
 def assert_isdistr(p):
     assert (p >= 0).all()
     assert (p <= 1).all()
     assert abs(p.sum() - 1.0) < 0.000001
 
+
 def equal(a, b, tol=1e-10):
     "L_{\inf}(a - b) < tol"
     return inf_norm(a,b) < tol
 
+
 def inf_norm(a, b):
     return np_abs(a - b).max()
+
 
 def assert_equal(a, b, tol=1e-10):
     err = inf_norm(a,b)
     assert err < tol, 'error = %s >= tolerance (%s)' % (err, tol)
+
 
 if __name__ == '__main__':
     #import doctest; doctest.testmod()

@@ -69,6 +69,7 @@ def logsumexp(arr, axis=0):
     >>> logsumexp(a)
     9.4586297444267107
     """
+    arr = np.asarray(arr)
     arr = np.rollaxis(arr, axis)
     # Use the max to normalize, as with the log this is what accumulates the
     # less errors

@@ -76,7 +76,7 @@ which can be overridden to allow for custom logging.
 
 Usage example:
 
->>> from web import ftpserver
+>>> from arsenal.web import ftpserver
 >>> authorizer = ftpserver.DummyAuthorizer()
 >>> authorizer.add_user('user', 'password', os.path.expanduser('~'), perm='elradfmw')
 >>> ftp_handler = ftpserver.FTPHandler

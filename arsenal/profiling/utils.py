@@ -6,7 +6,7 @@ import pstats
 import cProfile
 import tempfile
 
-# TODO: 
+# TODO:
 #  - maybe we should delete the `out` tempfile
 #  - I don't like that this currently makes a system call to open the image...
 #  - gprof2dot is on the pythonpath we should be able to avoid the system call
@@ -45,7 +45,8 @@ def main():
     parser = OptionParser()
     parser.allow_interspersed_args = False
     parser.add_option('-o', '--outfile', dest="outfile",
-                      help="Save stats to <outfile>", default=None)
+                      help="Save stats to <outfile>",
+                      default='/tmp/profile.tmp')
 
     if not sys.argv[1:]:
         parser.print_usage()
@@ -54,10 +55,11 @@ def main():
     (options, args) = parser.parse_args()
 
     viz = kcachegrind
+    #viz = profile_viz
 
     sys.path = [os.getcwd()] + sys.path
 
-    if (len(args) > 0):
+    if len(args) > 0:
         sys.argv[:] = args
         sys.path.insert(0, os.path.dirname(sys.argv[0]))
         viz('execfile(%r)' % sys.argv[0], out=options.outfile)
@@ -68,5 +70,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-

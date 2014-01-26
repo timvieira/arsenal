@@ -7,8 +7,6 @@
 import sys
 sys.path.append('..')
 
-from debug import ultraTB2
-
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option('--coverage',action="store_true", default=False)
@@ -18,7 +16,6 @@ parser.add_option('--verbose-doctest', action="store_true", default=False)
 parser.add_option('--pm', '--post-mortem', action="store_true", default=False)
 parser.add_option('--breakin', action="store_true", default=False)
 parser.add_option('-a','--automain', action="store_true", default=False)
-parser.add_option('--less-verbose', action="store_true", default=False)
 
 # split the argument list at the first item ending with .py
 source = [(i+1,f) for i, f in enumerate(sys.argv[1:]) if f.endswith('.py')]
@@ -30,11 +27,6 @@ scriptargs = sys.argv[source[0][0]:]
 #print 'scriptargs:',  scriptargs
 
 (opts, args) = parser.parse_args(devargs)
-
-if opts.less_verbose:
-    ultraTB2.enable(include_vars=False)
-else:
-    ultraTB2.enable()
 
 # hack sys.argv so that it no longer contains this script's options
 sys.argv = scriptargs
@@ -55,16 +47,16 @@ if opts.doctest or opts.verbose_doctest or opts.doctest_for is not None:
         atexit.register(lambda: doctest.testmod(verbose=opts.verbose_doctest))
 
 if opts.pm:
-    from debug.utils import enable_pm
+    from arsenal.debug.utils import enable_pm
     enable_pm()
 
 if opts.breakin:
-    from debug import breakin
+    from arsenal.debug import breakin
     breakin.enable()
 
 # execute the file
 execfile(source[0][1])
 
 if opts.automain:
-    from automain import automain
+    from arsenal.automain import automain
     automain()

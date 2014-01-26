@@ -65,14 +65,14 @@ mpl_stylesheet = {
      'ytick.minor.size': 0.0
 }
 
-import numpy as np
-import matplotlib as mpl
-import matplotlib.pylab as pl
+if __name__ == '__main__':
+    import numpy as np
+    import matplotlib as mpl
+    import matplotlib.pylab as pl
 
-mpl.rc_params().update(mpl_stylesheet)
+    mpl.rc_params().update(mpl_stylesheet)
 
+    xs, ys = np.random.uniform(0,1,size=(2,30))
+    pl.scatter(xs, ys)
 
-xs, ys = np.random.uniform(0,1,size=(2,30))
-pl.scatter(xs, ys)
-
-pl.show()
+    pl.show()

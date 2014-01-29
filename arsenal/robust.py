@@ -94,7 +94,7 @@ def retry(tries=2, pause=0.1, suppress=(Exception,), allow=(NameError, NotImplem
 
 
 if __name__ == '__main__':
-    from testing.assertions import assert_throws
+    from arsenal.assertions import assert_throws
 
     def test_retry():
 

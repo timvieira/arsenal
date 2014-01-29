@@ -14,6 +14,24 @@ except ImportError:
 from arsenal.terminal import colors
 
 
+def deprecated(use_instead=None):
+    """
+    This is a decorator which can be used to mark functions as deprecated.
+    It will result in a warning being emitted when the function is used.
+    """
+    def wrapped(func):
+        @wraps(func)
+        def new_func(*args, **kwargs):
+            message = "Call to deprecated function %s." % func.__name__
+            if use_instead:
+                message += " Use %s instead." % use_instead
+            warnings.warn(message, category=DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return new_func
+
+    return wrapped
+
+
 class ddict(dict):
     """
     Variation on collections.defaultdict which allows default value callback to
@@ -45,6 +63,7 @@ def ignore_error(color='red'):
         print color % '*'*80
 
 
+@deprecated
 class logger(object):
 
     def __init__(self, filename, clean=True, quiet=False):
@@ -64,6 +83,7 @@ class logger(object):
         log = logger(*args, **kw)
         sys.stderr = sys.stdout = log
         return log
+
 
 def force(g):
     """ force evaluation of generator `g`. """
@@ -188,27 +208,6 @@ def attn(msg):
 ##     return cls
 
 
-#def trace(f):
-#    def wrap(*args, **kw):
-#        print 'calling function: {f} with args: {args} kwargs: {kw}'.format(f=f, args=args, kw=kw)
-#        y = f(*args, **kw)
-#        print ' ->', y
-#        return y
-#    return wrap
-
-## I'm not sure about this function yet..
-## def deep_import(name):
-##     """
-##     A version of __import__ that works as expected when using the form
-##     'module.name' (returns the object corresponding to 'name', instead of
-##     'module').
-##     """
-##     mod = __import__(name)
-##     components = name.split('.')
-##     for comp in components[1:]:
-##         mod = getattr(mod, comp)
-##     return mod
-
 '''
 import difflib
 def showdiff(old, new):
@@ -231,24 +230,6 @@ def piped():
 def highlighter(p, flags=0):
     pattern = re.compile('%s' % p, flags)
     return lambda x: pattern.sub(colors.bold % colors.yellow % colors.bg_red % r'\1', x)
-
-
-def deprecated(use_instead=None):
-    """
-    This is a decorator which can be used to mark functions as deprecated.
-    It will result in a warning being emitted when the function is used.
-    """
-    def wrapped(func):
-        @wraps(func)
-        def new_func(*args, **kwargs):
-            message = "Call to deprecated function %s." % func.__name__
-            if use_instead:
-                message += " Use %s instead." % use_instead
-            warnings.warn(message, category=DeprecationWarning, stacklevel=2)
-            return func(*args, **kwargs)
-        return new_func
-
-    return wrapped
 
 
 def browser(html):
@@ -340,18 +321,20 @@ def redirect_io(f):
 #______________________________________________________________________________
 # Function decorators
 
-def threaded(callback=lambda *args, **kwargs: None, daemonic=False):
-    """Decorate  a function to run in its own thread and report the result
-    by calling callback with it."""
-    def innerDecorator(func):
-        @wraps(func)
-        def inner(*args, **kwargs):
-            target = lambda: callback(func(*args, **kwargs))
-            t = Thread(target=target)
-            t.setDaemon(daemonic)
-            t.start()
-        return inner
-    return innerDecorator
+# function decorator doesn't seem like a great solution.
+#
+#def threaded(callback=lambda *args, **kwargs: None, daemonic=False):
+#    """Decorate a function to run in its own thread and report the result by
+#    calling callback with it."""
+#    def innerDecorator(func):
+#        @wraps(func)
+#        def inner(*args, **kwargs):
+#            target = lambda: callback(func(*args, **kwargs))
+#            t = Thread(target=target)
+#            t.setDaemon(daemonic)
+#            t.start()
+#        return inner
+#    return innerDecorator
 
 #_______________________________________________________________________________
 #

@@ -1,6 +1,17 @@
-from __future__ import division
+"""
+Evaluations methods common in NLP and information extraction.
 
+
+TODO: Have a look at
+  https://github.com/nschneid/pyutil/blob/master/chunkeval.py, there appear to be
+  richer evaluation methods.
+
+"""
+
+from __future__ import division
 from collections import defaultdict
+
+
 class F1:
 
     def __init__(self, confusion_matrix=False):

@@ -25,7 +25,7 @@ def deprecated(use_instead=None):
             message = "Call to deprecated function %s." % func.__name__
             if use_instead:
                 message += " Use %s instead." % use_instead
-            warnings.warn(message, category=DeprecationWarning, stacklevel=2)
+            warnings.warn(message, stacklevel=2)
             return func(*args, **kwargs)
         return new_func
 

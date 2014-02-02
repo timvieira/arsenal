@@ -1,5 +1,5 @@
 """
-Debugging utilities
+Debugging utilities.
 """
 
 import re
@@ -9,52 +9,19 @@ import traceback
 
 from arsenal.debug import saverr  # registers hook
 
-# new IPython
-# import IPython
-# debugger = lambda: IPython.InteractiveShell().debugger(force=True)
-
-# try to use IPython's fancy debugger if available
-
-
 from IPython import embed as ip
 #from IPython.frontend.terminal.embed import InteractiveShellEmbed
 #_ip = InteractiveShellEmbed(banner1='')
 
-
-#    def ip():
-#        import pylab as pl
-#        pl.ion()
-#        pl.show()
-#        #_ip()
-#        embed()
+def enable_ultratb(mode='Context', **kwargs):
+    from IPython.core import ultratb
+    sys.excepthook = ultratb.FormattedTB(mode=mode, **kwargs)
 
 # TODO: look IPython's debugging stuff..
 # http://ipython.org/ipython-doc/dev/api/generated/IPython.core.debugger.html
 from IPython.core.debugger import Tracer
 set_trace = lambda: Tracer()()
 
-    #def set_trace(frame=None):
-    #    # get frame
-    #    frame = frame or sys._getframe().f_back
-    #    # start ipdb with colors
-    #    ip = ipapi.get()
-    #    d = Pdb(ip.options.colors)
-    #    d.set_trace(frame)
-    #
-    #def pm():
-    #    p = Pdb()
-    #    p.reset()
-    #    p.interaction(None, sys.last_traceback)
-
-"""
-    except ImportError:
-
-        # if ipython is unavailable, use interactive console
-        from code import InteractiveConsole
-        def ip():
-            frame = sys._getframe().f_back
-            InteractiveConsole(frame).interact()
-"""
 
 #from IPython.Debugger import Pdb
 from pdb import set_trace, pm, Pdb
@@ -67,7 +34,9 @@ def enable_debug_hook():
         pm()
     sys.excepthook = debug_hook
 
+
 enable_pm = enable_debug_hook
+
 
 def dumpobj(o, callables=False, private=False):
     """
@@ -108,6 +77,7 @@ def dumpobj(o, callables=False, private=False):
             print '%20s: %s' % (a, type(getattr(o,a)).__name__)
         except:
             pass
+
 
 def debug(s, *args, **kwargs):
     """

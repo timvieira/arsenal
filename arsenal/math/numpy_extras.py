@@ -1,6 +1,22 @@
 from __future__ import division
 import numpy as np
-from numpy import array, exp, log, dot, abs as np_abs, multiply
+from numpy import array, exp, log, dot, abs as np_abs, multiply, cumsum
+from numpy.random import uniform
+
+
+def sample(w, n=1):
+    """
+    Uses the inverse CDF method to return samples drawn from an (unnormalized)
+    discrete distribution.
+    """
+    cdf = cumsum(w)
+    r = uniform() if n == 1 else uniform(size=n)
+    return cdf.searchsorted(r * cdf[-1])
+
+
+def log_sample(w):
+    "Sample from unnormalized log-distribution."
+    return sample(exp(w - w.max()))
 
 
 def cumavg(x):

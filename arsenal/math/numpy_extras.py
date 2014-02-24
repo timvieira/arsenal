@@ -44,7 +44,7 @@ def sample(w, n=1):
     """
     c = cumsum(w)
     r = uniform() if n == 1 else uniform(size=n)
-    return c.searchsorted(r * cdf[-1])
+    return c.searchsorted(r * c[-1])
 
 
 def log_sample(w):

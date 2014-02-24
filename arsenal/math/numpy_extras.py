@@ -4,14 +4,47 @@ from numpy import array, exp, log, dot, abs as np_abs, multiply, cumsum
 from numpy.random import uniform
 
 
+def cdf(a):
+    """
+    Empirical CDF of data `a`, returns function which makes values to their
+    cumulative probabilities.
+
+     >>> g = cdf([5, 10, 15])
+
+    Evaluate the CDF at a few points
+
+     >>> g([5,9,13,15,100])
+     array([ 0.33333333,  0.33333333,  0.66666667,  1.        ,  1.        ])
+
+
+    Check that ties are handled correctly
+
+     >>> g = cdf([5, 5, 15])
+
+     The value p(x <= 5) = 2/3
+
+     >>> g([0, 5, 15])
+     array([ 0.        ,  0.66666667,  1.        ])
+
+    """
+
+    x = np.array(a, copy=True)
+    x.sort()
+
+    def f(z):
+        return np.searchsorted(x, z, 'right') * 1.0 / len(x)
+
+    return f
+
+
 def sample(w, n=1):
     """
     Uses the inverse CDF method to return samples drawn from an (unnormalized)
     discrete distribution.
     """
-    cdf = cumsum(w)
+    c = cumsum(w)
     r = uniform() if n == 1 else uniform(size=n)
-    return cdf.searchsorted(r * cdf[-1])
+    return c.searchsorted(r * cdf[-1])
 
 
 def log_sample(w):
@@ -60,14 +93,6 @@ def lidstone(p, delta):
     """
     return normalize(p + delta)
 
-'''
-def logsumexp(a):
-    """
-    Compute the log of the sum of exponentials of an array ``a``, :math:`\log(\exp(a_0) + \exp(a_1) + ...)`
-    """
-    b = a.max()
-    return b + log((exp(a-b)).sum())
-'''
 
 # based on implementation from scikits-learn
 def logsumexp(arr, axis=0):

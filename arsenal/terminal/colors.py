@@ -32,6 +32,8 @@ def getwidth(a):
     "Find maximum width of the string representations of the elements of ``a``."
     return max(len(str(z)) for z in a)
 
+def check(x, t='pass', f='fail'):
+    return green % t if x else red % f
 
 underline = '\033[4m%s\033[0m'
 
@@ -56,6 +58,7 @@ def color01(x, fmt='%.10f'):
     offset = x*w
     offset = int(round(offset))
     return color.fg256(a + offset, fmt % x)
+
 
 if __name__ == '__main__':
     test()

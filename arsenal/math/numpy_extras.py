@@ -1,7 +1,15 @@
 from __future__ import division
 import numpy as np
 from numpy import array, exp, log, dot, abs as np_abs, multiply, cumsum
-from numpy.random import uniform
+from numpy.random import uniform, normal
+from scipy.linalg import norm
+
+
+def spherical(size):
+    "Generate random vector from spherical Gaussian."
+    x = normal(0, 1, size=size)
+    x /= norm(x, 2)
+    return x
 
 
 def cdf(a):
@@ -151,7 +159,7 @@ def kl_divergence(p, q):
     """ Compute KL divergence of two vectors, K(p || q).
     NOTE: If any value in q is 0.0 then the KL-divergence is infinite.
     """
-    return dot(p, log(p / q)) / log_of_2
+    return dot(p, log(p) - log(q)) / log_of_2
 
 
 # KL(p||q) = sum_i p[i] log(p[i] / q[i])

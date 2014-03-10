@@ -445,7 +445,7 @@ def iterview(x, every=1, msg='', length=None):
     """
     iterator which prints its progress to *stderr*.
     """
-    WIDTH = 70
+    WIDTH = 79
 
     def plainformat(n, lenx):
         return '%5.1f%% (%*d/%d)' % ((float(n)/lenx)*100, len(str(lenx)), n, lenx)

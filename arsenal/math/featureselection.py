@@ -7,8 +7,9 @@ Output: a sorted list of the most informative features.
 """
 
 import sys
+import numpy as np
 from numpy import zeros, fromiter, int32
-from arsenal.math import kl_divergence, normalize, lidstone
+from arsenal.math import kl_divergence, lidstone
 from arsenal.alphabet import Alphabet
 from collections import defaultdict
 
@@ -56,7 +57,7 @@ def kl_filter(data,
 
     if do_label_count:
         label_count = defaultdict(int)
-        for label, features in data:
+        for label, _ in data:
             label_count[label] += 1
         label_count = label_count.items()
         label_count.sort(key=lambda x: -x[1])  # sort by count
@@ -107,7 +108,7 @@ def kl_filter(data,
         # zero-out features below cuffoff
         counts[cut] = 0
 
-    label_prior = normalize(counts.sum(axis=1))
+    label_prior = lidstone(counts.sum(axis=1), 0.001)  # avoids divide-by-zero
 
     # compute KL
     if progress:
@@ -115,7 +116,7 @@ def kl_filter(data,
 
     KL = zeros(M)
     for f in iterview(xrange(M), every=5000):
-        label_given_f = lidstone(counts[:,f], 0.0001)   # avoids divide-by-zero
+        label_given_f = lidstone(counts[:,f], 0.001)   # avoids divide-by-zero
         KL[f] = -kl_divergence(label_prior, label_given_f)
 
     # print KL-feature, most-informative first

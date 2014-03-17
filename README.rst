@@ -18,10 +18,6 @@ Highlights
     A "dumping ground" for odd and ends. I normally drop things in here and later
     move them elsewhere if the turn out to be useful.
 
-- automain.py
-    Automatically constructs a "main function" for any module which
-    calls the automain function.
-
 - robust.py
     utilities such as ``timelimit`` and ``retry`` to help "robustify" your code.
 

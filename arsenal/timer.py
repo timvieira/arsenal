@@ -33,12 +33,15 @@ class Timer(object):
     def std(self):
         return np.std(self.times, ddof=1)
     def compare(self, other):
+        if len(self.times) == 0 or len(other.times) == 0:
+            print '%s %s %s' % (self.name, '???', other.name)
+            return
         if self.avg <= other.avg:
-            print '%s is %gx faster' % (self.name, other.avg / self.avg)
+            print '%s is %6.4fx faster than %s' % (self.name, other.avg / self.avg, other.name)
         else:
             other.compare(self)
     def compare_many(self, *others):
-        self.compare(self)
+        #self.compare(self)
         for x in others:
             self.compare(x)
 

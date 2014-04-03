@@ -9,7 +9,11 @@ import traceback
 
 from arsenal.debug import saverr  # registers hook
 
-from IPython import embed as ip
+from IPython.terminal.embed import InteractiveShellEmbed
+def ip(banner1='', **kw):
+    shell = InteractiveShellEmbed.instance(banner1=banner1, **kw)
+    shell(header='', stack_depth=2)
+
 #from IPython.frontend.terminal.embed import InteractiveShellEmbed
 #_ip = InteractiveShellEmbed(banner1='')
 

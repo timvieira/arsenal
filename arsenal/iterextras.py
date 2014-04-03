@@ -440,7 +440,8 @@ def window(iterable, k):
 
 sliding_window = window
 
-
+# TODO: add option to show progress (at most) every x seconds, processing
+# elements of the stream might not align super-well with temporal interval.
 def iterview(x, every=1, msg='', length=None):
     """
     iterator which prints its progress to *stderr*.
@@ -489,27 +490,17 @@ def iterview(x, every=1, msg='', length=None):
     if lenx == 0:
         raise StopIteration
 
-    #history = []
     for n, y in enumerate(x):
         if every is None or n % every == 0:
             sys.stderr.write('\r' + fmt(starttime, n, lenx))
-
-        #b4 = time()
         yield y
 
-        #history.append(time() - b4)
-        #pylab.ion()
-        #pylab.hist(history, bins=50)
-        #pylab.draw()
-
     sys.stderr.write('\r' + fmt(starttime, n+1, lenx) + '\n')
-
-#import pylab
 
 #_______________________________________________________________________________
 #
 
-def consume(iterator, n):
+def drop(iterator, n):
     "Advance the iterator n-steps ahead. If n is none, consume entirely."
     # The technique uses objects that consume iterators at C speed.
     if n is None:
@@ -532,7 +523,7 @@ def no(seq, pred=None):
     the opposite of all, returns True if pred(x) is false for every element
     in the iterable.
     """
-    for elem in ifilter(pred, seq):
+    for _ in ifilter(pred, seq):
         return False
     return True
 

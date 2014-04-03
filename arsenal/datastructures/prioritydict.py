@@ -70,6 +70,11 @@ class prioritydict(dict):
         del self[k]
         return k
 
+# TODO: this isn't right because we're lazy about cleanup heappop pop_smallest
+# calls pop multiple times.
+#    def __len__(self):
+#        return len(self._heap)
+
     def __setitem__(self, key, val):
         # We are not going to remove the previous value from the heap, since
         # this would have a cost O(n).

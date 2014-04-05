@@ -6,6 +6,25 @@ from contextlib import contextmanager
 from fnmatch import fnmatch
 from arsenal.iterextras import atmost
 from subprocess import Popen, PIPE
+from path import path
+
+
+def filesize(f):
+    """
+    Uses du to compute human readable summary of filesize.
+
+    It's a wrapper around
+
+    $ du -hs filename
+
+    """
+    f = path(f)
+    if not f.exists():
+        return 'unknown'
+    try:
+        return Popen(['du', '-hs', f], stdout=PIPE).communicate()[0].strip().split()[0]
+    except TypeError:
+        return 'unknown'
 
 
 def filetype(f):

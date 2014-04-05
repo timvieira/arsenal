@@ -6,6 +6,8 @@ from itertools import *
 from random import shuffle
 from collections import defaultdict, deque
 from operator import itemgetter
+from arsenal.iterview import iterview
+
 
 # IDEAS:
 # * progress_meter: updates based on how much work was dones, e.g.,
@@ -439,63 +441,6 @@ def window(iterable, k):
     return izip(*iterators)
 
 sliding_window = window
-
-# TODO: add option to show progress (at most) every x seconds, processing
-# elements of the stream might not align super-well with temporal interval.
-def iterview(x, every=1, msg='', length=None):
-    """
-    iterator which prints its progress to *stderr*.
-    """
-    WIDTH = 79
-
-    def plainformat(n, lenx):
-        return '%5.1f%% (%*d/%d)' % ((float(n)/lenx)*100, len(str(lenx)), n, lenx)
-
-    def bars(size, n, lenx):
-        val = int((float(n)*size)/lenx + 0.5)
-        if size - val:
-            spacing = ">" + (" "*(size-val))[1:]
-        else:
-            spacing = ""
-        return "[%s%s]" % ("="*val, spacing)
-
-    def eta(elapsed, n, lenx):
-        if n == 0:
-            return '--:--:--'
-        if n == lenx:
-            secs = int(elapsed)
-        else:
-            secs = int((elapsed/n) * (lenx-n))
-        mins, secs = divmod(secs, 60)
-        hrs, mins = divmod(mins, 60)
-        return '%02d:%02d:%02d' % (hrs, mins, secs)
-
-    def fmt(starttime, n, lenx):
-        out = ''
-        if msg:
-            out += msg + ' '
-        out += plainformat(n, lenx) + ' '
-        if n == lenx:
-            end = '     '
-        else:
-            end = ' ETA '
-        end += eta(time() - starttime, n, lenx)
-        out += bars(WIDTH - len(out) - len(end), n, lenx)
-        out += end
-        return out
-
-    starttime = time()
-    lenx = length or len(x)
-    n = lenx
-    if lenx == 0:
-        raise StopIteration
-
-    for n, y in enumerate(x):
-        if every is None or n % every == 0:
-            sys.stderr.write('\r' + fmt(starttime, n, lenx))
-        yield y
-
-    sys.stderr.write('\r' + fmt(starttime, n+1, lenx) + '\n')
 
 #_______________________________________________________________________________
 #

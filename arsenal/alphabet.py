@@ -1,3 +1,5 @@
+import os
+
 class Alphabet(object):
     """
     Bijective mapping from strings to integers.
@@ -45,7 +47,7 @@ class Alphabet(object):
         inst = cls()
         for x in s:
             inst.add(x)
-        inst.freeze()
+#        inst.freeze()
         return inst
 
     def keys(self):
@@ -75,7 +77,7 @@ class Alphabet(object):
     def lookup(self, i):
         if i is None:
             return None
-#        assert isinstance(i, int)
+        #assert isinstance(i, int)
         return self._flip[i]
 
     def lookup_many(self, x):
@@ -83,15 +85,15 @@ class Alphabet(object):
             yield self.lookup(k)
 
     def __contains__(self, k):
-        assert isinstance(k, basestring)
+        #assert isinstance(k, basestring)
         return k in self._mapping
 
     def __getitem__(self, k):
         try:
             return self._mapping[k]
         except KeyError:
-            if not isinstance(k, basestring):
-                raise ValueError("Invalid key (%s): only strings allowed." % (k,))
+            #if not isinstance(k, basestring):
+            #    raise ValueError("Invalid key (%s): only strings allowed." % (k,))
             if self._frozen:
                 raise ValueError('Alphabet is frozen. Key "%s" not found.' % (k,))
             if not self._growing:
@@ -119,6 +121,8 @@ class Alphabet(object):
 
     @classmethod
     def load(cls, filename):
+        if not os.path.exists(filename):
+            return cls()
         with file(filename) as f:
             return cls.from_iterable(l.strip() for l in f)
 

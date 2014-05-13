@@ -457,7 +457,7 @@ def drop(iterator, n):
 
 def take(n, seq):
     """ Return the first n items in a sequence. """
-    return list(islice(seq, None, n))
+    return islice(seq, None, n)
 
 def nth(iterable, n):
     """ Returns a list containing the nth item. """
@@ -492,7 +492,7 @@ def flatten(listOfLists):
     """ (non-recursive) Flatten a list of lists. """
     return list(chain(*listOfLists))
 
-def batch(iterable, batchsize=2):
+def batch(size, iterable):
     """Yield a list of (up to) batchsize items at a time.  The last
     element will be shorter if there are items left over.
     batch(s, 2) -> [s0,s1], [s2,s3], [s4, s5], ...
@@ -503,7 +503,7 @@ def batch(iterable, batchsize=2):
     current = []
     for item in iterable:
         current.append(item)
-        if len(current) == batchsize:
+        if len(current) == size:
             yield current
             current = []
     if current:
@@ -517,18 +517,18 @@ def full_batches(iterable, batchsize=2):
     """
     return izip(*repeat(iter(iterable), batchsize))
 
-def batch_extra_lazy(iterable, batchsize):
-    """ batch(s, 2) -> [s0,s1], [s2,s3], [s4, s5], ...
-
-    Yield a list of (up to) batchsize items at a time.
-
-    >>> map(tuple, batch_extra_lazy(range(5), 2))
-    [(0, 1), (2, 3), (4,)]
-    """
-    sourceiter = iter(iterable)
-    while True:
-        batchiter = islice(sourceiter, batchsize)
-        yield chain([batchiter.next()], batchiter)
+#def batch_extra_lazy(iterable, batchsize):
+#    """ batch(s, 2) -> [s0,s1], [s2,s3], [s4, s5], ...
+#
+#    Yield a list of (up to) batchsize items at a time.
+#
+#    >>> map(tuple, batch_extra_lazy(range(5), 2))
+#    [(0, 1), (2, 3), (4,)]
+#    """
+#    sourceiter = iter(iterable)
+#    while True:
+#        batchiter = islice(sourceiter, batchsize)
+#        yield chain([batchiter.next()], batchiter)
 
 
 def iunzip(iterable, n=None):

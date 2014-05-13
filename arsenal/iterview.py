@@ -72,7 +72,7 @@ def fmt(start, n, length, width):
     return string
 
 
-def iterview(x, msg=None, every=10, mintime=None, length=None, width=78):
+def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newline=False):
     """
     Returns an iterator which prints its progress to stderr.
 
@@ -90,7 +90,9 @@ def iterview(x, msg=None, every=10, mintime=None, length=None, width=78):
     """
 
     start = time()
-    length = length or len(x)
+
+    if length is None:
+        length = len(x)
 
     if length == 0:
         raise StopIteration
@@ -108,12 +110,17 @@ def iterview(x, msg=None, every=10, mintime=None, length=None, width=78):
     for n, y in enumerate(x):
         if every is None or n % every == 0:
             if not mintime or time() - last_update >= mintime:
-                sys.stderr.write('\r%s%s' % (msg, fmt(start, n, length, width)))
+                if newline:
+                    sys.stderr.write('%s%s\n' % (msg, fmt(start, n, length, width)))
+                else:
+                    sys.stderr.write('\r%s%s' % (msg, fmt(start, n, length, width)))
                 last_update = time()
-
         yield y
 
-    sys.stderr.write('\r%s%s\n' % (msg, fmt(start, n+1, length, width)))
+    if newline:
+        sys.stderr.write('%s%s\n' % (msg, fmt(start, n+1, length, width)))
+    else:
+        sys.stderr.write('\r%s%s\n' % (msg, fmt(start, n+1, length, width)))
 
 
 if __name__ == '__main__':

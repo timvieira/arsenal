@@ -1,4 +1,6 @@
 import os
+from numpy.random import randint
+
 
 class Alphabet(object):
     """
@@ -26,12 +28,15 @@ class Alphabet(object):
     d
     """
 
-    def __init__(self):
+    def __init__(self, random_int=None):
         self._mapping = {}   # str -> int
         self._flip = {}      # int -> str; timv: consider using array or list
         self._i = 0
         self._frozen = False
         self._growing = True
+        self._random_int = random_int   # if non-zero, will randomly assign
+                                        # integers (between 0 and randon_int) as
+                                        # index (possibly with collisions)
 
     def __repr__(self):
         return 'Alphabet(size=%s,frozen=%s)' % (len(self), self._frozen)
@@ -44,6 +49,7 @@ class Alphabet(object):
 
     @classmethod
     def from_iterable(cls, s):
+        "Assumes keys are strings."
         inst = cls()
         for x in s:
             inst.add(x)
@@ -52,6 +58,9 @@ class Alphabet(object):
 
     def keys(self):
         return self._mapping.iterkeys()
+
+    def items(self):
+        return self._mapping.iteritems()
 
     def imap(self, seq, emit_none=False):
         """
@@ -98,12 +107,21 @@ class Alphabet(object):
                 raise ValueError('Alphabet is frozen. Key "%s" not found.' % (k,))
             if not self._growing:
                 return None
-            x = self._mapping[k] = self._i
+            if self._random_int:
+                x = self._mapping[k] = randint(0, self._random_int)
+            else:
+                x = self._mapping[k] = self._i
+                self._i += 1
             self._flip[x] = k
-            self._i += 1
             return x
 
     add = __getitem__
+
+    def __setitem__(self, k, v):
+        assert k not in self._mapping
+        assert isinstance(v, int)
+        self._mapping[k] = v
+        self._flip[v] = k
 
     def __iter__(self):
         for i in xrange(len(self)):
@@ -117,6 +135,7 @@ class Alphabet(object):
         return len(self._mapping)
 
     def plaintext(self):
+        "assumes keys are strings"
         return '\n'.join(self)
 
     @classmethod

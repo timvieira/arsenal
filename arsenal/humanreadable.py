@@ -90,11 +90,11 @@ def datestr(then, now=None):
     >>> datestr(d, now=d)
     '0 microseconds ago'
     >>> datestr(datetime(1970, 1, 1), now=d)
-    'January  1'
+    'Jan 01'
     >>> datestr(datetime(1969, 1, 1), now=d)
-    'January  1, 1969'
+    'Jan 01, 1969'
     >>> datestr(datetime(1970, 6, 1), now=d)
-    'June  1, 1970'
+    'Jun 01, 1970'
     >>> datestr(None)
     ''
     """
@@ -102,7 +102,6 @@ def datestr(then, now=None):
     def agohence(n, what, divisor=None):
         if divisor:
             n //= divisor
-
         out = str(abs(n)) + ' ' + what       # '2 day'
         if abs(n) != 1:
             out += 's'                       # '2 days'
@@ -137,7 +136,7 @@ def datestr(then, now=None):
         if abs(deltadays) < 4:
             return agohence(deltadays, 'day')
 
-        out = then.strftime('%B %e') # e.g. 'June 13'
+        out = then.strftime('%b %d') # e.g. 'June 13'
         if then.year != now.year or deltadays < 0:
             out += ', %s' % then.year
         return out

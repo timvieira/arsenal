@@ -1,8 +1,83 @@
 from __future__ import division
 import numpy as np
-from numpy import array, exp, log, dot, abs as np_abs, multiply, cumsum
+from numpy import array, exp, log, dot, abs, multiply, cumsum
 from numpy.random import uniform, normal
 from scipy.linalg import norm
+from numpy import isfinite
+
+
+def compare(expect, got, name=None):
+    """
+    Compare vectors.
+    """
+    from arsenal.terminal import yellow, green, red
+    assert len(expect) == len(got)
+
+    errors = []
+    if not isfinite(got).all():
+        errors.append('not finite')
+
+    if not isfinite(expect).all():
+        errors.append('not finite')
+
+    c = 1-cosine(expect, got)
+    if c > 1e-10:
+        errors.append('cosine dist: %g' % c)
+
+    d = linf(expect, got)
+    if d > 1e-10:
+        errors.append('l_inf: %g' % d)
+
+    x = expect
+    y = got
+    s = np.asarray(~((x > 0) ^ (y > 0)), dtype=int)
+    p = s.sum() * 100.0 / len(s)
+    if p != 100.0:
+        errors.append('same sign: %s%% (%s/%s)' % (p, s.sum(), len(s)))
+        errors.append('same sign vec: %s' % s)
+
+    if errors:
+        print
+        print red % 'Failed%s:' % ' (%s)' % name if name else ''
+        print yellow % 'expected:'
+        print expect
+        print yellow % 'got:'
+        print got
+        print yellow % 'errors:'
+        print '\n'.join(errors)
+    else:
+        print green % 'ok%s' \
+            % ' (%s)' % name if name else ''
+
+
+def linf(a, b):
+    return abs(a - b).max()
+
+
+def cosine(a, b):
+    return a.dot(b) / norm(a) / norm(b)
+
+
+class Mixture(object):
+    """
+    Mixture of several densities
+    """
+    def __init__(self, w, pdfs):
+        w = array(w)
+        assert (w >= 0).all() and abs(1 - w.sum()) <= 1e-10, \
+            'w is not a prob. distribution.'
+        self.pdfs = pdfs
+        self.w = w
+        self.cdf = np.cumsum(w)
+
+    def rvs(self):
+        # sample component
+        i = self.cdf.searchsorted(uniform())
+        # sample from component
+        return self.pdfs[i].rvs()
+
+    def pdf(self, x):
+        return sum([p.pdf(x) * w for w, p in zip(self.w, self.pdfs)])
 
 
 def spherical(size):
@@ -45,13 +120,13 @@ def cdf(a):
     return f
 
 
-def sample(w, n=1):
+def sample(w, n=None):
     """
     Uses the inverse CDF method to return samples drawn from an (unnormalized)
     discrete distribution.
     """
     c = cumsum(w)
-    r = uniform() if n == 1 else uniform(size=n)
+    r = uniform() if n is None else uniform(size=n)
     return c.searchsorted(r * c[-1])
 
 
@@ -221,7 +296,7 @@ def equal(a, b, tol=1e-10):
 
 
 def inf_norm(a, b):
-    return np_abs(a - b).max()
+    return abs(a - b).max()
 
 
 def assert_equal(a, b, tol=1e-10):

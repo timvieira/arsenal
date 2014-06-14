@@ -20,8 +20,8 @@ def compare(expect, got, name=None):
     if not isfinite(expect).all():
         errors.append('not finite')
 
-    c = 1-cosine(expect, got)
-    if c > 1e-10:
+    c = cosine(expect, got)
+    if c < 0.99999:
         errors.append('cosine dist: %g' % c)
 
     d = linf(expect, got)
@@ -34,7 +34,7 @@ def compare(expect, got, name=None):
     p = s.sum() * 100.0 / len(s)
     if p != 100.0:
         errors.append('same sign: %s%% (%s/%s)' % (p, s.sum(), len(s)))
-        errors.append('same sign vec: %s' % s)
+        #errors.append('same sign vec: %s' % s)
 
     if errors:
         print
@@ -44,6 +44,12 @@ def compare(expect, got, name=None):
         print yellow % 'got:'
         print got
         print yellow % 'errors:'
+
+        # relative error
+        rel = np.abs(expect - got) / [max(x,y) for x,y in zip(np.abs(expect), np.abs(got))]
+        rel = [x for x in rel if isfinite(x)]
+        print 'mean relative error:', np.mean(rel)
+
         print '\n'.join(errors)
     else:
         print green % 'ok%s' \

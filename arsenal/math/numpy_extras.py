@@ -76,11 +76,11 @@ class Mixture(object):
         self.w = w
         self.cdf = np.cumsum(w)
 
-    def rvs(self):
+    def rvs(self, size=1):
         # sample component
-        i = self.cdf.searchsorted(uniform())
+        i = self.cdf.searchsorted(uniform(size=size))
         # sample from component
-        return self.pdfs[i].rvs()
+        return np.array([self.pdfs[j].rvs() for j in i])
 
     def pdf(self, x):
         return sum([p.pdf(x) * w for w, p in zip(self.w, self.pdfs)])

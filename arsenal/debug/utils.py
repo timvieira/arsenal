@@ -8,14 +8,18 @@ import inspect
 import traceback
 
 from arsenal.debug import saverr  # registers hook
+try:
+    from IPython import embed as ip
+except ImportError:
+    try:
+        from IPython.frontend.terminal.embed import InteractiveShellEmbed
+    except ImportError:
+        from IPython.terminal.embed import InteractiveShellEmbed
 
-from IPython.terminal.embed import InteractiveShellEmbed
-def ip(banner1='', **kw):
-    shell = InteractiveShellEmbed.instance(banner1=banner1, **kw)
-    shell(header='', stack_depth=2)
+    def ip(banner1='', **kw):
+        shell = InteractiveShellEmbed.instance(banner1=banner1, **kw)
+        shell(header='', stack_depth=2)
 
-#from IPython.frontend.terminal.embed import InteractiveShellEmbed
-#_ip = InteractiveShellEmbed(banner1='')
 
 def enable_ultratb(mode='Context', **kwargs):
     from IPython.core import ultratb

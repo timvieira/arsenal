@@ -4,56 +4,106 @@ from numpy import array, exp, log, dot, abs, multiply, cumsum
 from numpy.random import uniform, normal
 from scipy.linalg import norm
 from numpy import isfinite
+from arsenal.terminal import yellow, green, red
 
 
 def compare(expect, got, name=None):
     """
     Compare vectors.
-    """
-    from arsenal.terminal import yellow, green, red
-    assert len(expect) == len(got)
 
-    errors = []
+    TODO:
+     - Can plot again eachother
+
+    """
+    expect = np.asarray(expect)
+    got = np.asarray(got)
+    assert expect.shape == got.shape
+    [n] = expect.shape
+
+    data = []
     if not isfinite(got).all():
-        errors.append('not finite')
+        data.append(['`got` not finite.', '', False])
 
     if not isfinite(expect).all():
-        errors.append('not finite')
+        data.append(['`expect` not finite.', '', False])
+
+    # TODO: add an option to drop NaNs.
+    #print expect
+    #print got
+    #inds = isfinite(expect) & isfinite(got)
+    #if not inds.any():
+    #    print red % 'TOO MANY NANS'
+    #    return
+    #expect = expect[inds]
+    #got = got[inds]
 
     c = cosine(expect, got)
-    if c < 0.99999:
-        errors.append('cosine dist: %g' % c)
+    data.append(['cosine-sim', c, (c > 0.99999)])
 
+    # TODO: this check should probably take into account the scale of the data.
     d = linf(expect, got)
-    if d > 1e-10:
-        errors.append('l_inf: %g' % d)
+    data.append(['Linf', d, d < 1e-10])
 
+    # same sign check (weak agreement, but useful sanity check -- especially for
+    # gradients)
     x = expect
     y = got
     s = np.asarray(~((x > 0) ^ (y > 0)), dtype=int)
     p = s.sum() * 100.0 / len(s)
-    if p != 100.0:
-        errors.append('same sign: %s%% (%s/%s)' % (p, s.sum(), len(s)))
-        #errors.append('same sign vec: %s' % s)
+    data.append(['same-sign', '%s%% (%s/%s)' % (p, s.sum(), len(s)), p == 100.0])
 
-    if errors:
-        print
-        print red % 'Failed%s:' % ' (%s)' % name if name else ''
-        print yellow % 'expected:'
-        print expect
-        print yellow % 'got:'
-        print got
-        print yellow % 'errors:'
+    # relative error
+    r = np.abs(expect - got) / [max(x,y) for x,y in zip(np.abs(expect), np.abs(got))]
+    r = np.mean(r[isfinite(r)])
+    data.append(['mean relative error', r, r <= 0.01])
 
-        # relative error
-        rel = np.abs(expect - got) / [max(x,y) for x,y in zip(np.abs(expect), np.abs(got))]
-        rel = [x for x in rel if isfinite(x)]
-        print 'mean relative error:', np.mean(rel)
+    # TODO: suggest that if relative error is high and rescaled error is low (or
+    # something to do wtih regression residuals) that maybe there is a
+    # (hopefully) simple fix via scale/offset.
 
-        print '\n'.join(errors)
-    else:
-        print green % 'ok%s' \
-            % ' (%s)' % name if name else ''
+    # TODO: can provide descriptive statistics for each vector
+    #data.append(['range (expect)', [expect.min(), expect.max()], 2])
+    #data.append(['range (got)   ', [got.min(), got.max()], 2])
+
+    # regression and rescaled error only valid for n >= 2
+    if n >= 2:
+        # rescaled error
+        E = expect / np.abs(expect).max()
+        G = got / np.abs(got).max()
+        R = np.abs(E - G)
+        r = np.mean(R)
+        data.append(['mean rescaled error', r, r <= 1e-10])
+
+        # least squares linear regression
+        #
+        # TODO: for regression we want parameters `[1 0]` and a small
+        # residual. We want both these conditions to hold. Might be useful to
+        # look at R^2 statistic since it normalizes scale and number of
+        # data-points. (it's often used for reduction in variance.)
+        #
+        from scipy.linalg import lstsq
+        A = np.ones((got.shape[0], 2))
+        A[:,0] = got
+        data.append(['regression', lstsq(A, expect), 2])
+
+    print
+    print 'Comparison%s:' % (' (%s)' % name if name else '')
+    #print yellow % 'expected:'
+    #print expect
+    #print yellow % 'got:'
+    #print got
+    for k, v, passed in data:
+        if passed == 1:
+            c = green
+        elif passed == 0:
+            c = red
+        else:
+            c = yellow
+        print '  %s: %s' % (k, c % (v,))
+    print
+
+    # TODO: return information computed here as an object or dict.
+    return data
 
 
 def linf(a, b):
@@ -61,7 +111,16 @@ def linf(a, b):
 
 
 def cosine(a, b):
-    return a.dot(b) / norm(a) / norm(b)
+    if not isfinite(a).all() or not isfinite(b).all():
+        return np.nan
+    A = norm(a)
+    B = norm(b)
+    if A == 0 and B == 0:
+        return 1.0
+    elif A != 0 and B != 0:
+        return a.dot(b) / A / B
+    else:
+        return np.nan
 
 
 class Mixture(object):
@@ -305,9 +364,16 @@ def inf_norm(a, b):
     return abs(a - b).max()
 
 
-def assert_equal(a, b, tol=1e-10):
+def assert_equal(a, b, tol=1e-10, name='', verbose=False, throw=True):
     err = inf_norm(a,b)
-    assert err < tol, 'error = %s >= tolerance (%s)' % (err, tol)
+    if name:
+        name = '%s: ' % name
+    if verbose or err > tol:
+        msg = '%s%s %s err=%s' % (name, a, b, err)
+        if throw and err > tol:
+            raise AssertionError(msg + ' >= tolerance (%s)' % tol)
+        else:
+            print msg, green % 'ok' if err < tol else red % 'fail'
 
 
 if __name__ == '__main__':

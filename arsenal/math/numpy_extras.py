@@ -364,12 +364,12 @@ def inf_norm(a, b):
     return abs(a - b).max()
 
 
-def assert_equal(a, b, tol=1e-10, name='', verbose=False, throw=True):
+def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10):
     err = inf_norm(a,b)
     if name:
         name = '%s: ' % name
     if verbose or err > tol:
-        msg = '%s%s %s err=%s' % (name, a, b, err)
+        msg = '%s%g %g err=%g' % (name, a, b, err)
         if throw and err > tol:
             raise AssertionError(msg + ' >= tolerance (%s)' % tol)
         else:

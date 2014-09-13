@@ -53,7 +53,8 @@ def compare(expect, got, name=None):
     data.append(['same-sign', '%s%% (%s/%s)' % (p, s.sum(), len(s)), p == 100.0])
 
     # relative error
-    r = np.abs(expect - got) / [max(x,y) for x,y in zip(np.abs(expect), np.abs(got))]
+    rs = [max(x,y) if x != 0 and y != 0 else 1.0 for x,y in zip(np.abs(expect), np.abs(got))]
+    r = np.abs(expect - got) / rs
     r = np.mean(r[isfinite(r)])
     data.append(['mean relative error', r, r <= 0.01])
 
@@ -67,9 +68,16 @@ def compare(expect, got, name=None):
 
     # regression and rescaled error only valid for n >= 2
     if n >= 2:
+
+        es = np.abs(expect).max()
+        gs = np.abs(got).max()
+        if es == 0:
+            es = 1
+        if gs == 0:
+            gs = 1
         # rescaled error
-        E = expect / np.abs(expect).max()
-        G = got / np.abs(got).max()
+        E = expect / es
+        G = got / gs
         R = np.abs(E - G)
         r = np.mean(R)
         data.append(['mean rescaled error', r, r <= 1e-10])

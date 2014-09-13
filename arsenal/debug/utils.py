@@ -7,6 +7,7 @@ import sys
 import inspect
 import traceback
 
+
 from arsenal.debug import saverr  # registers hook
 try:
     from IPython import embed as ip

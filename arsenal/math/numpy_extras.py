@@ -5,14 +5,34 @@ from numpy.random import uniform, normal
 from scipy.linalg import norm
 from numpy import isfinite
 from arsenal.terminal import yellow, green, red
+from arsenal.iterview import progress
 
 
-def compare(expect, got, name=None):
-    """
-    Compare vectors.
+def compare(expect, got, name=None, P_LARGER=0.9, scatter=False):
+    """Compare vectors.
+
+    Arguments:
+
+      - `expect`, `got`: two numeric two-dimensional datasets which we'd like to
+        compare (the names come for testing).
+
+      - `name`: name of this comparison.
+
 
     TODO:
-     - Can plot again eachother
+
+     - Turn this function into a class which holds all the data and references
+       statistics, plots, etc.
+
+     - Allow user to specify alternative names to `expect` and `got` since they
+       are often confusing.
+
+     - Add an option to drop NaNs and continue comparison.
+
+     - Support dictionarys as input with named dimensions and/or possibly an
+       alphabet for naming dimensions.
+
+     - Indicate which dimensions have the largest errors.
 
     """
     expect = np.asarray(expect)
@@ -21,13 +41,13 @@ def compare(expect, got, name=None):
     [n] = expect.shape
 
     data = []
+
+    # Check that vectors are finite.
     if not isfinite(got).all():
-        data.append(['`got` not finite.', '', False])
-
+        data.append(['got finite', progress(isfinite(got).sum(), n), False])
     if not isfinite(expect).all():
-        data.append(['`expect` not finite.', '', False])
+        data.append(['expect finite', progress(isfinite(expect).sum(), n), False])
 
-    # TODO: add an option to drop NaNs.
     #print expect
     #print got
     #inds = isfinite(expect) & isfinite(got)
@@ -66,6 +86,14 @@ def compare(expect, got, name=None):
     #data.append(['range (expect)', [expect.min(), expect.max()], 2])
     #data.append(['range (got)   ', [got.min(), got.max()], 2])
 
+    if scatter:
+        import pylab as pl
+        ax = pl.figure().add_subplot(111)
+        ax.scatter(got, expect, lw=0, alpha=0.5)
+        ax.set_title(name)
+        ax.set_xlabel('got')
+        ax.set_ylabel('expect')
+
     # regression and rescaled error only valid for n >= 2
     if n >= 2:
 
@@ -90,9 +118,40 @@ def compare(expect, got, name=None):
         # data-points. (it's often used for reduction in variance.)
         #
         from scipy.linalg import lstsq
-        A = np.ones((got.shape[0], 2))
+        A = np.ones((n, 2))
         A[:,0] = got
-        data.append(['regression', lstsq(A, expect), 2])
+        result = lstsq(A, expect)
+        data.append(['regression', result, 2])
+
+        if scatter:
+            coeff = result[0]
+            xa,xb=ax.get_xlim()
+            A = np.ones((n, 2))
+            A[:,0] = got
+
+            # plot estimated line
+            ys = A.dot(coeff)
+            ax.plot(A[:,0], ys, c='r', alpha=0.5)
+
+            # plot target line
+            ys = A.dot([1,0])
+            ax.plot(A[:,0], ys, c='g', alpha=0.5)
+
+            ax.grid(True)
+            ax.set_xlim(xa,xb)
+
+
+
+
+
+    # These tests check if one of the datasets is consistently larger than the
+    # other. The threshold for error is based on `P_LARGER` ("percent larger").
+    L = ((expect-got) > 0).sum()
+    if L >= P_LARGER * n:
+        data.append(['expect is larger', progress(L, n), 0])
+    L = ((got-expect) > 0).sum()
+    if L >= P_LARGER * n:
+        data.append(['got is larger', progress(L, n), 0])
 
     print
     print 'Comparison%s:' % (' (%s)' % name if name else '')

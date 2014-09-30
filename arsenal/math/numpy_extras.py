@@ -8,7 +8,8 @@ from arsenal.terminal import yellow, green, red
 from arsenal.iterview import progress
 
 
-def compare(expect, got, name=None, P_LARGER=0.9, scatter=False):
+def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
+            regression=False, show_regression=False, alphabet=None):
     """Compare vectors.
 
     Arguments:
@@ -78,6 +79,9 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False):
     r = np.mean(r[isfinite(r)])
     data.append(['mean relative error', r, r <= 0.01])
 
+    if alphabet is not None:
+        show_largest_rel_errors(expect, got, alphabet)
+
     # TODO: suggest that if relative error is high and rescaled error is low (or
     # something to do wtih regression residuals) that maybe there is a
     # (hopefully) simple fix via scale/offset.
@@ -108,24 +112,34 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False):
         G = got / gs
         R = np.abs(E - G)
         r = np.mean(R)
-        data.append(['mean rescaled error', r, r <= 1e-10])
+        data.append(['mean rescaled error', r, r <= 1e-5])
 
-        # least squares linear regression
-        #
-        # TODO: for regression we want parameters `[1 0]` and a small
-        # residual. We want both these conditions to hold. Might be useful to
-        # look at R^2 statistic since it normalizes scale and number of
-        # data-points. (it's often used for reduction in variance.)
-        #
-        from scipy.linalg import lstsq
-        A = np.ones((n, 2))
-        A[:,0] = got
-        result = lstsq(A, expect)
-        data.append(['regression', result, 2])
+        if regression:
+            # least squares linear regression
+            #
+            # TODO: for regression we want parameters `[1 0]` and a small
+            # residual. We want both these conditions to hold. Might be useful
+            # to look at R^2 statistic since it normalizes scale and number of
+            # data-points. (it's often used for reduction in variance.)
+            #
+            from scipy.linalg import lstsq
+            A = np.ones((n, 2))
+            A[:,0] = got
 
-        if scatter:
+            if np.isfinite(got).all() and np.isfinite(expect).all():
+                # data can't contain any NaNs
+                result = lstsq(A, expect)
+                data.append(['regression', result, 2])
+            else:
+                # contains a NaN
+                result = None
+                data.append(['regression',
+                             'did not run due to NaNs in data',
+                             0])
+
+        if show_regression and regression and scatter and result is not None:
             coeff = result[0]
-            xa,xb=ax.get_xlim()
+            xa, xb = ax.get_xlim()
             A = np.ones((n, 2))
             A[:,0] = got
 
@@ -133,28 +147,28 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False):
             ys = A.dot(coeff)
             ax.plot(A[:,0], ys, c='r', alpha=0.5)
 
-            # plot target line
-            ys = A.dot([1,0])
-            ax.plot(A[:,0], ys, c='g', alpha=0.5)
+            if 0:
+                # plot target line (sometimes this ruins the plot -- e.g. if the
+                # data is really off the y=x line).
+                ys = A.dot([1,0])
+                ax.plot(A[:,0], ys, c='g', alpha=0.5)
 
             ax.grid(True)
             ax.set_xlim(xa,xb)
 
 
-
-
-
-    # These tests check if one of the datasets is consistently larger than the
-    # other. The threshold for error is based on `P_LARGER` ("percent larger").
-    L = ((expect-got) > 0).sum()
-    if L >= P_LARGER * n:
-        data.append(['expect is larger', progress(L, n), 0])
-    L = ((got-expect) > 0).sum()
-    if L >= P_LARGER * n:
-        data.append(['got is larger', progress(L, n), 0])
+    if n >= 2:
+        # These tests check if one of the datasets is consistently larger than the
+        # other. The threshold for error is based on `P_LARGER` ("percent larger").
+        L = ((expect-got) > 0).sum()
+        if L >= P_LARGER * n:
+            data.append(['expect is larger', progress(L, n), 0])
+        L = ((got-expect) > 0).sum()
+        if L >= P_LARGER * n:
+            data.append(['got is larger', progress(L, n), 0])
 
     print
-    print 'Comparison%s:' % (' (%s)' % name if name else '')
+    print 'Comparison%s:' % (' (%s)' % name if name else ''), 'n=%s' % n
     #print yellow % 'expected:'
     #print expect
     #print yellow % 'got:'
@@ -173,6 +187,53 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False):
     return data
 
 
+def show_largest_rel_errors(expect, got, alphabet):
+    "show largest relative errors"
+
+    df = []
+
+    #es = np.abs(expect).max()
+    #gs = np.abs(got).max()
+
+    for (i,(x,y)) in enumerate(zip(expect, got)):
+        scale = max(abs(x), abs(y))
+#        if scale <= 1e-6:    # XXX: this is potentially dangerous if the data is on a small scale
+#            scale = 1
+
+        if scale == 0:
+            scale = 1
+        e = np.abs(x - y) / scale
+        # XXX: skip zeros.
+        #if abs(x) < 1e-10 and abs(y) < 1e-10:
+        #    e = 0.0
+
+        if e <= 0.00001:
+            continue
+
+        df.append([e, alphabet[i], x, y])
+
+        #df.append({'name':   alphabet[i],
+        #           'error':  e,
+        #           'expect': x,
+        #           'got':    y})
+
+    df.sort(reverse=1)
+
+    # TODO: highlight sign errors.
+
+    if len(df):
+        print ' Relative errors'
+        print ' ==============='
+        for e, n, x, y in df:
+#            print '  %-15s %.5f %10.7f %10.7f' % (n, e, x, y), ((green % 'ok') if e <= 0.01 else red % 'bad')
+            print '  %-15s %.5f %g %g' % (n, e, x, y), ((green % 'ok') if e <= 0.01 else red % 'bad')
+
+    #from pandas import DataFrame
+    #df = DataFrame(df)
+    #df.set_index('name', inplace=1)
+    #print df.sort('error', ascending=0)
+
+
 def linf(a, b):
     return abs(a - b).max()
 
@@ -185,7 +246,7 @@ def cosine(a, b):
     if A == 0 and B == 0:
         return 1.0
     elif A != 0 and B != 0:
-        return a.dot(b) / A / B
+        return a.dot(b) / (A*B)
     else:
         return np.nan
 

@@ -21,6 +21,7 @@ class Timer(object):
     def __init__(self, name):
         self.name = name
         self.times = []
+        self.features = []
         self.b4 = None
 
     def __enter__(self):
@@ -31,6 +32,10 @@ class Timer(object):
 
     def __str__(self):
         return 'Timer(name=%s, avg=%g, std=%g)' % (self.name, self.avg, self.std)
+
+    def __call__(self, **features):
+        self.features.append(features)
+        return self
 
     @property
     def avg(self):
@@ -62,17 +67,20 @@ class Timer(object):
             other.compare(self, attr=attr, verbose=verbose)
 
     def compare_many(self, *others, **kw):
-        #self.compare(self)
         for x in others:
             self.compare(x, **kw)
 
-    def plot(self, *others):
+    def plot_feature(self, feature, timecol='timer'):
         import pylab as pl
-        pl.plot(self.times)
-        for x in others:
-            pl.plot(x.times)
-        pl.show()
+        a = self.dataframe(timecol).groupby(feature).mean()
+        pl.scatter(a.index, a[timecol], lw=0, alpha=0.5)
+        return a
 
+    def dataframe(self, timecol='timer'):
+        from pandas import DataFrame
+        df = DataFrame(self.features)
+        df[timecol] = self.times
+        return df
 
 
 @contextmanager
@@ -94,3 +102,26 @@ def timeit(msg="%.4f seconds", header=None):
 
 timesection = lambda x: timeit(header='%s...' % x,
                                msg=' -> %s took %%.2f seconds' % x)
+
+
+def main():
+    import pylab as pl
+    from arsenal.iterview import iterview
+    from time import sleep
+    from numpy.random import uniform
+    t = Timer('test')
+
+    for i in iterview(xrange(1, 20)):
+        for _ in xrange(10):
+            with t(i=i):
+                c = 0.01
+                z = max(i**2 * 0.0001 + uniform(-c, c), 0.0)
+                sleep(z)
+
+    a = t.plot_feature('i')
+    print a
+    pl.show()
+
+
+if __name__ == '__main__':
+    main()

@@ -3,6 +3,11 @@ from time import time
 from contextlib import contextmanager
 from arsenal.humanreadable import htime
 from arsenal.terminal import yellow
+from arsenal.misc import ddict
+
+def timers():
+    return ddict(Timer)
+
 
 
 class Timer(object):
@@ -70,10 +75,18 @@ class Timer(object):
         for x in others:
             self.compare(x, **kw)
 
-    def plot_feature(self, feature, timecol='timer'):
-        import pylab as pl
+    def plot_feature(self, feature, timecol='timer', ax=None, **kw):
         a = self.dataframe(timecol).groupby(feature).mean()
-        pl.scatter(a.index, a[timecol], lw=0, alpha=0.5)
+        if ax is None:
+            import pylab as pl
+            ax = pl.figure().add_subplot(111)
+
+        ax.plot(a.index, a[timecol], alpha=0.5, **kw)
+        del kw['label']
+        ax.scatter(a.index, a[timecol], lw=0, alpha=0.5, **kw)
+
+        ax.set_xlabel(feature)
+        ax.set_ylabel('average time (seconds)')
         return a
 
     def dataframe(self, timecol='timer'):

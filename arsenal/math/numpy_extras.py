@@ -3,6 +3,7 @@ import numpy as np
 from numpy import array, exp, log, dot, abs, multiply, cumsum
 from numpy.random import uniform, normal
 from scipy.linalg import norm
+from scipy import stats
 from numpy import isfinite
 from arsenal.terminal import yellow, green, red
 from arsenal.iterview import progress
@@ -354,9 +355,20 @@ def normalize_interval(data):
     Shift and rescale data so that it lies in the range [0,1].
     """
     shift = data.min(axis=0)
-    rescale = data.max(axis=0) - shift
+    rescale = data.ptp(axis=0)
     rescale[rescale == 0] = 1.0  # avoid divide by zero
-    return (data - shift) / rescale
+    x = (data - shift)
+    x /= rescale
+    return x
+
+
+def mean_confidence_interval(a, confidence=0.95):
+    "returns (mean, lower, upper)"
+    a = np.asarray(a)
+    n = a.shape[0]
+    m = np.mean(a)
+    h = a.std(ddof=1) / np.sqrt(n) * stats.t._ppf((1+confidence)/2., n-1)
+    return m, m-h, m+h
 
 
 def normalize(p):

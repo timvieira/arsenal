@@ -122,17 +122,15 @@ def atomicwrite(filename, mode=0666, verbose=False):
       mode: permissions with which to create the file
     """
 
-    # TODO: try to create the file right next to existing file.
-    #       >>> tempfile.mkstemp(prefix=filename, dir=os.path.dirname(filename))
-    (fd, tmp_filename) = tempfile.mkstemp()
+    # create the temp file in the same directory
+    _, tmp_filename = tempfile.mkstemp(prefix=os.path.basename(filename),
+                                       dir=os.path.dirname(filename))
 
     if verbose:
         print '[atomicwrite] using temporary file:', tmp_filename
 
-    try:
-        yield os.open(tmp_filename, os.O_WRONLY|os.O_CREAT)
-    finally:
-        os.close(fd)
+    with file(tmp_filename, 'wb') as f:
+        yield f
 
     try:
         os.chmod(tmp_filename, mode)

@@ -80,9 +80,6 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
     r = np.mean(r[isfinite(r)])
     data.append(['mean relative error', r, r <= 0.01])
 
-    if alphabet is not None:
-        show_largest_rel_errors(expect, got, alphabet)
-
     # TODO: suggest that if relative error is high and rescaled error is low (or
     # something to do wtih regression residuals) that maybe there is a
     # (hopefully) simple fix via scale/offset.
@@ -184,6 +181,9 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
         print '  %s: %s' % (k, c % (v,))
     print
 
+    if alphabet is not None:
+        show_largest_rel_errors(expect, got, alphabet)
+
     # TODO: return information computed here as an object or dict.
     return data
 
@@ -226,8 +226,19 @@ def show_largest_rel_errors(expect, got, alphabet):
         print ' Relative errors'
         print ' ==============='
         for e, n, x, y in df:
-#            print '  %-15s %.5f %10.7f %10.7f' % (n, e, x, y), ((green % 'ok') if e <= 0.01 else red % 'bad')
-            print '  %-15s %.5f %g %g' % (n, e, x, y), ((green % 'ok') if e <= 0.01 else red % 'bad')
+
+            types = []
+            if x < y:
+                types.append('bigger')
+            else:
+                types.append('smaller')
+
+            if np.sign(x) != np.sign(y):
+                types.append(red % 'wrong sign')
+
+            print '  %-15s %.5f %g %g' % (n, e, x, y), \
+                ((green % 'ok') if e <= 0.01 else red % 'bad'), \
+                '(%s)' % (','.join(types))
 
     #from pandas import DataFrame
     #df = DataFrame(df)

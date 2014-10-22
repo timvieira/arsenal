@@ -220,8 +220,6 @@ def show_largest_rel_errors(expect, got, alphabet):
 
     df.sort(reverse=1)
 
-    # TODO: highlight sign errors.
-
     if len(df):
         print ' Relative errors'
         print ' ==============='
@@ -233,6 +231,7 @@ def show_largest_rel_errors(expect, got, alphabet):
             else:
                 types.append('smaller')
 
+            # highlight sign errors.
             if np.sign(x) != np.sign(y):
                 types.append(red % 'wrong sign')
 

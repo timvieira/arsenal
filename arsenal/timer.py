@@ -91,9 +91,14 @@ class Timer(object):
 
     def dataframe(self, timecol='timer'):
         from pandas import DataFrame
-        df = DataFrame(self.features)
+        df = DataFrame(list(self.features))
         df[timecol] = self.times
         return df
+
+    def filter(self, f, name=None):
+        t = Timer(name)
+        t.times, t.features = zip(*[(x,y) for (x,y) in zip(self.times, self.features) if f(x,y)])
+        return t
 
 
 @contextmanager

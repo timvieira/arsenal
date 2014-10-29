@@ -1,3 +1,6 @@
+#import matplotlib
+#matplotlib.use('GTK')
+
 import pylab as pl
 import numpy as np
 from collections import defaultdict
@@ -31,7 +34,6 @@ def axman(name, xlabel=None, ylabel=None, title=None):
     handle to a named plot.
 
     """
-    pl.ion()
     ax = AX[name]
     ax.clear()
     yield ax
@@ -42,10 +44,12 @@ def axman(name, xlabel=None, ylabel=None, title=None):
     ax.set_title(title or name)  # `title` overrides `name`.
     ax.figure.tight_layout()
     try:
-        ax.figure.canvas.show()
-        pl.show()
+        ax.figure.canvas.draw()
+        ax.figure.canvas.flush_events()
+        pl.show(block=False)
     except AttributeError:
         print 'warning failed to plot %s' % (name,)
+
 
 @contextmanager
 def scatter_manager(name, with_ax=False, xlabel=None, ylabel=None, title=None, **style):

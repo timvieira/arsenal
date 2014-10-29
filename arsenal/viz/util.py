@@ -35,20 +35,27 @@ def axman(name, xlabel=None, ylabel=None, title=None):
 
     """
     ax = AX[name]
+    with update_ax(ax):
+        yield ax
+        if xlabel:
+            ax.set_xlabel(xlabel)
+        if ylabel:
+            ax.set_ylabel(ylabel)
+        ax.set_title(title or name)  # `title` overrides `name`.
+        ax.figure.tight_layout()
+
+
+@contextmanager
+def update_ax(ax):
+    "Manages clearing and updating a plot."
     ax.clear()
-    yield ax
-    if xlabel:
-        ax.set_xlabel(xlabel)
-    if ylabel:
-        ax.set_ylabel(ylabel)
-    ax.set_title(title or name)  # `title` overrides `name`.
-    ax.figure.tight_layout()
+    yield
     try:
         ax.figure.canvas.draw()
         ax.figure.canvas.flush_events()
         pl.show(block=False)
     except AttributeError:
-        print 'warning failed to plot %s' % (name,)
+        print 'warning failed to ax'
 
 
 @contextmanager

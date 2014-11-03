@@ -7,19 +7,33 @@ from scipy import stats
 from numpy import isfinite
 from arsenal.terminal import yellow, green, red
 from arsenal.iterview import progress
+from pandas import DataFrame
 
 
-def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
-            regression=False, show_regression=False, alphabet=None):
+def compare(expect, got, name=None, data=None, P_LARGER=0.9, scatter=False,
+            regression=False, show_regression=False, alphabet=None,
+            expect_label=None,
+            got_label=None):
     """Compare vectors.
+
 
     Arguments:
 
-      - `expect`, `got`: two numeric two-dimensional datasets which we'd like to
-        compare (the names come for testing).
+      - Specifying data for comparison two methods:
+
+        1) `expect`, `got`: two numeric one-dimensional arrays which we'd like
+           to compare (the argument names come for software testing). This
+           method requires argument `data=None`.
+
+        2) `data`: instance of `DataFrame`, expects arguments `expect` and `got`
+           to be column labels.
 
       - `name`: name of this comparison.
 
+    Note:
+
+     - when plotting `expect` is the y-axis, `got` is the x-axis. This is by
+       convention that `expect` is the dependent variable (regression target).
 
     TODO:
 
@@ -37,18 +51,43 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
      - Indicate which dimensions have the largest errors.
 
     """
-    expect = np.asarray(expect)
-    got = np.asarray(got)
+
+    if data is not None:
+        assert isinstance(expect, (int, basestring)), \
+            'expected a column name got %s' % type(expect)
+        assert isinstance(got, (int, basestring)), \
+            'expected a column name got %s' % type(got)
+
+        if expect_label is None:
+            expect_label = expect
+        if got_label is None:
+            got_label = got
+
+        expect = data[expect]
+        got = data[got]
+
+    else:
+
+        if expect_label is None:
+            expect_label = 'expect'
+        if got_label is None:
+            got_label = 'got'
+
+        expect = np.asarray(expect)
+        got = np.asarray(got)
+
+        data = DataFrame({expect_label: expect, got_label: got})
+
     assert expect.shape == got.shape
     [n] = expect.shape
 
-    data = []
+    tests = []
 
     # Check that vectors are finite.
     if not isfinite(got).all():
-        data.append(['got finite', progress(isfinite(got).sum(), n), False])
+        tests.append(['got finite', progress(isfinite(got).sum(), n), False])
     if not isfinite(expect).all():
-        data.append(['expect finite', progress(isfinite(expect).sum(), n), False])
+        tests.append(['expect finite', progress(isfinite(expect).sum(), n), False])
 
     #print expect
     #print got
@@ -60,11 +99,11 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
     #got = got[inds]
 
     c = cosine(expect, got)
-    data.append(['cosine-sim', c, (c > 0.99999)])
+    tests.append(['cosine-sim', c, (c > 0.99999)])
 
     # TODO: this check should probably take into account the scale of the data.
     d = linf(expect, got)
-    data.append(['Linf', d, d < 1e-10])
+    tests.append(['Linf', d, d < 1e-10])
 
     # same sign check (weak agreement, but useful sanity check -- especially for
     # gradients)
@@ -72,29 +111,40 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
     y = got
     s = np.asarray(~((x > 0) ^ (y > 0)), dtype=int)
     p = s.sum() * 100.0 / len(s)
-    data.append(['same-sign', '%s%% (%s/%s)' % (p, s.sum(), len(s)), p == 100.0])
+    tests.append(['same-sign', '%s%% (%s/%s)' % (p, s.sum(), len(s)), p == 100.0])
 
     # relative error
     rs = [max(x,y) if x != 0 and y != 0 else 1.0 for x,y in zip(np.abs(expect), np.abs(got))]
     r = np.abs(expect - got) / rs
     r = np.mean(r[isfinite(r)])
-    data.append(['mean relative error', r, r <= 0.01])
+    tests.append(['mean relative error', r, r <= 0.01])
 
     # TODO: suggest that if relative error is high and rescaled error is low (or
     # something to do wtih regression residuals) that maybe there is a
     # (hopefully) simple fix via scale/offset.
 
     # TODO: can provide descriptive statistics for each vector
-    #data.append(['range (expect)', [expect.min(), expect.max()], 2])
-    #data.append(['range (got)   ', [got.min(), got.max()], 2])
+    #tests.append(['range (expect)', [expect.min(), expect.max()], 2])
+    #tests.append(['range (got)   ', [got.min(), got.max()], 2])
 
     if scatter:
-        import pylab as pl
-        ax = pl.figure().add_subplot(111)
-        ax.scatter(got, expect, lw=0, alpha=0.5)
-        ax.set_title(name)
-        ax.set_xlabel('got')
-        ax.set_ylabel('expect')
+        if 1:
+            import pylab as pl
+            ax = pl.figure().add_subplot(111)
+            ax.scatter(got, expect, lw=0, alpha=0.5)
+            if name is not None:
+                ax.set_title(name)
+            ax.set_xlabel(got_label)
+            ax.set_ylabel(expect_label)
+        else:
+            import seaborn as sns
+            sns.set_context(rc={"figure.figsize": (7, 5)})
+
+            g = sns.JointGrid(got_label, expect_label, data=data)
+            g.plot(sns.regplot, sns.distplot, stats.spearmanr)
+
+            print "Pearson's r: {0}".format(stats.pearsonr(got, expect))
+
 
     # regression and rescaled error only valid for n >= 2
     if n >= 2:
@@ -110,7 +160,7 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
         G = got / gs
         R = np.abs(E - G)
         r = np.mean(R)
-        data.append(['mean rescaled error', r, r <= 1e-5])
+        tests.append(['mean rescaled error', r, r <= 1e-5])
 
         if regression:
             # least squares linear regression
@@ -127,13 +177,13 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
             if np.isfinite(got).all() and np.isfinite(expect).all():
                 # data can't contain any NaNs
                 result = lstsq(A, expect)
-                data.append(['regression', result, 2])
+                tests.append(['regression', result, 2])
             else:
                 # contains a NaN
                 result = None
-                data.append(['regression',
-                             'did not run due to NaNs in data',
-                             0])
+                tests.append(['regression',
+                              'did not run due to NaNs in data',
+                              0])
 
         if show_regression and regression and scatter and result is not None:
             coeff = result[0]
@@ -160,10 +210,10 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
         # other. The threshold for error is based on `P_LARGER` ("percent larger").
         L = ((expect-got) > 0).sum()
         if L >= P_LARGER * n:
-            data.append(['expect is larger', progress(L, n), 0])
+            tests.append(['expect is larger', progress(L, n), 0])
         L = ((got-expect) > 0).sum()
         if L >= P_LARGER * n:
-            data.append(['got is larger', progress(L, n), 0])
+            tests.append(['got is larger', progress(L, n), 0])
 
     print
     print 'Comparison%s:' % (' (%s)' % name if name else ''), 'n=%s' % n
@@ -171,7 +221,7 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
     #print expect
     #print yellow % 'got:'
     #print got
-    for k, v, passed in data:
+    for k, v, passed in tests:
         if passed == 1:
             c = green
         elif passed == 0:
@@ -185,7 +235,7 @@ def compare(expect, got, name=None, P_LARGER=0.9, scatter=False,
         show_largest_rel_errors(expect, got, alphabet)
 
     # TODO: return information computed here as an object or dict.
-    return data
+    return tests
 
 
 def show_largest_rel_errors(expect, got, alphabet):
@@ -565,3 +615,20 @@ if __name__ == '__main__':
         print 'passed tests.'
 
     tests()
+
+
+    def test_compare():
+        n = 100
+
+        # `a` is a noisy version of `b`, but tends to overestimate.
+        a = np.linspace(0,1,n)
+        b = a + np.random.uniform(-0.01, 0.1, size=n)
+        compare(a,b,scatter=1)
+
+
+        compare('a', 'b', scatter=1, data=DataFrame({'a': a, 'b': b}))
+
+        import pylab as pl
+        pl.show()
+
+    test_compare()

@@ -37,7 +37,7 @@ def pareto_frontier(X, Y, maxX=True, maxY=True):
     return frontier
 
 
-def show_frontier(X, Y, maxX=False, maxY=True, dots=False, ax=None, **style):
+def show_frontier(X, Y, maxX=False, maxY=True, dots=False, ax=None, label=None, **style):
     """Plot Pareto frontier.
 
     Args:
@@ -79,7 +79,7 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False, ax=None, **style):
     pts.extend([q, (b,d)])
     # make plot
     pts = np.array(pts)
-    ax.plot(pts[:,0], pts[:,1], **sty)
+    ax.plot(pts[:,0], pts[:,1], label=label, **sty)
 
 
 def test():

@@ -1,11 +1,21 @@
-#import matplotlib
-#matplotlib.use('GTK')
-
 import pylab as pl
 import numpy as np
 from collections import defaultdict
 from contextlib import contextmanager
 from pandas.stats.moments import rolling_mean
+from matplotlib.backends.backend_pdf import PdfPages
+from arsenal.terminal import yellow
+from arsenal.viz.covariance_ellipse import covariance_ellipse
+
+
+def save_plots(pdf):
+    "save all plots to pdf"
+    pp = PdfPages(pdf)
+    for i in pl.get_fignums():
+        pl.figure(i)
+        pl.savefig(pp, format='pdf')
+    pp.close()
+    print yellow % 'saved plots to "%s"' % pdf
 
 
 # global reference to all of the plots
@@ -29,13 +39,13 @@ def lineplot(name, with_ax=False, avg=10, xlabel=None, ylabel=None, title=None, 
 
 
 @contextmanager
-def axman(name, xlabel=None, ylabel=None, title=None):
+def axman(name, xlabel=None, ylabel=None, title=None, clear=True):
     """axman is axis manager. Manages clearing, updating and maintaining a global
     handle to a named plot.
 
     """
     ax = AX[name]
-    with update_ax(ax):
+    with update_ax(ax, clear=clear):
         yield ax
         if xlabel:
             ax.set_xlabel(xlabel)
@@ -46,9 +56,10 @@ def axman(name, xlabel=None, ylabel=None, title=None):
 
 
 @contextmanager
-def update_ax(ax):
+def update_ax(ax, clear=True):
     "Manages clearing and updating a plot."
-    ax.clear()
+    if clear:
+        ax.clear()
     yield
     try:
         ax.figure.canvas.draw()

@@ -72,8 +72,9 @@ class Timer(object):
             other.compare(self, attr=attr, verbose=verbose)
 
     def compare_many(self, *others, **kw):
-        for x in others:
-            self.compare(x, **kw)
+        for x in sorted(others, key=lambda x: x.name):
+            if x != self:
+                self.compare(x, **kw)
 
     def plot_feature(self, feature, timecol='timer', ax=None, **kw):
         a = self.dataframe(timecol).groupby(feature).mean()

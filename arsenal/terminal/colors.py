@@ -35,6 +35,7 @@ def getwidth(a):
 def check(x, t='pass', f='fail'):
     return green % t if x else red % f
 
+
 underline = '\033[4m%s\033[0m'
 
 def test():

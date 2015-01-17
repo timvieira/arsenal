@@ -1,20 +1,11 @@
-import sys
-from time import time, sleep
-
-from operator import getitem, sub, mul
-from itertools import *
+import heapq
+from operator import getitem
+from itertools import chain, count, cycle, imap, islice, izip, repeat, tee
 from random import shuffle
-from collections import defaultdict, deque
+from collections import defaultdict
 from operator import itemgetter
 from arsenal.iterview import iterview
 
-
-# IDEAS:
-# * progress_meter: updates based on how much work was dones, e.g.,
-#     >> p = progress_meter(100)
-#     0.0%
-#     >> p.update(10)
-#     10.0%
 
 def argmax(f, seq):
     """
@@ -23,6 +14,7 @@ def argmax(f, seq):
     """
     return argmax2(f,seq)[1]
 
+
 def argmax2(f, seq):
     """
     >>> argmax2(lambda x: -x**2 + 1, range(-10,10))
@@ -30,11 +22,22 @@ def argmax2(f, seq):
     """
     return max(((f(x),x) for x in seq), key=itemgetter(0))
 
+
 def argmin(f, seq):
+    """
+    >>> argmin(lambda x: x**2 + 1, range(-10,10))
+    0
+    """
     return argmin2(f,seq)[1]
 
+
 def argmin2(f, seq):
+    """
+    >>> argmin2(lambda x: x**2 + 1, range(-10,10))
+    (1, 0)
+    """
     return min(((f(x),x) for x in seq), key=itemgetter(0))
+
 
 def groupby2(s, key=lambda x: x):
     """
@@ -48,6 +51,7 @@ def groupby2(s, key=lambda x: x):
         groups[key(x)].append(x)
     return dict(groups)
 
+
 def atmost(k, seq):
     """
     >>> atmost(1, [0,0,0])
@@ -59,15 +63,16 @@ def atmost(k, seq):
     >>> atmost(1, [0,1,1])
     False
     """
-    count = 0
-    if count > k:
+    cnt = 0
+    if cnt > k:
         return False
     for x in seq:
         if x:
-            count += 1
-            if count > k:
+            cnt += 1
+            if cnt > k:
                 return False
     return True
+
 
 def partition(data, proportion):
     """
@@ -86,10 +91,14 @@ def partition(data, proportion):
 
 def breadth_first(tree, children=iter, depth=-1, queue=None):
     """Traverse the nodes of a tree in breadth-first order.
-    (No need to check for cycles.)
-    The first argument should be the tree root;
-    children should be a function taking as argument a tree node
-    and returning an iterator of the node's children.
+
+    - (No need to check for cycles.)
+
+    - The first argument should be the tree root;
+
+    - children should be a function taking as argument a tree node and returning
+      an iterator of the node's children.
+
     """
     if queue is None:
         queue = []
@@ -104,42 +113,11 @@ def breadth_first(tree, children=iter, depth=-1, queue=None):
             except (StopIteration, TypeError, IndexError):
                 pass
 
-def iterative_deepening(T, children, callback):
-    def visit(node,i):
-        if i == 0:
-            callback(node)
-        else:
-            for c in children(node):
-                visit(c,i-1)
-    i = 0
-    while 1:
-        visit(T,i)
-        i += 1
-
-
-##def interleave(*iters):
-##    """ take several iterators and weave them together, much like roundrobin does except with different ordering. """
-
-# def iter_partition(it, weights, shuffle=None):
-#     """ partition an iterator according to weights, return an len(weights) iterators
-#
-#     ** Do this in an ONLINE FASHION so that we don't need to know the length of the iterator **
-#
-#     """
-#     if shuffle:
-#         it = list(it)
-#         random.shuffle(it)
-#     it = iter(it)
-
-
-def grouper(n, iterable, fillvalue=None):
-    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
-    args = [iter(iterable)] * n
-    return izip_longest(fillvalue=fillvalue, *args)
 
 def compress(data, selectors):
     "compress('ABCDEF', [1,0,1,0,1,1]) --> A C E F"
     return (d for d, s in izip(data, selectors) if s)
+
 
 def cross_lower_triangle(it):
     """
@@ -168,7 +146,6 @@ def cross_triangle(it):
             yield (x,y)
 
 
-import heapq
 def imerge(*iterables):
     """
     Merge multiple sorted inputs into a single sorted output.
@@ -184,8 +161,8 @@ def imerge(*iterables):
     h_append = h.append
     for it in map(iter, iterables):
         try:
-            next = it.next
-            h_append([next(), next])
+            _next = it.next
+            h_append([_next(), _next])
         except _StopIteration:
             pass
     heapq.heapify(h)
@@ -193,9 +170,9 @@ def imerge(*iterables):
     while 1:
         try:
             while 1:
-                v, next = s = h[0]      # raises IndexError when h is empty
+                v, _next = s = h[0]     # raises IndexError when h is empty
                 yield v
-                s[0] = next()           # raises StopIteration when exhausted
+                s[0] = _next()          # raises StopIteration when exhausted
                 siftup(h, 0)            # restore heap condition
         except _StopIteration:
             heappop(h)                  # remove empty iterator
@@ -224,6 +201,7 @@ def floor(stream, baseline=None):
         m = min(m, s)
         yield m
 
+
 def ceil(stream):
     """Generate the stream of maximum values from the input stream.
 
@@ -240,6 +218,7 @@ def ceil(stream):
         M = max(M, s)
         yield M
 
+
 def iter_length(it):
     """
     Calculate the length or an iterator
@@ -250,27 +229,6 @@ def iter_length(it):
     """
     return sum(1 for _ in it)
 
-def diff(s, t):
-    """Generate the differences between two streams
-
-    If the streams are of unequal length, the shorter is truncated.
-    >>> dd = diff([2, 4, 6, 8], [1, 2, 3])
-    >>> assert list(dd) == [1, 2, 3]
-    """
-    return imap(sub, s, t)
-
-def last(stream, default=None):
-    """Return the last item in the stream or the default if the stream is empty.
-
-    >>> last('abc')
-    'c'
-    >>> last([], default=-1)
-    -1
-    """
-    s = default
-    for s in stream:
-        pass
-    return s
 
 def accumulate(stream):
     """Generate partial sums from the stream.
@@ -404,19 +362,21 @@ def unique(iterable, key=None):
                 yield element
 
 
-# Recipe credited to George Sakkis
 def roundrobin(*iterables):
     """ roundrobin('ABC', 'D', 'EF') --> A D E B F C
 
     >>> list(roundrobin('ABC', 'D', 'EF'))
     ['A', 'D', 'E', 'B', 'F', 'C']
+
+    Recipe credited to George Sakkis
+
     """
     pending = len(iterables)
     nexts = cycle(iter(it).next for it in iterables)
     while pending:
         try:
-            for next in nexts:
-                yield next()
+            for _next in nexts:
+                yield _next()
         except StopIteration:
             pending -= 1
             nexts = cycle(islice(nexts, pending))
@@ -446,58 +406,37 @@ sliding_window = window
 #
 
 def drop(iterator, n):
-    "Advance the iterator n-steps ahead. If n is none, consume entirely."
-    # The technique uses objects that consume iterators at C speed.
-    if n is None:
-        # feed the entire iterator into a zero-length deque
-        deque(iterator, maxlen=0)
-    else:
-        # advance to the emtpy slice starting at position n
-        next(islice(iterator, n, n), None)
+    "Advance the iterator n-steps ahead."
+    # advance to the emtpy slice starting at position n
+    next(islice(iterator, n, n), None)
+
 
 def take(n, seq):
     """ Return the first n items in a sequence. """
     return islice(seq, None, n)
 
-def nth(iterable, n):
-    """ Returns a list containing the nth item. """
-    return list(islice(iterable, n, n+1))
-
-def no(seq, pred=None):
-    """
-    the opposite of all, returns True if pred(x) is false for every element
-    in the iterable.
-    """
-    for _ in ifilter(pred, seq):
-        return False
-    return True
-
-def quantify(seq, pred=None):
-    """ Count how many times the predicate is true in the sequence """
-    return sum(imap(pred, seq))
 
 def padnone(seq):
     """ Returns the sequence elements and then returns None indefinitely """
     return chain(seq, repeat(None))
 
+
 def ncycles(seq, n):
     """ Returns the sequence elements n times """
     return chain(*repeat(seq, n))
 
-def dotproduct(vec1, vec2):
-    """ Return the dot product between two vectors. """
-    return sum(imap(mul, vec1, vec2))
 
 def flatten(listOfLists):
     """ (non-recursive) Flatten a list of lists. """
     return list(chain(*listOfLists))
+
 
 def batch(size, iterable):
     """Yield a list of (up to) batchsize items at a time.  The last
     element will be shorter if there are items left over.
     batch(s, 2) -> [s0,s1], [s2,s3], [s4, s5], ...
 
-    >>> list(batch(range(5), 2))
+    >>> list(batch(2, range(5)))
     [[0, 1], [2, 3], [4]]
     """
     current = []
@@ -509,13 +448,19 @@ def batch(size, iterable):
     if current:
         yield current
 
-def full_batches(iterable, batchsize=2):
-    """ Differs from batch in that it returns only batchs of size equal to batchsize, no less.
 
-    >>> list(full_batches(range(5), 2))
-    [(0, 1), (2, 3)]
-    """
-    return izip(*repeat(iter(iterable), batchsize))
+#def batch(n, iterable, fillvalue=None):
+#    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+#    args = [iter(iterable)] * n
+#    return izip_longest(fillvalue=fillvalue, *args)
+
+#def full_batches(iterable, batchsize=2):
+#    """ Differs from batch in that it returns only batchs of size equal to batchsize, no less.
+#
+#    >>> list(full_batches(range(5), 2))
+#    [(0, 1), (2, 3)]
+#    """
+#    return izip(*repeat(iter(iterable), batchsize))
 
 #def batch_extra_lazy(iterable, batchsize):
 #    """ batch(s, 2) -> [s0,s1], [s2,s3], [s4, s5], ...
@@ -536,9 +481,17 @@ def iunzip(iterable, n=None):
     which index those tuples.  This function is the reverse of izip().
     n is the length of the n-tuple and will be autodetected if not
     specified.  If the iterable contains tuples of differing sizes,
-    the behavior is undefined."""
-    # a braindead implementation for now (since it relies on tee() which is
-    # braindead in this module (but not in Python 2.4+))
+    the behavior is undefined.
+
+    >>> a0,b0,c0 = range(1, 10), range(21, 30), range(81, 90)
+    >>> z = zip(a0,b0,c0)
+    >>> a, b, c = iunzip(z)
+    >>> a, b, c = map(list, (a,b,c))
+    >>> assert a == a0 and b == b0 and c == c0
+    >>> recombined = zip(a, b, c)
+    >>> assert recombined == z
+
+    """
     iterable = iter(iterable) # ensure we're dealing with an iterable
     if n is None: # check the first element for length
         first = iterable.next()
@@ -551,22 +504,9 @@ def iunzip(iterable, n=None):
     return [imap(selector(i), it) for i,it in izip(count(), iter_tees)]
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     def test():
-        a0,b0,c0 = range(1, 10), range(21, 30), range(81, 90)
-        test = zip(a0,b0,c0)
-        a, b, c = iunzip(test)
-        a, b, c = map(list, (a,b,c))
-        assert a == a0 and b == b0 and c == c0
-        recombined = zip(a, b, c)
-        assert recombined == test
-
-        def example_iterview():
-            for _ in iterview(xrange(400), every=20):
-                sleep(0.01)
-        #example_iterview()
-
         X = [[0 for i in xrange(4)] for j in xrange(4)]
         for (k,(i,j)) in enumerate(cross_lower_triangle(range(4))):
             X[i][j] = k+1
@@ -576,15 +516,6 @@ if __name__ == "__main__":
                   [4, 5, 6, 0]]
         assert X == target
 
-        import numpy as np
-        d = (np.random.rand(20, 3) - 0.5) * 100
-        A = np.average(d, axis=0)
-        a = last(rolling_average(d))
-        assert np.linalg.norm(A - a) < 1e-10  # roughly zero difference
-
-        import doctest; doctest.testmod()
-
-        for _ in iterview(range(100), 1):
-            sleep(.1)
-
     test()
+
+    import doctest; doctest.testmod()

@@ -4,6 +4,14 @@ from time import time
 __all__ = ['iterview']
 
 
+# IDEAS:
+# * progress_meter: updates based on how much work was dones, e.g.,
+#     >> p = progress_meter(100)
+#     0.0%
+#     >> p.update(10)
+#     10.0%
+
+
 def progress(n, length):
     """
     Returns a string indicating current progress.

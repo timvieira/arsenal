@@ -4,14 +4,15 @@ import subprocess, tempfile, BaseHTTPServer
 from functools import wraps
 from StringIO import StringIO
 from contextlib import contextmanager
-from threading import Thread
-
-try:
-    from arsenal.passwords import *
-except ImportError:
-    pass
-
 from arsenal.terminal import colors
+
+
+def open_diff(a, b, cmd='meld'):
+    "View diff of string representations in dedicated diff program."
+    import os
+    print >> file('/tmp/a','wb'), a
+    print >> file('/tmp/b','wb'), b
+    os.system('%s /tmp/a /tmp/b' % cmd)
 
 
 def deprecated(use_instead=None):
@@ -63,26 +64,26 @@ def ignore_error(color='red'):
         print color % '*'*80
 
 
-@deprecated
-class logger(object):
-
-    def __init__(self, filename, clean=True, quiet=False):
-        if clean:
-            os.system('rm -f ' + filename)
-        self.f = file(filename, 'wb')
-        self.quiet = quiet
-
-    def write(self, x):
-        self.f.write(x)
-        if not self.quiet:
-            sys.__stdout__.write(x)
-
-    @staticmethod
-    def start(*args, **kw):
-        """ redirect stdout and stderr to logger """
-        log = logger(*args, **kw)
-        sys.stderr = sys.stdout = log
-        return log
+#@deprecated
+#class logger(object):
+#
+#    def __init__(self, filename, clean=True, quiet=False):
+#        if clean:
+#            os.system('rm -f ' + filename)
+#        self.f = file(filename, 'wb')
+#        self.quiet = quiet
+#
+#    def write(self, x):
+#        self.f.write(x)
+#        if not self.quiet:
+#            sys.__stdout__.write(x)
+#
+#    @staticmethod
+#    def start(*args, **kw):
+#        """ redirect stdout and stderr to logger """
+#        log = logger(*args, **kw)
+#        sys.stderr = sys.stdout = log
+#        return log
 
 
 def force(g):
@@ -93,87 +94,20 @@ def force(g):
     return wrap
 
 
-
-'''
-timv: put this utility somewhere else. I have several variants on it. Should
-consolidate modifications...
-
-def parse_sexpr(e):
-    """
-    Parse a string representing an s-expressions into lists-of-lists.
-
-    based on implementation by George Sakkis
-    http://mail.python.org/pipermail/python-list/2005-March/312004.html
-    """
-    e = re.compile('^\s*;.*?\n', re.M).sub('', e)  # remove comments
-
-    es, stack = [], []
-    for token in re.split(r'([()])|\s+', e):
-        if token == '(':
-            new = []
-            if stack:
-                stack[-1].append(new)
-            else:
-                es.append(new)
-            stack.append(new)
-        elif token == ')':
-            try:
-                stack.pop()
-            except IndexError:
-                raise ValueError("Unbalanced right parenthesis: %s" % e)
-        elif token:
-            try:
-                stack[-1].append(token)
-            except IndexError:
-                raise ValueError("Unenclosed subexpression (near %s)" % token)
-    return es
-'''
-
-'''
-# by George Sakkis (gsakkis at rutgers.edu)
-# http://mail.python.org/pipermail/python-list/2005-March/312004.html
-def parse_sexpr(expression, multiple=False):
-    "If multiple s-expressions expected as output, set multiple to True."
-    subexpressions,stack = [],[]
-    for token in re.split(r'([()])|\s+', expression):
-        if token == '(':
-            new = []
-            if stack:
-                stack[-1].append(new)
-            else:
-                subexpressions.append(new)
-            stack.append(new)
-        elif token == ')':
-            try:
-                stack.pop()
-            except IndexError:
-                raise ValueError("Unbalanced right parenthesis: %s" % expression)
-        elif token:
-            try:
-                stack[-1].append(token)
-            except IndexError:
-                raise ValueError("Unenclosed subexpression (near %s)" % token)
-    if stack:
-        raise ValueError("Unbalanced left parenthesis: %s" % expression)
-    if len(subexpressions) > 1 and not multiple:
-        raise ValueError("Single s-expression expected (%d given)" % len(subexpressions))
-    return subexpressions[0]
-'''
-
-def attn(msg):
-    """ Display a dialog which is sure to get my attention. """
-    import gtk
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    window.connect("delete_event", lambda *x: False)
-    window.connect("destroy", lambda *x: gtk.main_quit())
-    window.set_border_width(10)
-    button = gtk.Button(msg)
-    button.connect_object("clicked", gtk.Widget.destroy, window)
-    window.add(button)
-    button.show()
-    window.show()
-    window.fullscreen()
-    gtk.main()
+#def attn(msg):
+#    """ Display a dialog which is sure to get my attention. """
+#    import gtk
+#    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+#    window.connect("delete_event", lambda *x: False)
+#    window.connect("destroy", lambda *x: gtk.main_quit())
+#    window.set_border_width(10)
+#    button = gtk.Button(msg)
+#    button.connect_object("clicked", gtk.Widget.destroy, window)
+#    window.add(button)
+#    button.show()
+#    window.show()
+#    window.fullscreen()
+#    gtk.main()
 
 
 ## # borrowed from whoosh
@@ -208,20 +142,6 @@ def attn(msg):
 ##     return cls
 
 
-'''
-import difflib
-def showdiff(old, new):
-    d = difflib.Differ()
-    lines = d.compare(old.lines(),new.lines())
-    realdiff = False
-    for l in lines:
-        print l,
-        if not realdiff and not l[0].isspace():
-            realdiff = True
-    return realdiff
-'''
-
-
 def piped():
     """ Returns piped input via stdin, else None. """
     return sys.stdin if not sys.stdin.isatty() else None
@@ -251,9 +171,9 @@ def browser(html):
     server.handle_request()
 
 
-def pager(s, pager='less'):
+def pager(s, cmd='less'):
     """Use the pager passed in and send string s through it."""
-    subprocess.Popen(pager, stdin=subprocess.PIPE).communicate(s)
+    subprocess.Popen(cmd, stdin=subprocess.PIPE).communicate(s)
 
 
 def edit_with_editor(s=None):
@@ -318,26 +238,6 @@ def redirect_io(f):
             return f(*args, **kwargs)
     return wrap
 
-#______________________________________________________________________________
-# Function decorators
-
-# function decorator doesn't seem like a great solution.
-#
-#def threaded(callback=lambda *args, **kwargs: None, daemonic=False):
-#    """Decorate a function to run in its own thread and report the result by
-#    calling callback with it."""
-#    def innerDecorator(func):
-#        @wraps(func)
-#        def inner(*args, **kwargs):
-#            target = lambda: callback(func(*args, **kwargs))
-#            t = Thread(target=target)
-#            t.setDaemon(daemonic)
-#            t.start()
-#        return inner
-#    return innerDecorator
-
-#_______________________________________________________________________________
-#
 
 if __name__ == '__main__':
 
@@ -360,4 +260,4 @@ if __name__ == '__main__':
 
     doctest.testmod()
 
-    attn('ATTENTION!')
+    #attn('ATTENTION!')

@@ -48,6 +48,8 @@ class Timer(object):
 
     @property
     def std(self):
+        if len(self.times) <= 1:
+            return 0.0
         return np.std(self.times, ddof=1)
 
     @property

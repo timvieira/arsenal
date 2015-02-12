@@ -1,6 +1,8 @@
 from __future__ import division
 import numpy as np
-from numpy import array, exp, log, dot, abs, multiply, cumsum
+import pylab as pl
+from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
+    asarray, ones, mean, searchsorted, sqrt
 from numpy.random import uniform, normal
 from scipy.linalg import norm
 from scipy import stats
@@ -31,20 +33,30 @@ def relative_difference(a, b):
 
     """
 
-    a = np.array(a).flatten()
-    b = np.array(b).flatten()
-    x = np.atleast_2d(np.array([a, b]))
+    a = array(a).flatten()
+    b = array(b).flatten()
+    #x = np.atleast_2d(array([a, b]))
+    #fs = abs(x).max(axis=0)
+    #fs[fs == 0] = 1
+    #return (abs(x[0,:] - x[1,:]) / fs).flatten()
 
-    fs = np.abs(x).max(axis=0)
-    fs[fs == 0] = 1
-
-    return (np.abs(x[0,:] - x[1,:]) / fs).flatten()
+    es = []
+    for x,y in zip(a,b):
+        if x == y:  # covers inf, but not nan
+            e = 0
+        else:
+            s = max(abs(x), abs(y))
+            if s == 0:
+                s = 1
+            e = abs(x-y) / s
+        es.append(e)
+    return np.array(es)
 
 
 class compare(object):
 
     def __init__(self, expect, got, name=None, data=None, P_LARGER=0.9,
-                 scatter=False, regression=False, show_regression=False,
+                 scatter=False, regression=False, show_regression=False, ax=None,
                  alphabet=None, expect_label=None, got_label=None, scatter_kw=None):
         """Compare vectors.
 
@@ -80,6 +92,9 @@ class compare(object):
 
         """
 
+        if show_regression:
+            regression = 1
+
         scatter_kw = scatter_kw or {}
 
         if data is not None:
@@ -103,8 +118,8 @@ class compare(object):
             if got_label is None:
                 got_label = 'got'
 
-            expect = np.asarray(expect)
-            got = np.asarray(got)
+            expect = asarray(expect)
+            got = asarray(got)
 
             data = DataFrame({expect_label: expect, got_label: got})
 
@@ -123,6 +138,12 @@ class compare(object):
         if not isfinite(expect).all():
             tests.append(['expect finite', progress(isfinite(expect).sum(), n), False])
 
+        if isfinite(got).all() and isfinite(expect).all():
+            tests.append(['norms', [norm(expect), norm(got)], -1])
+        tests.append(['zeros', '%s %s' % (progress((got==0).sum(), n),
+                                          progress((expect==0).sum(), n)),
+                      -1])
+
         #print expect
         #print got
         #inds = isfinite(expect) & isfinite(got)
@@ -138,9 +159,6 @@ class compare(object):
         p = pearsonr(expect, got)[0]
         tests.append(['pearson', p, (p > 0.99999)])
 
-        #p = stats.pearsonr(got, expect)
-        #tests.append(['pearson-sim', p, (p > 0.99999)])
-
         # TODO: this check should probably take into account the scale of the data.
         d = linf(expect, got)
         tests.append(['Linf', d, d < 1e-8])
@@ -149,13 +167,13 @@ class compare(object):
         # for gradients)
         x = expect
         y = got
-        s = np.asarray(~((x > 0) ^ (y > 0)), dtype=int)
+        s = asarray(~((x >= 0) ^ (y >= 0)), dtype=int)
         p = s.sum() * 100.0 / len(s)
         tests.append(['same-sign', '%s%% (%s/%s)' % (p, s.sum(), len(s)), p == 100.0])
 
         # relative error
         r = relative_difference(expect, got)
-        r = np.mean(r[isfinite(r)])
+        r = mean(r[isfinite(r)])
         tests.append(['mean relative error', r, r <= 0.01])
 
         # TODO: suggest that if relative error is high and rescaled error is low (or
@@ -168,8 +186,8 @@ class compare(object):
 
         if scatter:
             if 1:
-                import pylab as pl
-                ax = pl.figure().add_subplot(111)
+                if ax is None:
+                    ax = pl.figure().add_subplot(111)
                 ax.scatter(got, expect, lw=0, alpha=0.5, **scatter_kw)
                 if name is not None:
                     ax.set_title(name)
@@ -188,8 +206,8 @@ class compare(object):
         # regression and rescaled error only valid for n >= 2
         if n >= 2:
 
-            es = np.abs(expect).max()
-            gs = np.abs(got).max()
+            es = abs(expect).max()
+            gs = abs(got).max()
             if es == 0:
                 es = 1
             if gs == 0:
@@ -197,23 +215,24 @@ class compare(object):
             # rescaled error
             E = expect / es
             G = got / gs
-            R = np.abs(E - G)
-            r = np.mean(R)
+            R = abs(E - G)
+            r = mean(R)
             tests.append(['mean rescaled error', r, r <= 1e-5])
 
             if regression:
                 # least squares linear regression
                 #
                 # TODO: for regression we want parameters `[1 0]` and a small
-                # residual. We want both these conditions to hold. Might be useful
-                # to look at R^2 statistic since it normalizes scale and number of
-                # data-points. (it's often used for reduction in variance.)
+                # residual. We want both these conditions to hold. Might be
+                # useful to look at R^2 statistic since it normalizes scale and
+                # number of data-points. (it's often used for reduction in
+                # variance.)
                 #
                 from scipy.linalg import lstsq
-                A = np.ones((n, 2))
+                A = ones((n, 2))
                 A[:,0] = got
 
-                if np.isfinite(got).all() and np.isfinite(expect).all():
+                if isfinite(got).all() and isfinite(expect).all():
                     # data can't contain any NaNs
                     result = lstsq(A, expect)
                     tests.append(['regression', result, 2])
@@ -227,7 +246,7 @@ class compare(object):
             if show_regression and regression and scatter and result is not None:
                 coeff = result[0]
                 xa, xb = ax.get_xlim()
-                A = np.ones((n, 2))
+                A = ones((n, 2))
                 A[:,0] = got
 
                 # plot estimated line
@@ -278,8 +297,8 @@ class compare(object):
 
         df = []
 
-        #es = np.abs(expect).max()
-        #gs = np.abs(got).max()
+        #es = abs(expect).max()
+        #gs = abs(got).max()
 
         for (i,(x,y)) in enumerate(zip(self.expect, self.got)):
             # XXX: skip zeros.
@@ -312,7 +331,8 @@ class compare(object):
                     types.append('smaller')
 
                 # highlight sign errors.
-                if np.sign(x) != np.sign(y):
+                #if np.sign(x) != np.sign(y):
+                if (x >= 0) != (y >= 0):
                     types.append(red % 'wrong sign')
 
                 print '  %-15s %.5f %g %g' % (n, e, x, y), \
@@ -343,7 +363,7 @@ def cosine(a, b):
 
 
 def is_distribution(p):
-    p = np.asarray(p)
+    p = asarray(p)
     return (p >= 0).all() and abs(1 - p.sum()) < 1e-10
 
 
@@ -357,13 +377,13 @@ class Mixture(object):
             'w is not a prob. distribution.'
         self.pdfs = pdfs
         self.w = w
-        self.cdf = np.cumsum(w)
+        self.cdf = cumsum(w)
 
     def rvs(self, size=1):
         # sample component
         i = self.cdf.searchsorted(uniform(size=size))
         # sample from component
-        return np.array([self.pdfs[j].rvs() for j in i])
+        return array([self.pdfs[j].rvs() for j in i])
 
     def pdf(self, x):
         return sum([p.pdf(x) * w for w, p in zip(self.w, self.pdfs)])
@@ -400,11 +420,11 @@ def cdf(a):
 
     """
 
-    x = np.array(a, copy=True)
+    x = array(a, copy=True)
     x.sort()
 
     def f(z):
-        return np.searchsorted(x, z, 'right') * 1.0 / len(x)
+        return searchsorted(x, z, 'right') * 1.0 / len(x)
 
     return f
 
@@ -432,7 +452,7 @@ def cumavg(x):
     array([ 1. ,  1.5,  2. ,  2.5,  3. ])
 
     """
-    return np.cumsum(x) / np.arange(1.0, len(x)+1)
+    return cumsum(x) / arange(1.0, len(x)+1)
 
 
 def normalize_zscore(data):
@@ -459,10 +479,10 @@ def normalize_interval(data):
 
 def mean_confidence_interval(a, confidence=0.95):
     "returns (mean, lower, upper)"
-    a = np.asarray(a)
+    a = asarray(a)
     n = a.shape[0]
-    m = np.mean(a)
-    h = a.std(ddof=1) / np.sqrt(n) * stats.t._ppf((1+confidence)/2., n-1)
+    m = mean(a)
+    h = a.std(ddof=1) / sqrt(n) * stats.t._ppf((1+confidence)/2., n-1)
     return m, m-h, m+h
 
 
@@ -487,13 +507,13 @@ def logsumexp(arr, axis=0):
     Examples
     --------
 
-    >>> a = np.arange(10)
+    >>> a = arange(10)
     >>> log(sum(exp(a)))
     9.4586297444267107
     >>> logsumexp(a)
     9.4586297444267107
     """
-    arr = np.asarray(arr)
+    arr = asarray(arr)
     arr = np.rollaxis(arr, axis)
     # Use the max to normalize, as with the log this is what accumulates the
     # less errors
@@ -599,7 +619,16 @@ def inf_norm(a, b):
     return abs(a - b).max()
 
 
-def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10):
+def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
+    """isfinite: asserts that *both* `a` and `b` must be finite.
+
+    >>> assert_equal(0, 1, throw=0, color=0)
+    0 1 err=1 fail
+
+    >>> assert_equal(0, 0, verbose=1, color=0)
+    0 0 err=0 ok
+
+    """
     err = inf_norm(a,b)
     if name:
         name = '%s: ' % name
@@ -608,7 +637,10 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10):
         if throw and err > tol:
             raise AssertionError(msg + ' >= tolerance (%s)' % tol)
         else:
-            print msg, green % 'ok' if err < tol else red % 'fail'
+            if not color:
+                print msg, 'ok' if err < tol else 'fail'
+            else:
+                print msg, green % 'ok' if err < tol else red % 'fail'
 
 
 if __name__ == '__main__':
@@ -651,19 +683,15 @@ if __name__ == '__main__':
 
     tests()
 
-
     def test_compare():
         n = 100
-
         # `a` is a noisy version of `b`, but tends to overestimate.
         a = np.linspace(0,1,n)
         b = a + np.random.uniform(-0.01, 0.1, size=n)
         compare(a,b,scatter=1)
-
-
         compare('a', 'b', scatter=1, data=DataFrame({'a': a, 'b': b}))
-
-        import pylab as pl
         pl.show()
 
-    test_compare()
+    #test_compare()
+
+    print relative_difference(np.inf, np.inf)

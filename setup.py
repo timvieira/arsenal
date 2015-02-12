@@ -6,5 +6,4 @@ setup(name='arsenal',
       description='Utils.',
       author='Tim Vieira',
       url='https://github.com/timvieira/arsenal/',
-      packages= find_packages(),
-      install_requires=['numpy'])
+      packages=find_packages())

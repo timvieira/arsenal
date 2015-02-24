@@ -79,7 +79,7 @@ def kl_filter(data,
 
     # label-feature tally (note: we ignore dulicate features)
     counts = zeros((K,M))
-    for y, fv in iterview(data, every=5000):
+    for y, fv in iterview(data):
         counts[y, fv] += 1
 
     feature_counts = counts.sum(axis=0)
@@ -115,7 +115,7 @@ def kl_filter(data,
         print >> sys.stderr, '\nKL'
 
     KL = zeros(M)
-    for f in iterview(xrange(M), every=5000):
+    for f in iterview(xrange(M)):
         label_given_f = lidstone(counts[:,f], 0.001)   # avoids divide-by-zero
         KL[f] = -kl_divergence(label_prior, label_given_f)
 
@@ -135,10 +135,24 @@ def kl_filter(data,
         z = (-KL[i], F.lookup(i), l)
 
         if verbose:
-            print >> out, '%8.6f\t%s\t%s' % (-KL[i], int(counts[:,i].sum()), F.lookup(i)), '\t\033[32m', ' '.join('%s(%s)' % (k,v) for v, k in l), '\033[0m'
+            print >> out, '%8.6f\t%s\t%s' % (-KL[i], int(counts[:,i].sum()), F.lookup(i)), '\t\033[32m', ' '.join('%s(%.4f)' % (k,v) for v, k in l), '\033[0m'
 
         yield z
 
 
 if __name__ == '__main__':
-    list(kl_filter(read_tab_file(file(sys.argv[1]) if len(sys.argv) == 2 else sys.stdin)))
+    from argparse import ArgumentParser
+    p = ArgumentParser()
+    p.add_argument('input', type=file)
+    p.add_argument('--feature-cuttoff', type=int, default=0)
+    p.add_argument('--feature-label-cuttoff', type=int, default=0)
+    p.add_argument('--progress', action='store_true')
+    args = p.parse_args()
+
+    #list(kl_filter(read_tab_file(file(sys.argv[1]) if len(sys.argv) == 2 else sys.stdin)))
+
+    for _ in kl_filter(read_tab_file(args.input),
+                       feature_count_cuttoff=args.feature_cuttoff,
+                       feature_label_cuttoff=args.feature_label_cuttoff,
+                       progress=args.progress):
+        pass

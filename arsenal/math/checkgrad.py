@@ -4,12 +4,13 @@ from numpy.linalg import norm
 from arsenal.iterview import iterview
 from arsenal.terminal import green, red, yellow
 from random import sample
+from arsenal.math import cosine
 
 
 # TODO: implement sign check (these are pretty bad errors), difference in scale
 # TODO: unify with `arsenal.math.numpy_extras.compare`
 def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=True,
-                    verbose=True, random_subset=None):
+                    verbose=True, progress=True, random_subset=None):
 
     """Check gradient that `f(theta) == grad` by centered-difference approximation.
 
@@ -53,10 +54,13 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
     if random_subset is not None:
         keys = sample(keys, min(len(keys), random_subset))
 
+    if hasattr(random_subset, '__iter__'):
+        keys = list(random_subset)
+
     assert len(keys) > 0
 
     fd = zeros_like(theta)
-    for i in (iterview(keys, msg='checkgrad') if verbose else keys):
+    for i in (iterview(keys, msg='checkgrad') if progress else keys):
         was = theta[i]
         # perturb right
         theta[i] = was + eps
@@ -104,7 +108,7 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
         else:
             print red % 'failed %s of %s' % (fails, len(keys)),
 
-        print 'cosine similarity: %g' % (np.dot(grad[keys], fd[keys]) / norm(grad[keys]) / norm(fd[keys]))
+        print 'cosine similarity: %g' % cosine(grad[keys], fd[keys])
 
         # TODO: add sign check.
 

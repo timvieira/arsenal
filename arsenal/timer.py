@@ -1,4 +1,5 @@
 import numpy as np
+from sys import stderr
 from time import time
 from contextlib import contextmanager
 from arsenal.humanreadable import htime
@@ -105,21 +106,18 @@ class Timer(object):
 
 
 @contextmanager
-def timeit(msg="%.4f seconds", header=None):
+def timeit(name, fmt='{name} ({htime})', header=None):
     """Context Manager which prints the time it took to run code block."""
     if header is not None:
         print header
     b4 = time()
     yield
-
-    t = time() - b4
-    ht = htime(t)
-    if t < 60:
-        ht = t
-    try:
-        print msg % ht
-    except TypeError:
-        print msg, ht
+    sec = time() - b4
+    if sec < 60:
+        ht = '%.4f sec' % sec
+    else:
+        ht = htime(sec)
+    print >> stderr, fmt.format(name=name, htime=ht, sec=sec)
 
 timesection = lambda x: timeit(header='%s...' % x,
                                msg=' -> %s took %%.2f seconds' % x)

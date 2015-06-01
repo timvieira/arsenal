@@ -69,7 +69,7 @@ def console_width(minimum=None, default=80):
         winsize = array("H", [0] * 4)
         try:
             ioctl(sys.stdout.fileno(), TIOCGWINSZ, winsize)
-        except IOError:
+        except (IOError, AttributeError):
             pass
         return max(minimum, (winsize[1], winsize[0])[0])
 

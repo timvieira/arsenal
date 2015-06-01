@@ -37,7 +37,8 @@ def pareto_frontier(X, Y, maxX=True, maxY=True):
     return frontier
 
 
-def show_frontier(X, Y, maxX=False, maxY=True, dots=False, ax=None, label=None, **style):
+def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
+                  XMAX=None, YMIN=None, ax=None, label=None, **style):
     """Plot Pareto frontier.
 
     Args:
@@ -55,11 +56,17 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False, ax=None, label=None, 
       style: keyword arguments, which will be passed to lines connecting the
         points on the Pareto frontier.
 
+      XMAX: max value along x-axis
+      YMIN: min value along y-axis
+
     """
     if ax is None:
         ax = pl.gca()
     sty = {'c': 'b', 'alpha': 0.3, 'zorder': 0}
     sty.update(style)
+
+    assert not maxX and maxY, 'need to update some hardcoded logic'
+
     f = pareto_frontier(X, Y, maxX=maxX, maxY=maxY)
     if not f:
         print yellow % '[warn] Empty frontier'
@@ -70,13 +77,22 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False, ax=None, label=None, 
     # Connect corners of frontier. The first and last points on frontier have
     # lines which surround the point cloud.
     p, q = f[0], f[-1]
+
     (a,b) = min(X), max(X)
     (c,d) = min(Y), max(Y)
+
     # connect points with line segments
     pts = []
-    pts.extend([p, (a,c)])
+
+    XMAX = XMAX if XMAX is not None else max(X)
+    YMIN = YMIN if YMIN is not None else min(Y)
+    assert XMAX >= max(X)
+    assert YMIN <= min(Y)
+
+    pts.extend([(min(X), YMIN)])
     pts.extend(x for ((a,b), (c,d)) in window(f, 2) for x in [[a,b], [c,b], [c,b], [c,d]])
-    pts.extend([q, (b,d)])
+    pts.extend([(XMAX, max(Y))])
+
     # make plot
     pts = np.array(pts)
     ax.plot(pts[:,0], pts[:,1], label=label, **sty)

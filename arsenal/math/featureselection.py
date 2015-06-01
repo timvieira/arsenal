@@ -7,11 +7,27 @@ Output: a sorted list of the most informative features.
 """
 
 import sys
-import numpy as np
-from numpy import zeros, fromiter, int32
-from arsenal.math import kl_divergence, lidstone
+from numpy import dot, log, zeros, fromiter, int32
 from arsenal.alphabet import Alphabet
 from collections import defaultdict
+
+
+def normalize(p):
+    return p / p.sum()
+
+
+def lidstone(p, delta):
+    """
+    Lidstone smoothing is a generalization of Laplace smoothing.
+    """
+    return normalize(p + delta)
+
+
+def kl_divergence(p, q):
+    """ Compute KL divergence of two vectors, K(p || q).
+    NOTE: If any value in q is 0.0 then the KL-divergence is infinite.
+    """
+    return dot(p, log(p) - log(q))
 
 
 def read_tab_file(f):

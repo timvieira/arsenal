@@ -6,4 +6,9 @@ setup(name='arsenal',
       description='Utils.',
       author='Tim Vieira',
       url='https://github.com/timvieira/arsenal/',
+      install_requires=[
+          'keyring',
+          'numpy',
+          'path.py',
+      ],
       packages=find_packages())

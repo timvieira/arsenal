@@ -1,5 +1,6 @@
 import pylab as pl
 import numpy as np
+from sys import stderr
 from collections import defaultdict
 from contextlib import contextmanager
 from pandas.stats.moments import rolling_mean
@@ -66,7 +67,7 @@ def update_ax(ax, clear=True):
         ax.figure.canvas.flush_events()
         pl.show(block=False)
     except (NotImplementedError, AttributeError):
-        print 'warning failed to update plot.'
+        print >> stderr, 'warning failed to update plot.'
 
 
 @contextmanager

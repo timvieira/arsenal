@@ -156,7 +156,10 @@ class compare(object):
         c = cosine(expect, got)
         tests.append(['cosine-sim', c, (c > 0.99999)])
 
-        p = pearsonr(expect, got)[0]
+        if norm(expect) == 0 and norm(got) == 0:
+            p = 1.0
+        else:
+            p = pearsonr(expect, got)[0]
         tests.append(['pearson', p, (p > 0.99999)])
 
         # TODO: this check should probably take into account the scale of the data.
@@ -235,7 +238,7 @@ class compare(object):
                 if isfinite(got).all() and isfinite(expect).all():
                     # data can't contain any NaNs
                     result = lstsq(A, expect)
-                    tests.append(['regression', result, 2])
+                    tests.append(['regression', result[0], 2])
                 else:
                     # contains a NaN
                     result = None
@@ -286,6 +289,12 @@ class compare(object):
                 c = red
             else:
                 c = yellow
+
+            try:
+                v = '%g' % v
+            except TypeError:
+                pass
+
             print '  %s: %s' % (k, c % (v,))
         print
 
@@ -307,7 +316,7 @@ class compare(object):
 
             e = relative_difference(x, y)
 
-            if e <= 0.00001:
+            if e <= 0.001:
                 continue
 
             df.append([e, self.alphabet[i], x, y])

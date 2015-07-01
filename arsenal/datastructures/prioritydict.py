@@ -52,7 +52,7 @@ class prioritydict(dict):
         self._heap = [(v, k) for k, v in self.iteritems()]
         heapify(self._heap)
 
-    def pop_smallest(self):
+    def pop_smallest(self, value=False):
         """
         Return the item with the lowest priority and remove it.
 
@@ -68,7 +68,10 @@ class prioritydict(dict):
         while k not in self or self[k] != v:   # while `k` is stale
             v, k = heappop(heap)
         del self[k]
+        if value:
+            return k, v
         return k
+
 
 # TODO: this isn't right because we're lazy about cleanup heappop pop_smallest
 # calls pop multiple times.

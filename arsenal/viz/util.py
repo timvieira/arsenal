@@ -1,3 +1,11 @@
+from os import environ
+DISPLAY = True
+if not environ.get('DISPLAY'):
+    import matplotlib
+    #print 'Not a display environment.'
+    matplotlib.use('Agg')
+    DISPLAY = False
+
 import pylab as pl
 import numpy as np
 from sys import stderr
@@ -41,7 +49,7 @@ def lineplot(name, with_ax=False, avg=10, xlabel=None, ylabel=None, title=None, 
 
 @contextmanager
 def axman(name, xlabel=None, ylabel=None, title=None, clear=True):
-    """axman is axis manager. Manages clearing, updating and maintaining a global
+    """`axman` is axis manager. Manages clearing, updating and maintaining a global
     handle to a named plot.
 
     """

@@ -6,9 +6,32 @@ from arsenal.humanreadable import htime
 from arsenal.terminal import yellow
 from arsenal.misc import ddict
 
-def timers():
-    return ddict(Timer)
+def timers(title=None):
+    return Benchmark(title) #
 
+class Benchmark(object):
+    def __init__(self, title):
+        self.title = title
+        self.timers = ddict(Timer)
+    def __getitem__(self, name):
+        return self.timers[name]
+    def compare(self):
+        Timer.compare_many(*self.timers.values())
+    def values(self):
+        return self.timers.values()
+    def keys(self):
+        return self.timers.keys()
+    def __len__(self):
+        return len(self.timers)
+    def plot_feature(self, feature, timecol='timer', ax=None, **kw):
+        for t in self.timers.values():
+            t.plot_feature(feature=feature,
+                           timecol=timecol,
+                           ax=ax,
+                           **kw)
+        if self.title is not None:
+            ax.set_title(self.title)
+        ax.legend(loc=2)
 
 
 class Timer(object):
@@ -80,14 +103,20 @@ class Timer(object):
                 self.compare(x, **kw)
 
     def plot_feature(self, feature, timecol='timer', ax=None, **kw):
-        a = self.dataframe(timecol).groupby(feature).mean()
+        df = self.dataframe(timecol)
+        a = df.groupby(feature).mean()
         if ax is None:
             import pylab as pl
             ax = pl.figure().add_subplot(111)
 
-        ax.plot(a.index, a[timecol], alpha=0.5, **kw)
-        del kw['label']
-        ax.scatter(a.index, a[timecol], lw=0, alpha=0.5, **kw)
+        if 'label' not in kw:
+            # use name of the timer as default label.
+            kw['label'] = self.name
+
+        [l] = ax.plot(a.index, a[timecol], alpha=0.5, **kw)
+        del kw['label'] # delete label so it doesn't appear twice in the legend
+        #ax.scatter(a.index, a[timecol], lw=0, alpha=0.5, **kw)
+        ax.scatter(df[feature], df[timecol], c=l.get_color(), lw=0, alpha=0.25, **kw)
 
         ax.set_xlabel(feature)
         ax.set_ylabel('average time (seconds)')

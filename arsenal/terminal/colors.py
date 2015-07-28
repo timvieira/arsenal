@@ -1,7 +1,4 @@
-try:
-    from fabulous import color
-except ImportError:
-    pass
+import colored
 
 # TODO: Consider using fabulous for most of this. It supports a wider variety of
 # colors and might do a better job with other macs.
@@ -58,7 +55,7 @@ def color01(x, fmt='%.10f'):
     w = b - a
     offset = x*w
     offset = int(round(offset))
-    return color.fg256(a + offset, fmt % x)
+    return colored.fg(a + offset) + (fmt % x) + colored.attr('reset') #color.fg256(a + offset, fmt % x)
 
 
 if __name__ == '__main__':

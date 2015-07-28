@@ -75,7 +75,8 @@ def update_ax(ax, clear=True):
         ax.figure.canvas.flush_events()
         pl.show(block=False)
     except (NotImplementedError, AttributeError):
-        print >> stderr, 'warning failed to update plot.'
+        #print >> stderr, 'warning failed to update plot.'
+        pass
 
 
 @contextmanager

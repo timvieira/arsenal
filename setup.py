@@ -9,6 +9,7 @@ setup(name='arsenal',
       install_requires=[
           'keyring',
           'numpy',
+          'colored',
           'path.py',
       ],
       packages=find_packages())

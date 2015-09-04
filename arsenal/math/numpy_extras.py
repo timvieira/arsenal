@@ -4,7 +4,7 @@ import pylab as pl
 from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
     asarray, ones, mean, searchsorted, sqrt
 from numpy.random import uniform, normal
-from scipy.linalg import norm
+from scipy.linalg import norm as _norm
 from scipy import stats
 from numpy import isfinite
 from arsenal.terminal import yellow, green, red
@@ -12,6 +12,11 @@ from arsenal.iterview import progress
 from pandas import DataFrame
 from scipy.stats import pearsonr
 
+
+def norm(x, p=2):
+    if not isfinite(x).all():
+        return np.nan
+    return _norm(x, p)
 
 def relative_difference(a, b):
     """Element-wise relative difference of two arrays
@@ -133,15 +138,15 @@ class compare(object):
         tests = []
 
         # Check that vectors are finite.
-        if not isfinite(got).all():
-            tests.append(['got finite', progress(isfinite(got).sum(), n), False])
         if not isfinite(expect).all():
             tests.append(['expect finite', progress(isfinite(expect).sum(), n), False])
+        if not isfinite(got).all():
+            tests.append(['got finite', progress(isfinite(got).sum(), n), False])
 
-        if isfinite(got).all() and isfinite(expect).all():
-            tests.append(['norms', [norm(expect), norm(got)], -1])
-        tests.append(['zeros', '%s %s' % (progress((got==0).sum(), n),
-                                          progress((expect==0).sum(), n)),
+
+        tests.append(['norms', [norm(expect), norm(got)], -1])
+        tests.append(['zeros', '%s %s' % (progress((expect==0).sum(), n),
+                                          progress((got==0).sum(), n)),
                       -1])
 
         #print expect
@@ -639,6 +644,8 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
 
     """
     err = inf_norm(a,b)
+    if np.array(a == b).all():   # handles the non-finite cases.
+        err = 0
     if name:
         name = '%s: ' % name
     if verbose or err > tol:

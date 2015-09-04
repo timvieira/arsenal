@@ -66,11 +66,7 @@ class F1:
         print r"""\hline
 \end{tabular}
 """
-
         return tbl
-
-
-
 
     def scores(self, verbose=True):
         relevant  = self.relevant
@@ -79,9 +75,16 @@ class F1:
             #from prettytable import PrettyTable
             #t = PrettyTable(["","P","R","F"])
             #x.set_field_align("City name", "l") # Left align city names
-            print ' ============================================'
-            print ' |          |   C   |   P   |   R   |   F   |'
-            print ' |==========================================|'
+
+            m = max(len(x) for x in self.relevant)
+            fmt = ' | %{0}s | %5d | %5.1f | %5.1f | %5.1f |'.format(m)
+
+            line = ' |' + '='*m + '==================================|'
+
+            print line
+            print ' |', ' '*m, '|   C   |   P   |   R   |   F   |'
+            print line
+
         tbl = []
         labels = self.relevant.keys()
         labels.sort()
@@ -96,16 +99,13 @@ class F1:
             if P + R != 0:
                 F = 2*P*R / (P + R)
             if verbose:
-                print ' | %8s | %5d | %5.1f | %5.1f | %5.1f |' % (label[-8:], count, P*100, R*100, F*100)
-#                print ' | %8s | %5d | %5.1f | %5.1f | %5.1f |' % (label, count, P*100, R*100, F*100)
+                print fmt % (label, count, P*100, R*100, F*100)
                 #t.add_row([label, P*100, R*100, F*100])
             tbl.append((label,count,P,R,F))
         if verbose:
-            print ' ============================================'
+            print line
             #print t
         return tbl
-
-
 
     def confusion(self):
         assert self.confusion_matrix is not None

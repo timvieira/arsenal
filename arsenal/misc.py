@@ -190,6 +190,8 @@ def edit_with_editor(s=None):
         subprocess.call([os.environ.get('EDITOR', 'nano'), t.name])
         return t.read().strip()
 
+editor = edit_with_editor
+
 #_________________________________________________________________________
 #
 

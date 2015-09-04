@@ -16,6 +16,9 @@ def progress(n, length):
     """
     Returns a string indicating current progress.
     """
+    if length == 0:
+        return ('%5.1f%% (%*d/%d)'
+                % ((float('nan'), len(str(length)), n, length)))
 
     return ('%5.1f%% (%*d/%d)'
             % ((float(n) / length) * 100, len(str(length)), n, length))

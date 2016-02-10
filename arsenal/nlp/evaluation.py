@@ -72,10 +72,6 @@ class F1:
         relevant  = self.relevant
         retrieved = self.retrieved
         if verbose:
-            #from prettytable import PrettyTable
-            #t = PrettyTable(["","P","R","F"])
-            #x.set_field_align("City name", "l") # Left align city names
-
             m = max(len(x) for x in self.relevant)
             fmt = ' | %{0}s | %5d | %5.1f | %5.1f | %5.1f |'.format(m)
 
@@ -117,3 +113,43 @@ class F1:
                     incorrect += cnt
                     print '      %6s -> %s' % (predicted, cnt)
             print
+
+
+def plot_confusion(y_true, y_pred, alphabet, normalized=False):
+    """
+    Draw confusion matrix
+
+    Options:
+
+     - normalized: Normalize the confusion matrix by row (i.e by the number of samples in each
+       class)
+
+    """
+    import pylab as pl, numpy as np
+    from sklearn.metrics import confusion_matrix
+
+    def plot_confusion_matrix(cm, title='Confusion matrix', cmap=pl.cm.Blues):
+        pl.imshow(cm, interpolation='nearest', cmap=cmap)
+        pl.title(title)
+        pl.colorbar()
+        target_names = list(alphabet)
+        tick_marks = np.arange(len(target_names))
+        pl.xticks(tick_marks, target_names, rotation=45)
+        pl.yticks(tick_marks, target_names)
+        pl.tight_layout()
+        pl.ylabel('True label')
+        pl.xlabel('Predicted label')
+
+    # Compute confusion matrix
+    cm = confusion_matrix(y_true, y_pred)
+    np.set_printoptions(precision=2)
+
+    if normalized:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+    print cm
+
+    pl.figure()
+    plot_confusion_matrix(cm, title='Confusion matrix')
+
+    pl.show()

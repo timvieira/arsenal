@@ -68,7 +68,8 @@ def pareto_ix(X, Y, maxX=True, maxY=True):
 
 
 def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
-                  XMAX=None, YMIN=None, ax=None, label=None, **style):
+                  XMAX=None, YMIN=None, ax=None, label=None,
+                  interpolation='pessimistic', **style):
     """Plot Pareto frontier.
 
     Args:
@@ -114,8 +115,12 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
     # lines which surround the point cloud.
     f = [(min(X), YMIN)] + f + [(XMAX, max(Y))]
 
-    # Make line segments from adjacent points
-    pts = np.array([x for ((a,b), (c,d)) in window(f, 2) for x in [[a,b], [c,b], [c,b], [c,d]]])
+    if interpolation == 'pessimistic':
+        # Make line segments from adjacent points
+        pts = np.array([x for ((a,b), (c,d)) in window(f, 2) for x in [[a,b], [c,b], [c,b], [c,d]]])
+    elif interpolation == 'linear':
+        # Make line segments from adjacent points
+        pts = np.array([x for ((a,b), (c,d)) in window(f, 2) for x in [[a,b], [c,d]]])
 
     # Plot
     ax.plot(pts[:,0], pts[:,1], label=label, **sty)
@@ -145,6 +150,11 @@ class Pareto(object):
         show_frontier(self.df[self.xcol], self.df[self.ycol], ax=self.ax, **plot_kwargs)
 
     def lookup_x(self, x):
+        """
+        Find Pareto point constrained by x.
+            argmax    p.y
+         p: p.x <= x
+        """
         s = self.df
         s = s[s[self.xcol] <= x]    # filter
         if s.empty:
@@ -153,6 +163,11 @@ class Pareto(object):
         return s.ix[yy][self.ycol]
 
     def lookup_y(self, y):
+        """
+        Find Pareto point constrained by y.
+            argmax    p.x
+         p: p.x >= y
+        """
         s = self.df
         s = s[s[self.ycol] >= y]    # filter
         if s.empty:

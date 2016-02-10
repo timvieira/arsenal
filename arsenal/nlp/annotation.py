@@ -138,6 +138,9 @@ def extract_contiguous(s, labeler=None):
     >>> list(extract_contiguous(""))
     []
 
+    >>> list(extract_contiguous("AAAA"))
+    [Span(label='A', begins=0, ends=4)]
+
     >>> list(extract_contiguous("AABBC"))
     [Span(label='A', begins=0, ends=2), Span(label='B', begins=2, ends=4), Span(label='C', begins=4, ends=5)]
 

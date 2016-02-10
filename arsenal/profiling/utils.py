@@ -4,7 +4,41 @@ import os
 import sys
 import pstats
 import cProfile
-import tempfile
+#import tempfile
+
+
+from contextlib import contextmanager
+@contextmanager
+def profiler(use='cprofile', filename='out.prof'):
+
+    if use == 'yep':   # pragma: no cover
+        import yep
+        yep.start(filename)
+
+    if use == 'cprofile':  # pragma: no cover
+        #import cProfile
+        prof = cProfile.Profile()
+        prof.enable()
+
+    try:
+
+        yield
+
+    finally:
+        if use == 'yep':  # pragma: no cover
+            yep.stop()
+            print yellow % 'wrote: %s' % prof_file, '(use google-pprof to view)'
+            # google-pprof --text /bin/ls imitation.prof
+            # google-pprof --evince /bin/ls imitation.prof
+            # google-pprof --web /bin/ls --web imitation.prof
+
+        if use == 'cprofile':  # pragma: no cover
+            #import pstats
+            prof.disable()
+            prof.dump_stats(filename)
+            pstats.Stats(filename).strip_dirs().sort_stats('time').print_stats()
+
+
 
 # TODO:
 #  - maybe we should delete the `out` tempfile

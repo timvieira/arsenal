@@ -103,7 +103,10 @@ def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newli
     start = time()
 
     if length is None:
-        length = len(x)
+        try:
+            length = len(x)
+        except TypeError:
+            length = sys.maxint
 
     if length == 0:
         raise StopIteration

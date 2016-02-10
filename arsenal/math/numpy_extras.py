@@ -363,6 +363,8 @@ def linf(a, b):
     return abs(a - b).max()
 
 
+# Notes: I'm not using `scipy.spatial.distance.cosine` because it doesn't handle
+# the zero norm cases.
 def cosine(a, b):
     if not isfinite(a).all() or not isfinite(b).all():
         return np.nan
@@ -485,7 +487,7 @@ def normalize_interval(data):
     """
     shift = data.min(axis=0)
     rescale = data.ptp(axis=0)
-    rescale[rescale == 0] = 1.0  # avoid divide by zero
+    #rescale[rescale == 0] = 1.0  # avoid divide by zero
     x = (data - shift)
     x /= rescale
     return x

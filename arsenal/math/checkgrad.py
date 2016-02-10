@@ -10,7 +10,7 @@ from arsenal.math import cosine
 # TODO: implement sign check (these are pretty bad errors), difference in scale
 # TODO: unify with `arsenal.math.numpy_extras.compare`
 def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=True,
-                    verbose=True, progress=True, random_subset=None):
+                    verbose=True, progress=True, keys=None, random_subset=None):
 
     """Check gradient that `f(theta) == grad` by centered-difference approximation.
 
@@ -45,17 +45,17 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
 
     grad = np.asarray(grad)
 
-    if alphabet is not None:
-        keys = alphabet._flip.keys()
-        assert len(alphabet), 'Alphabet is empty.'
-    else:
-        keys = range(len(theta))
-
-    if random_subset is not None:
-        keys = sample(keys, min(len(keys), random_subset))
-
-    if hasattr(random_subset, '__iter__'):
-        keys = list(random_subset)
+    if keys is None:
+        if alphabet is not None:
+            keys = alphabet._flip.keys()
+            assert len(alphabet), 'Alphabet is empty.'
+        else:
+            keys = range(len(theta))
+        if random_subset is not None:
+            if hasattr(random_subset, '__iter__'):
+                keys = list(random_subset)
+            else:
+                keys = sample(keys, min(len(keys), random_subset))
 
     assert len(keys) > 0
 

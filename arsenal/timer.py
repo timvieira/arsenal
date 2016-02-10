@@ -24,6 +24,9 @@ class Benchmark(object):
     def __len__(self):
         return len(self.timers)
     def plot_feature(self, feature, timecol='timer', ax=None, **kw):
+        if ax is None:
+            import pylab as pl
+            ax = pl.figure().add_subplot(111)
         for t in self.timers.values():
             t.plot_feature(feature=feature,
                            timecol=timecol,
@@ -116,7 +119,7 @@ class Timer(object):
         [l] = ax.plot(a.index, a[timecol], alpha=0.5, **kw)
         del kw['label'] # delete label so it doesn't appear twice in the legend
         #ax.scatter(a.index, a[timecol], lw=0, alpha=0.5, **kw)
-        ax.scatter(df[feature], df[timecol], c=l.get_color(), lw=0, alpha=0.25, **kw)
+        ax.scatter(df[feature], np.array(df[timecol]), c=l.get_color(), lw=0, alpha=0.25, **kw)
 
         ax.set_xlabel(feature)
         ax.set_ylabel('average time (seconds)')

@@ -23,17 +23,21 @@ def pareto_frontier(X, Y, maxX=True, maxY=True):
         return []
     a = sorted(zip(X, Y), reverse=maxX)
     frontier = []
-    _, lasty = a[0]
+    [lastx, lasty] = a[0]
     for xy in a:
-        _,y = xy
+        x,y = xy
         if maxY:
             if y >= lasty:
-                frontier.append(xy)
+                if lastx != x:
+                    frontier.append(xy)
                 lasty = y
+                lastx = x
         else:
             if y <= lasty:
-                frontier.append(xy)
+                if lastx != x:
+                    frontier.append(xy)
                 lasty = y
+                lastx = x
     return frontier
 
 
@@ -53,17 +57,21 @@ def pareto_ix(X, Y, maxX=True, maxY=True):
         return []
     a = sorted(zip(X, Y, range(len(X))), reverse=maxX)
     frontier = []
-    [_, lasty, _] = a[0]
+    [lastx, lasty, _] = a[0]
     for xyi in a:
-        _,y,i = xyi
+        x,y,i = xyi
         if maxY:
             if y >= lasty:
-                frontier.append(i)
+                if lastx != x:
+                    frontier.append(i)
                 lasty = y
+                lastx = x
         else:
             if y <= lasty:
-                frontier.append(i)
+                if lastx != x:
+                    frontier.append(i)
                 lasty = y
+                lastx = x
     return frontier
 
 

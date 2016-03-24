@@ -194,8 +194,6 @@ def test():
     Y /= Y.max()
     Y *= 0.95
 
-    #Y = X
-
     df = DataFrame({'X': X, 'Y': Y})
     P = Pareto(df, 'X', 'Y')
 

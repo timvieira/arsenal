@@ -23,7 +23,8 @@ def pareto_frontier(X, Y, maxX=True, maxY=True):
         return []
     a = sorted(zip(X, Y), reverse=maxX)
     frontier = []
-    [lastx, lasty] = a[0]
+    lastx = float('-inf') if maxX else float('+inf')
+    lasty = float('-inf') if maxY else float('+inf')
     for xy in a:
         x,y = xy
         if maxY:
@@ -57,7 +58,8 @@ def pareto_ix(X, Y, maxX=True, maxY=True):
         return []
     a = sorted(zip(X, Y, range(len(X))), reverse=maxX)
     frontier = []
-    [lastx, lasty, _] = a[0]
+    lastx = float('-inf') if maxX else float('+inf')
+    lasty = float('-inf') if maxY else float('+inf')
     for xyi in a:
         x,y,i = xyi
         if maxY:

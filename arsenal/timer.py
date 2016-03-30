@@ -105,9 +105,24 @@ class Timer(object):
             if x != self:
                 self.compare(x, **kw)
 
-    def plot_feature(self, feature, timecol='timer', ax=None, **kw):
+    def plot_feature(self, feature, timecol='timer', ax=None, show='avg', **kw):
         df = self.dataframe(timecol)
         a = df.groupby(feature).mean()
+
+        loglog = kw.get('loglog')
+        del kw['loglog']
+
+        if loglog:
+            X = np.log(a.index)
+            Y = np.log(a[timecol])
+            ax.set_xlabel('log %s' % feature)
+            ax.set_ylabel('log average time (seconds)')
+        else:
+            X = a.index
+            Y = a[timecol]
+            ax.set_xlabel(feature)
+            ax.set_ylabel('average time (seconds)')
+
         if ax is None:
             import pylab as pl
             ax = pl.figure().add_subplot(111)
@@ -116,13 +131,23 @@ class Timer(object):
             # use name of the timer as default label.
             kw['label'] = self.name
 
-        [l] = ax.plot(a.index, a[timecol], alpha=0.5, **kw)
+        [l] = ax.plot(X, Y, lw=2, alpha=0.5, **kw)
         del kw['label'] # delete label so it doesn't appear twice in the legend
-        #ax.scatter(a.index, a[timecol], lw=0, alpha=0.5, **kw)
-        ax.scatter(df[feature], np.array(df[timecol]), c=l.get_color(), lw=0, alpha=0.25, **kw)
 
-        ax.set_xlabel(feature)
-        ax.set_ylabel('average time (seconds)')
+        if 'avg' in show:
+            ax.scatter(X, Y, c=l.get_color(), lw=0, alpha=0.25, **kw)
+        elif 'scatter' in show:
+            if loglog:
+                ax.scatter(np.log(df[feature]), np.log(df[timecol]), c=l.get_color(), alpha=0.25, **kw)
+            else:
+                ax.scatter(df[feature], df[timecol], c=l.get_color(), alpha=0.25, **kw)
+        #elif 'box' in show:
+        #    # TODO: doen't work very well yet. need to fill out the x-axis since
+        #    # feature might not be dense. Should throw an error if feature isn't an
+        #    # integral.
+        #    ddd = [np.asarray(dd[timecol]) for f, dd in sorted(df.groupby(feature))]
+        #    ax.boxplot(ddd)
+
         return a
 
     def dataframe(self, timecol='timer'):

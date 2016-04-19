@@ -106,6 +106,15 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
     sty = {'c': 'b', 'alpha': 0.3, 'zorder': 0}
     sty.update(style)
 
+
+    if interpolation == 'linear-convex':
+        from scipy.spatial import ConvexHull
+        X = np.array(X)
+        Y = np.array(Y)
+        hull = ConvexHull(np.array([X,Y]).T)
+        X = X[hull.vertices]
+        Y = Y[hull.vertices]
+
     assert not maxX and maxY, 'need to update some hardcoded logic'
 
     f = pareto_frontier(X, Y, maxX=maxX, maxY=maxY)
@@ -128,7 +137,7 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
     if interpolation == 'pessimistic':
         # Make line segments from adjacent points
         pts = np.array([x for ((a,b), (c,d)) in window(f, 2) for x in [[a,b], [c,b], [c,b], [c,d]]])
-    elif interpolation == 'linear':
+    elif interpolation in {'linear','linear-convex'}:
         # Make line segments from adjacent points
         pts = np.array([x for ((a,b), (c,d)) in window(f, 2) for x in [[a,b], [c,d]]])
 

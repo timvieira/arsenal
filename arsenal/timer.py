@@ -110,7 +110,8 @@ class Timer(object):
         a = df.groupby(feature).mean()
 
         loglog = kw.get('loglog')
-        del kw['loglog']
+        if 'loglog' in kw:
+            del kw['loglog']
 
         if loglog:
             X = np.log(a.index)

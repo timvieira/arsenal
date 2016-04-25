@@ -127,8 +127,10 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
 
     XMAX = XMAX if XMAX is not None else max(X)
     YMIN = YMIN if YMIN is not None else min(Y)
-    assert XMAX >= max(X)
-    assert YMIN <= min(Y)
+    if max(X) > XMAX:
+        print '[pareto] WARNING: max(X) > XMAX. Plot will not show these points.'
+    if min(Y) < YMIN:
+        print '[pareto] WARNING: min(X) < XIN. Plot will not show these points.'
 
     # Connect corners of frontier. The first and last points on frontier have
     # lines which surround the point cloud.

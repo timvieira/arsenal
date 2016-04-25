@@ -143,8 +143,7 @@ class compare(object):
         if not isfinite(got).all():
             tests.append(['got finite', progress(isfinite(got).sum(), n), False])
 
-
-        tests.append(['norms', [norm(expect), norm(got)], -1])
+        tests.append(['norms', '[%g, %g]' % (norm(expect), norm(got)), -1])
         tests.append(['zeros', '%s %s' % (progress((expect==0).sum(), n),
                                           progress((got==0).sum(), n)),
                       -1])
@@ -159,7 +158,7 @@ class compare(object):
         #got = got[inds]
 
         c = cosine(expect, got)
-        tests.append(['cosine-sim', c, (c > 0.99999)])
+        tests.append(['cosine-sim', c, (c > 0.99999)])   # cosine similarities must be really high.
 
         if norm(expect) == 0 and norm(got) == 0:
             p = 1.0

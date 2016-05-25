@@ -6,12 +6,12 @@ if not environ.get('DISPLAY'):
     matplotlib.use('Agg')
     DISPLAY = False
 
+from pandas import ewma
 import pylab as pl
 import numpy as np
 from sys import stderr
 from collections import defaultdict
 from contextlib import contextmanager
-from pandas.stats.moments import rolling_mean
 from matplotlib.backends.backend_pdf import PdfPages
 from arsenal.terminal import yellow
 from arsenal.viz.covariance_ellipse import covariance_ellipse
@@ -35,7 +35,7 @@ DATA = defaultdict(list)
 
 
 @contextmanager
-def lineplot(name, with_ax=False, avg=10, xlabel=None, ylabel=None, title=None, **style):
+def lineplot(name, with_ax=False, halflife=20, xlabel=None, ylabel=None, title=None, **style):
     with axman(name, xlabel=xlabel, ylabel=ylabel, title=title) as ax:
         data = DATA[name]
         if with_ax:
@@ -43,8 +43,8 @@ def lineplot(name, with_ax=False, avg=10, xlabel=None, ylabel=None, title=None, 
         else:
             yield data
         ax.plot(range(len(data)), data, alpha=0.5, **style)
-        if avg:
-            ax.plot(rolling_mean(np.asarray(data), avg), alpha=0.5, c='k', lw=2)
+        if halflife:
+            ax.plot(ewma(np.asarray(data), halflife=halflife), alpha=0.5, c='k', lw=2)
 
 
 @contextmanager

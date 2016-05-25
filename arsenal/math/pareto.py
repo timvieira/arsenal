@@ -108,6 +108,9 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
 
 
     if interpolation == 'linear-convex':
+        # Convex hull by itself doesn't work, but what we have is ok because its
+        # the intersection of the convex hull with the pareto frontier, which is
+        # handled below.
         from scipy.spatial import ConvexHull
         X = np.array(X)
         Y = np.array(Y)
@@ -145,6 +148,7 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
 
     # Plot
     ax.plot(pts[:,0], pts[:,1], label=label, **sty)
+    return pts
 
 
 class Pareto(object):

@@ -10,7 +10,7 @@ from numpy import isfinite
 from arsenal.terminal import yellow, green, red
 from arsenal.iterview import progress
 from pandas import DataFrame
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, spearmanr
 
 
 def norm(x, p=2):
@@ -158,6 +158,7 @@ class compare(object):
         #got = got[inds]
 
         c = cosine(expect, got)
+        self.cosine = c
         tests.append(['cosine-sim', c, (c > 0.99999)])   # cosine similarities must be really high.
 
         if norm(expect) == 0 and norm(got) == 0:
@@ -165,6 +166,9 @@ class compare(object):
         else:
             p = pearsonr(expect, got)[0]
         tests.append(['pearson', p, (p > 0.99999)])
+
+        p = spearmanr(expect, got)[0]
+        tests.append(['spearman', p, (p > 0.99999)])
 
         # TODO: this check should probably take into account the scale of the data.
         d = linf(expect, got)
@@ -191,6 +195,8 @@ class compare(object):
         #tests.append(['range (expect)', [expect.min(), expect.max()], 2])
         #tests.append(['range (got)   ', [got.min(), got.max()], 2])
 
+        self.pearsonr = pearsonr(got, expect)
+
         if scatter:
             if 1:
                 if ax is None:
@@ -203,12 +209,9 @@ class compare(object):
             else:
                 import seaborn as sns
                 sns.set_context(rc={"figure.figsize": (7, 5)})
-
                 g = sns.JointGrid(got_label, expect_label, data=data)
                 g.plot(sns.regplot, sns.distplot, stats.spearmanr)
-
-                print "Pearson's r: {0}".format(pearsonr(got, expect))
-
+                print "Pearson's r: {0}".format(self.pearsonr)
 
         # regression and rescaled error only valid for n >= 2
         if n >= 2:

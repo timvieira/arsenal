@@ -531,12 +531,14 @@ def logsumexp(arr, axis=0):
     >>> logsumexp(a)
     9.4586297444267107
     """
-    arr = asarray(arr)
+    arr = np.array(arr, dtype=np.double)
     arr = np.rollaxis(arr, axis)
     # Use the max to normalize, as with the log this is what accumulates the
     # less errors
     vmax = arr.max(axis=0)
-    out = log(exp(arr - vmax).sum(axis=0))
+    arr -= vmax
+    exp(arr, out=arr)
+    out = log(arr.sum(axis=0))
     out += vmax
     return out
 
@@ -554,7 +556,7 @@ def exp_normalize(x, T=1.0):
     y = array(x)      # creates copy
     y /= T
     y -= y.max()
-    y = exp(y)
+    exp(y, y)
     y /= y.sum()
     return y
 

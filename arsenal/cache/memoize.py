@@ -1,9 +1,6 @@
 import atexit
 import shelve
 import cPickle as pickle
-from functools import wraps
-
-
 from datetime import datetime, timedelta
 from copy import deepcopy
 from threading import RLock
@@ -77,7 +74,7 @@ class ShelfBasedCache(object):
     def __init__(self, func, key, None_is_bad=False):
         self.func = func
         self.filename = '{self.func.__name__}.shelf~'.format(self=self)
-        self.cache = shelve.open(self.filename) #, writeback=True)
+        self.cache = shelve.open(self.filename, flag='c') #, writeback=True)
         self.key = key
         self.None_is_bad = None_is_bad
         self.__name__ = 'ShelfBasedCache(%s)' % func.__name__
@@ -166,10 +163,10 @@ class memoize_persistent(object):
         finally:
             if self.key == loaded_key:
                 self.cache = cache
-                print 'loaded cache for {self.func.__name__}'.format(self=self)
+                #print 'loaded cache for {self.func.__name__}'.format(self=self)
             else:
                 self.cache = {}
-                print 'failed to load cache for {self.func.__name__}'.format(self=self)
+                #print 'failed to load cache for {self.func.__name__}'.format(self=self)
 
     def __call__(self, *args):
         # wait until you call the function to un-pickle

@@ -9,7 +9,6 @@ from arsenal.terminal import colors
 
 def open_diff(a, b, cmd='meld'):
     "View diff of string representations in dedicated diff program."
-    import os
     print >> file('/tmp/a','wb'), a
     print >> file('/tmp/b','wb'), b
     os.system('%s /tmp/a /tmp/b' % cmd)

@@ -21,8 +21,12 @@ class Benchmark(object):
         return self.timers.values()
     def keys(self):
         return self.timers.keys()
+    def items(self):
+        return self.timers.items()
     def __len__(self):
         return len(self.timers)
+    def __iter__(self):
+        return iter(sorted(self.keys()))
     def plot_feature(self, feature, timecol='timer', ax=None, **kw):
         if ax is None:
             import pylab as pl

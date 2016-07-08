@@ -6,10 +6,10 @@ if not environ.get('DISPLAY'):
     matplotlib.use('Agg')
     DISPLAY = False
 
-from pandas import ewma
+import pandas
 import pylab as pl
-import numpy as np
-from sys import stderr
+#import numpy as np
+#from sys import stderr
 from collections import defaultdict
 from contextlib import contextmanager
 from matplotlib.backends.backend_pdf import PdfPages
@@ -44,7 +44,7 @@ def lineplot(name, with_ax=False, halflife=20, xlabel=None, ylabel=None, title=N
             yield data
         ax.plot(range(len(data)), data, alpha=0.5, **style)
         if halflife:
-            ax.plot(ewma(np.asarray(data), halflife=halflife), alpha=0.5, c='k', lw=2)
+            ax.plot(pandas.Series(data).ewm(halflife=halflife).mean(), alpha=0.5, c='k', lw=2)
 
 
 @contextmanager

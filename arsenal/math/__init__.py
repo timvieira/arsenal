@@ -1,2 +1,2 @@
-from math import *
+#from math import *
 from numpy_extras import *

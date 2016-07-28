@@ -17,3 +17,5 @@ class OrderedSet(object):
             self.list.append(item)
     def __len__(self):
         return len(self.set)
+    def __repr__(self):
+        return 'OrderedSet(%r)' % self.list

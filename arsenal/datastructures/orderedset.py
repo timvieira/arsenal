@@ -15,3 +15,5 @@ class OrderedSet(object):
         if item not in self.set:
             self.set.add(item)
             self.list.append(item)
+    def __len__(self):
+        return len(self.set)

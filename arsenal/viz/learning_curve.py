@@ -51,7 +51,8 @@ class LearningCurve(object):
                     # TODO: averaging doesn't support irregular time steps.
                     halflife = 10
                     _,yy = zip(*data[k])
-                    ax.plot(pandas.Series(yy).ewm(halflife=halflife).mean(),
+                    ax.plot(xs,
+                            pandas.Series(yy).ewm(halflife=halflife).mean(),
                             lw=2, c=l.get_color())
 
             ax.set_title(self.name)

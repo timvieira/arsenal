@@ -19,3 +19,5 @@ class OrderedSet(object):
         return len(self.set)
     def __repr__(self):
         return 'OrderedSet(%r)' % self.list
+    def __getitem__(self, *args):
+        return self.list.__getitem__(*args)

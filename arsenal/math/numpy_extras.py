@@ -172,6 +172,7 @@ class compare(object):
 
         # TODO: this check should probably take into account the scale of the data.
         d = linf(expect, got)
+        self.max_err = d
         tests.append(['Linf', d, d < 1e-8])
 
         # same sign check (weak agreement, but useful sanity check -- especially

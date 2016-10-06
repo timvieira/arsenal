@@ -61,8 +61,9 @@ def relative_difference(a, b):
 class compare(object):
 
     def __init__(self, expect, got, name=None, data=None, P_LARGER=0.9,
-                 scatter=False, regression=False, show_regression=False, ax=None,
-                 alphabet=None, expect_label=None, got_label=None, scatter_kw=None):
+                 scatter=False, regression=True, show_regression=False, ax=None,
+                 alphabet=None, expect_label=None, got_label=None, scatter_kw=None,
+                 show=False, plot=False):
         """Compare vectors.
 
         Arguments:
@@ -96,6 +97,10 @@ class compare(object):
          - Indicate which dimensions have the largest errors.
 
         """
+
+        if plot or show:
+            scatter = 1
+            show_regression = 1
 
         if show_regression:
             regression = 1
@@ -245,17 +250,16 @@ class compare(object):
 
                 if isfinite(got).all() and isfinite(expect).all():
                     # data can't contain any NaNs
-                    result = lstsq(A, expect)
-                    tests.append(['regression', result[0], 2])
+                    coeff, _, _, _ = lstsq(A, expect)
+                    tests.append(['regression', '[%.3f %.3f]' % (coeff[0], coeff[1]), 2])
                 else:
                     # contains a NaN
-                    result = None
+                    coeff = None
                     tests.append(['regression',
                                   'did not run due to NaNs in data',
                                   0])
 
-            if show_regression and regression and scatter and result is not None:
-                coeff = result[0]
+            if show_regression and regression and scatter and coeff is not None:
                 xa, xb = ax.get_xlim()
                 A = ones((n, 2))
                 A[:,0] = got
@@ -308,6 +312,9 @@ class compare(object):
 
         if alphabet is not None:
             self.show_largest_rel_errors()
+
+        if show:
+            pl.show()
 
     def show_largest_rel_errors(self):
         "show largest relative errors"

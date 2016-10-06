@@ -15,7 +15,7 @@ from xml.etree.ElementTree import parse
 def linearize(el, path, numbered=True):
 
     # print text value if not empty
-    text = (el.text or '').strip()
+    text = (el.text or '').strip() if hasattr(el, 'text') else ''
     if not text:
         yield path, ''
     else:

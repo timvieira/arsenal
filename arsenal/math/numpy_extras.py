@@ -18,6 +18,19 @@ def norm(x, p=2):
         return np.nan
     return _norm(x, p)
 
+
+def zero_retrieval(expect, got):
+    "How good are we at retrieving zero values? Measured with F1 score."
+    # F1 on zeros
+    A = (expect==0)
+    B = (got==0)
+    C = (A == B).sum()
+    R = C / A.sum() if A.sum() != 0 else 1.0
+    P = C / B.sum() if B.sum() != 0 else 1.0
+    F = 2*P*R/(P+R) if (P+R) != 0 else 1.0
+    return F
+
+
 def relative_difference(a, b):
     """Element-wise relative difference of two arrays
 
@@ -61,9 +74,7 @@ def relative_difference(a, b):
 class compare(object):
 
     def __init__(self, expect, got, name=None, data=None, P_LARGER=0.9,
-                 scatter=False, regression=True, show_regression=False, ax=None,
-                 alphabet=None, expect_label=None, got_label=None, scatter_kw=None,
-                 show=False, plot=False):
+                 regression=True, ax=None, alphabet=None, expect_label=None, got_label=None):
         """Compare vectors.
 
         Arguments:
@@ -98,15 +109,6 @@ class compare(object):
 
         """
 
-        if plot or show:
-            scatter = 1
-            show_regression = 1
-
-        if show_regression:
-            regression = 1
-
-        scatter_kw = scatter_kw or {}
-
         if data is not None:
             assert isinstance(expect, (int, basestring)), \
                 'expected a column name got %s' % type(expect)
@@ -122,7 +124,6 @@ class compare(object):
             got = data[got]
 
         else:
-
             if expect_label is None:
                 expect_label = 'expect'
             if got_label is None:
@@ -139,8 +140,14 @@ class compare(object):
         self.expect = expect
         self.got = got
         self.alphabet = alphabet
+        self.ax = ax
+        self.name = name
+        self.got_label = got_label
+        self.expect_label = expect_label
+        self.n = n
+        self.coeff = None
 
-        tests = []
+        self.tests = tests = []
 
         # Check that vectors are finite.
         if not isfinite(expect).all():
@@ -148,29 +155,24 @@ class compare(object):
         if not isfinite(got).all():
             tests.append(['got finite', progress(isfinite(got).sum(), n), False])
 
-        tests.append(['norms', '[%g, %g]' % (norm(expect), norm(got)), -1])
-        tests.append(['zeros', '%s %s' % (progress((expect==0).sum(), n),
-                                          progress((got==0).sum(), n)),
-                      -1])
+        ne = norm(expect)
+        ng = norm(got)
+        ok = abs(ne-ng)/ne < 0.01
+        tests.append(['norms', '[%g, %g]' % (ne, ng), ok])
 
-        #print expect
-        #print got
-        #inds = isfinite(expect) & isfinite(got)
-        #if not inds.any():
-        #    print red % 'TOO MANY NANS'
-        #    return
-        #expect = expect[inds]
-        #got = got[inds]
+        # TODO: what do we want to say about sparsity?
+        #tests.append(['zeros', '%s %s' % (progress((expect==0).sum(), n),
+        #                                  progress((got==0).sum(), n)),
+        #              -1])
+        F = zero_retrieval(expect, got)
+        tests.append(['zero F1', F, F > 0.99])
 
         c = cosine(expect, got)
         self.cosine = c
         tests.append(['cosine-sim', c, (c > 0.99999)])   # cosine similarities must be really high.
 
-        if norm(expect) == 0 and norm(got) == 0:
-            p = 1.0
-        else:
-            p = pearsonr(expect, got)[0]
-        tests.append(['pearson', p, (p > 0.99999)])
+        self.pearsonr = 1.0 if ne == ng == 0 else pearsonr(expect, got)[0]
+        tests.append(['pearson', self.pearsonr, (self.pearsonr > 0.99999)])
 
         p = spearmanr(expect, got)[0]
         tests.append(['spearman', p, (p > 0.99999)])
@@ -201,27 +203,8 @@ class compare(object):
         #tests.append(['range (expect)', [expect.min(), expect.max()], 2])
         #tests.append(['range (got)   ', [got.min(), got.max()], 2])
 
-        self.pearsonr = pearsonr(got, expect)
-
-        if scatter:
-            if 1:
-                if ax is None:
-                    ax = pl.figure().add_subplot(111)
-                ax.scatter(got, expect, lw=0, alpha=0.5, **scatter_kw)
-                if name is not None:
-                    ax.set_title(name)
-                ax.set_xlabel(got_label)
-                ax.set_ylabel(expect_label)
-            else:
-                import seaborn as sns
-                sns.set_context(rc={"figure.figsize": (7, 5)})
-                g = sns.JointGrid(got_label, expect_label, data=data)
-                g.plot(sns.regplot, sns.distplot, stats.spearmanr)
-                print "Pearson's r: {0}".format(self.pearsonr)
-
         # regression and rescaled error only valid for n >= 2
         if n >= 2:
-
             es = abs(expect).max()
             gs = abs(got).max()
             if es == 0:
@@ -235,48 +218,8 @@ class compare(object):
             r = mean(R)
             tests.append(['mean rescaled error', r, r <= 1e-5])
 
-            if regression:
-                # least squares linear regression
-                #
-                # TODO: for regression we want parameters `[1 0]` and a small
-                # residual. We want both these conditions to hold. Might be
-                # useful to look at R^2 statistic since it normalizes scale and
-                # number of data-points. (it's often used for reduction in
-                # variance.)
-                #
-                from scipy.linalg import lstsq
-                A = ones((n, 2))
-                A[:,0] = got
-
-                if isfinite(got).all() and isfinite(expect).all():
-                    # data can't contain any NaNs
-                    coeff, _, _, _ = lstsq(A, expect)
-                    tests.append(['regression', '[%.3f %.3f]' % (coeff[0], coeff[1]), 2])
-                else:
-                    # contains a NaN
-                    coeff = None
-                    tests.append(['regression',
-                                  'did not run due to NaNs in data',
-                                  0])
-
-            if show_regression and regression and scatter and coeff is not None:
-                xa, xb = ax.get_xlim()
-                A = ones((n, 2))
-                A[:,0] = got
-
-                # plot estimated line
-                ys = A.dot(coeff)
-                ax.plot(A[:,0], ys, c='r', alpha=0.5)
-
-                if 0:
-                    # plot target line (sometimes this ruins the plot -- e.g. if the
-                    # data is really off the y=x line).
-                    ys = A.dot([1,0])
-                    ax.plot(A[:,0], ys, c='g', alpha=0.5)
-
-                ax.grid(True)
-                ax.set_xlim(xa,xb)
-
+        if regression:
+            self.regression()
 
         if n >= 2:
             # These tests check if one of the datasets is consistently larger than the
@@ -313,8 +256,77 @@ class compare(object):
         if alphabet is not None:
             self.show_largest_rel_errors()
 
-        if show:
-            pl.show()
+    def plot(self, regression=True, seaborn=False, ax=None, **scatter_kw):
+        if ax is not None:
+            self.ax = ax
+        if seaborn:
+            import seaborn as sns
+            sns.set_context(rc={"figure.figsize": (7, 5)})
+            g = sns.JointGrid(self.got_label, self.expect_label, data=self.data)
+            g.plot(sns.regplot, sns.distplot, stats.spearmanr)
+            print "Pearson's r: {0}".format(self.pearsonr)
+        else:
+            if self.ax is None:
+                self.ax = pl.figure().add_subplot(111)
+            self.ax.scatter(self.got, self.expect, lw=0, alpha=0.5, **scatter_kw)
+            if self.name is not None:
+                self.ax.set_title(self.name)
+            self.ax.set_xlabel(self.got_label)
+            self.ax.set_ylabel(self.expect_label)
+        if regression:
+            self.regression_line()
+        return self
+
+    def show(self, *args, **kw):
+        self.plot(*args, **kw)
+        pl.show()
+        return self
+
+    def regression_line(self):
+        # TODO: write the coeff to plot.
+        if self.coeff is not None and isfinite(self.coeff).all():
+            xa, xb = self.ax.get_xlim()
+            A = ones((self.n, 2))
+            A[:,0] = self.got
+            # plot estimated line
+            ys = A.dot(self.coeff)
+            self.ax.plot(A[:,0], ys, c='r', alpha=0.5)
+            self.ax.grid(True)
+            self.ax.set_xlim(xa,xb)
+        return self
+
+    def regression(self):
+        "least squares linear regression"
+
+        # TODO: for regression we want parameters `[1 0]` and a small
+        # residual. We want both these conditions to hold. Might be
+        # useful to look at R^2 statistic since it normalizes scale and
+        # number of data-points. (it's often used for reduction in
+        # variance.)
+
+        # data can't contain any NaNs
+        if not isfinite(self.got).all() or not isfinite(self.expect).all():
+            tests.append(['regression',
+                          'did not run due to NaNs in data',
+                          0])
+            return
+
+        if self.n < 2:
+            tests.append(['regression',
+                          'too few points',
+                          0])
+            return
+
+        from scipy.linalg import lstsq
+        A = ones((self.n, 2))
+        A[:,0] = self.got
+
+        self.coeff, _, _, _ = lstsq(A, self.expect)
+
+        # Label with warn or ok.
+        ok = 1 if abs(self.coeff - [1, 0]).max() <= 1e-5 else 2
+
+        self.tests.append(['regression', '[%.3f %.3f]' % (self.coeff[0], self.coeff[1]), ok])
 
     def show_largest_rel_errors(self):
         "show largest relative errors"
@@ -676,7 +688,7 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
 if __name__ == '__main__':
     #import doctest; doctest.testmod()
 
-    def tests():
+    def run_tests():
 
         # Entropy tests
         assert entropy(array((0.5, 0.5))) == 1.0
@@ -711,7 +723,7 @@ if __name__ == '__main__':
 
         print 'passed tests.'
 
-    tests()
+    run_tests()
 
     def test_compare():
         n = 100

@@ -2,11 +2,10 @@ from __future__ import division
 import numpy as np
 import pylab as pl
 from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
-    asarray, ones, mean, searchsorted, sqrt
+    asarray, ones, mean, searchsorted, sqrt, isfinite
 from numpy.random import uniform, normal
 from scipy.linalg import norm as _norm
 from scipy import stats
-from numpy import isfinite
 from arsenal.terminal import yellow, green, red
 from arsenal.iterview import progress
 from pandas import DataFrame
@@ -21,12 +20,15 @@ def norm(x, p=2):
 
 def zero_retrieval(expect, got):
     "How good are we at retrieving zero values? Measured with F1 score."
+    assert expect.shape == got.shape
     # F1 on zeros
-    A = (expect==0)
-    B = (got==0)
-    C = (A == B).sum()
-    R = C / A.sum() if A.sum() != 0 else 1.0
-    P = C / B.sum() if B.sum() != 0 else 1.0
+    A = (expect == 0)
+    B = (got == 0)
+    C = (A & B).sum()
+    A = A.sum()
+    B = B.sum()
+    R = C / A if A != 0 else 1.0
+    P = C / B if B != 0 else 1.0
     F = 2*P*R/(P+R) if (P+R) != 0 else 1.0
     return F
 
@@ -306,15 +308,15 @@ class compare(object):
 
         # data can't contain any NaNs
         if not isfinite(self.got).all() or not isfinite(self.expect).all():
-            tests.append(['regression',
-                          'did not run due to NaNs in data',
-                          0])
+            self.tests.append(['regression',
+                               'did not run due to NaNs in data',
+                               0])
             return
 
         if self.n < 2:
-            tests.append(['regression',
-                          'too few points',
-                          0])
+            self.tests.append(['regression',
+                               'too few points',
+                               0])
             return
 
         from scipy.linalg import lstsq

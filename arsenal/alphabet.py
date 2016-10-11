@@ -90,8 +90,7 @@ class Alphabet(object):
         return self._flip[i]
 
     def lookup_many(self, x):
-        for k in x:
-            yield self.lookup(k)
+        return map(self.lookup, x)
 
     def __contains__(self, k):
         #assert isinstance(k, basestring)
@@ -148,6 +147,9 @@ class Alphabet(object):
     def save(self, filename):
         with file(filename, 'wb') as f:
             f.write(self.plaintext())
+
+    def __eq__(self, other):
+        return self._mapping == other._mapping
 
 
 if __name__ == '__main__':

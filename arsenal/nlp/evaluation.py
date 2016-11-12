@@ -72,7 +72,7 @@ class F1:
         relevant  = self.relevant
         retrieved = self.retrieved
         if verbose:
-            m = max(len(x) for x in self.relevant)
+            m = max(map(len, self.relevant)) if self.relevant else 0
             fmt = ' | %{0}s | %5d | %5.1f | %5.1f | %5.1f |'.format(m)
 
             line = ' |' + '='*m + '==================================|'

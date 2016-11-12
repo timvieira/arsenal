@@ -1,9 +1,9 @@
+import numpy as np
 import heapq
-from operator import getitem
+from operator import getitem, itemgetter
 from itertools import chain, count, cycle, imap, islice, izip, repeat, tee
 from random import shuffle
 from collections import defaultdict
-from operator import itemgetter
 from arsenal.iterview import iterview
 
 

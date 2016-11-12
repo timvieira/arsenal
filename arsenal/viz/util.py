@@ -85,9 +85,7 @@ class NumericalDebug(object):
         if self.df.empty:
             return
         with update_ax(self.ax):
-            compare(expect, got, data=self.df, ax=self.ax,
-                    show_regression=show_regression, scatter=scatter,
-                    **kw)
+            compare(expect, got, data=self.df).plot(ax=self.ax, **kw)
 
 # Global references to numerical debugger class.
 DEBUG = ddict(NumericalDebug)

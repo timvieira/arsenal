@@ -12,6 +12,20 @@ from pandas import DataFrame
 from scipy.stats import pearsonr, spearmanr
 
 
+def split_ix(N, p, randomize=1):
+    if randomize:
+        I = np.random.permutation(N)
+    else:
+        I = range(N)
+    folds = []
+    for q in p:
+        j = int(np.ceil(N*q))
+        fold = I[:j]
+        folds.append(fold)
+        I = I[j:]
+    return folds
+
+
 def norm(x, p=2):
     if not isfinite(x).all():
         return np.nan
@@ -76,7 +90,8 @@ def relative_difference(a, b):
 class compare(object):
 
     def __init__(self, expect, got, name=None, data=None, P_LARGER=0.9,
-                 regression=True, ax=None, alphabet=None, expect_label=None, got_label=None):
+                 regression=True, ax=None, alphabet=None,
+                 expect_label=None, got_label=None, verbose=1):
         """Compare vectors.
 
         Arguments:
@@ -110,6 +125,12 @@ class compare(object):
          - Indicate which dimensions have the largest errors.
 
         """
+
+        if isinstance(expect, dict) and isinstance(got, dict):
+            _alphabet = expect.keys() if alphabet is None else alphabet
+            assert set(got.keys()) == set(_alphabet)
+            expect = [expect[k] for k in _alphabet]
+            got = [got[k] for k in _alphabet]
 
         if data is not None:
             assert isinstance(expect, (int, basestring)), \
@@ -233,30 +254,33 @@ class compare(object):
             if L >= P_LARGER * n:
                 tests.append(['got is larger', progress(L, n), 0])
 
+        self.tests = tests
+        if verbose:
+            self.message()
+
+        if alphabet is not None:
+            self.show_largest_rel_errors()
+
+    def message(self):
         print
-        print 'Comparison%s:' % (' (%s)' % name if name else ''), 'n=%s' % n
+        print 'Comparison%s:' % (' (%s)' % self.name if self.name else ''), 'n=%s' % self.n
         #print yellow % 'expected:'
         #print expect
         #print yellow % 'got:'
         #print got
-        for k, v, passed in tests:
+        for k, v, passed in self.tests:
             if passed == 1:
                 c = green
             elif passed == 0:
                 c = red
             else:
                 c = yellow
-
             try:
                 v = '%g' % v
             except TypeError:
                 pass
-
             print '  %s: %s' % (k, c % (v,))
         print
-
-        if alphabet is not None:
-            self.show_largest_rel_errors()
 
     def plot(self, regression=True, seaborn=False, ax=None, **scatter_kw):
         if ax is not None:

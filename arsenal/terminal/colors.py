@@ -47,15 +47,13 @@ def test():
 
 
 # TODO: needs some work, but it's pretty fun to use
-def color01(x, fmt='%.10f'):
+def color01(x, fmt='%.10f', min_color=235, max_color=255):
     "Colorize numbers in [0,1] based on value; darker means smaller value."
     if not (0 <= x <= 1 + 1e-10):
         return red % fmt % x
-    a, b = 238, 255   # 232, 255
-    w = b - a
-    offset = x*w
-    offset = int(round(offset))
-    return colored.fg(a + offset) + (fmt % x) + colored.attr('reset') #color.fg256(a + offset, fmt % x)
+    width = max_color - min_color
+    color = min_color + int(round(x*width))
+    return '%s%s%s' % (colored.fg(color), (fmt % x), colored.attr('reset'))
 
 
 if __name__ == '__main__':

@@ -29,7 +29,7 @@ def ransac(data, model, n, k, t, d, debug=False):
     besterr          = numpy.inf
     best_inlier_idxs = None
 
-    for i in iterview(xrange(k), 250):
+    for i in iterview(xrange(k)):
         # randomly partition data (random_partition returns two arrays of ids)
         maybe_idxs, test_idxs = random_partition(n, data.shape[0])
 

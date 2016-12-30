@@ -112,7 +112,7 @@ def axman(name, xlabel=None, ylabel=None, title=None, clear=True):
     ax = AX[name]
     prev_ax = pl.gca()
     with update_ax(ax, clear=clear):
-        pl.sca(ax)
+        _try_sca(ax)
         yield ax
         if xlabel:
             ax.set_xlabel(xlabel)
@@ -120,7 +120,14 @@ def axman(name, xlabel=None, ylabel=None, title=None, clear=True):
             ax.set_ylabel(ylabel)
         ax.set_title(title or name)  # `title` overrides `name`.
         #ax.figure.tight_layout()
-        pl.sca(prev_ax)
+        _try_sca(prev_ax)
+
+
+def _try_sca(ax):
+    try:
+        pl.sca(ax)
+    except ValueError:
+        pass
 
 
 @contextmanager

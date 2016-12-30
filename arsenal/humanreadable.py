@@ -117,17 +117,10 @@ def datestr(then, now=None):
     if not then:
         return ""
     if not now:
-        now = datetime.utcnow()
-    if type(now).__name__ == "DateTime":
-        now = datetime.fromtimestamp(now)
-    if type(then).__name__ == "DateTime":
-        then = datetime.fromtimestamp(then)
-    elif type(then).__name__ == "date":
-        then = datetime(then.year, then.month, then.day)
+        now = datetime.now()
 
     delta = now - then
-    deltaseconds = int(delta.days * oneday + delta.seconds
-                       + delta.microseconds * 1e-06)
+    deltaseconds = int(delta.total_seconds())
     deltadays = abs(deltaseconds) // oneday
     if deltaseconds < 0:
         deltadays *= -1 # fix for oddity of floor

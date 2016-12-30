@@ -1,2 +1,3 @@
 #from math import *
-from numpy_extras import *
+from util import *
+from compare import compare

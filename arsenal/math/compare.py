@@ -103,25 +103,28 @@ class compare(object):
 
         ne = norm(expect)
         ng = norm(got)
-        ok = abs(ne-ng)/ne < 0.01
-        tests.append(['norms', '[%g, %g]' % (ne, ng), ok])
+        ok = abs(ne-ng)/ne < 0.01 if ne != 0 else True
 
-        # TODO: what do we want to say about sparsity?
-        #tests.append(['zeros', '%s %s' % (progress((expect==0).sum(), n),
-        #                                  progress((got==0).sum(), n)),
-        #              -1])
-        F = zero_retrieval(expect, got)
-        tests.append(['zero F1', F, F > 0.99])
+        if n > 1:
+            tests.append(['norms', '[%g, %g]' % (ne, ng), ok])
 
-        c = cosine(expect, got)
-        self.cosine = c
-        tests.append(['cosine-sim', c, (c > 0.99999)])   # cosine similarities must be really high.
+            # TODO: what do we want to say about sparsity?
+            #tests.append(['zeros', '%s %s' % (progress((expect==0).sum(), n),
+            #                                  progress((got==0).sum(), n)),
+            #              -1])
+            F = zero_retrieval(expect, got)
+            tests.append(['zero F1', F, F > 0.99])
 
-        self.pearsonr = 1.0 if ne == ng == 0 else pearsonr(expect, got)[0]
-        tests.append(['pearson', self.pearsonr, (self.pearsonr > 0.99999)])
+        if n > 1:
+            c = cosine(expect, got)
+            self.cosine = c
+            tests.append(['cosine-sim', c, (c > 0.99999)])   # cosine similarities must be really high.
 
-        p = spearmanr(expect, got)[0]
-        tests.append(['spearman', p, (p > 0.99999)])
+            self.pearsonr = 1.0 if ne == ng == 0 else pearsonr(expect, got)[0]
+            tests.append(['pearson', self.pearsonr, (self.pearsonr > 0.99999)])
+
+            p = spearmanr(expect, got)[0]
+            tests.append(['spearman', p, (p > 0.99999)])
 
         # TODO: this check should probably take into account the scale of the data.
         d = linf(expect, got)
@@ -261,9 +264,9 @@ class compare(object):
             return
 
         if self.n < 2:
-            self.tests.append(['regression',
-                               'too few points',
-                               0])
+#            self.tests.append(['regression',
+#                               'too few points',
+#                               0])
             return
 
         A = np.ones((self.n, 2))

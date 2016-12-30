@@ -1,17 +1,43 @@
-import numpy as np
-from numpy import zeros_like
-from numpy.linalg import norm
+from arsenal.math import compare
 from arsenal.iterview import iterview
-from arsenal.terminal import green, red, yellow
-from random import sample
-from arsenal.math import cosine
 
 
-# TODO: implement sign check (these are pretty bad errors), difference in scale
-# TODO: unify with `arsenal.math.numpy_extras.compare`
+def fdcheck(func, w, g, keys = None, eps = 1e-5):
+    """
+    Finite-difference check.
+
+    Returns `arsenal.math.compare` instance.
+
+    - `func`: zero argument function, which references `w` in caller's scope.
+    - `w`: parameters.
+    - `g`: gradient estimate to compare against
+    - `keys`: dimensions to check
+    - `eps`: perturbation size
+
+    """
+    if keys is None:
+        if hasattr(w, 'keys'):
+            keys = w.keys()
+        else:
+            keys = range(len(w))
+    fd = {}
+    for key in iterview(keys):
+        was = w[key]
+        w[key] = was + eps
+        b = func()
+        w[key] = was - eps
+        a = func()
+        w[key] = was
+        fd[key] = (b-a) / (2*eps)
+
+    return compare([fd[k] for k in keys],
+                   [g[k] for k in keys])
+
+
+#from arsenal.misc import deprecated
+#@deprecated('fdcheck')
 def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=True,
                     verbose=True, progress=True, keys=None, random_subset=None):
-
     """Check gradient that `f(theta) == grad` by centered-difference approximation.
 
     Provides feedback on which dimensions differ
@@ -40,6 +66,12 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
        `theta`).
 
     """
+
+    import numpy as np
+    from numpy import zeros_like
+    from arsenal.terminal import green, red, yellow
+    from random import sample
+    from arsenal.math import cosine
 
     fails = 0
 
@@ -111,8 +143,3 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
         print 'cosine similarity: %g' % cosine(grad[keys], fd[keys])
 
         # TODO: add sign check.
-
-        #print norm(grad[keys]) / norm(fd[keys]), norm(fd[keys]) / norm(grad[keys])
-
-        #print grad.dot(fd), norm(grad), norm(fd)
-        #print 'factor:', fd.mean() / grad.mean()  # print scaling factor

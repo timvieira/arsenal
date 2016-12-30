@@ -1,7 +1,6 @@
 import numpy as np
 import pylab as pl
 import pandas as pd
-from numpy import isfinite
 from scipy.linalg import norm
 from arsenal.iterview import progress
 from scipy.stats import pearsonr, spearmanr
@@ -37,13 +36,7 @@ class compare(object):
 
         TODO:
 
-         - Allow user to specify alternative names to `expect` and `got` since they
-           are often confusing.
-
          - Add an option to drop NaNs and continue comparison.
-
-         - Support dictionarys as input with named dimensions and/or possibly an
-           alphabet for naming dimensions.
 
          - Indicate which dimensions have the largest errors.
 
@@ -96,10 +89,10 @@ class compare(object):
         self.tests = tests = []
 
         # Check that vectors are finite.
-        if not isfinite(expect).all():
-            tests.append(['expect finite', progress(isfinite(expect).sum(), n), False])
-        if not isfinite(got).all():
-            tests.append(['got finite', progress(isfinite(got).sum(), n), False])
+        if not np.isfinite(expect).all():
+            tests.append(['expect finite', progress(np.isfinite(expect).sum(), n), False])
+        if not np.isfinite(got).all():
+            tests.append(['got finite', progress(np.isfinite(got).sum(), n), False])
 
         ne = norm(expect)
         ng = norm(got)
@@ -107,11 +100,6 @@ class compare(object):
 
         if n > 1:
             tests.append(['norms', '[%g, %g]' % (ne, ng), ok])
-
-            # TODO: what do we want to say about sparsity?
-            #tests.append(['zeros', '%s %s' % (progress((expect==0).sum(), n),
-            #                                  progress((got==0).sum(), n)),
-            #              -1])
             F = zero_retrieval(expect, got)
             tests.append(['zero F1', F, F > 0.99])
 
@@ -141,7 +129,7 @@ class compare(object):
 
         # relative error
         r = relative_difference(expect, got)
-        r = np.mean(r[isfinite(r)])
+        r = np.mean(r[np.isfinite(r)])
         tests.append(['mean relative error', r, r <= 0.01])
 
         # TODO: suggest that if relative error is high and rescaled error is low (or
@@ -236,7 +224,7 @@ class compare(object):
 
     def regression_line(self):
         # TODO: write the coeff to plot.
-        if self.coeff is not None and isfinite(self.coeff).all():
+        if self.coeff is not None and np.isfinite(self.coeff).all():
             xa, xb = self.ax.get_xlim()
             A = np.ones((self.n, 2))
             A[:,0] = self.got
@@ -249,24 +237,13 @@ class compare(object):
 
     def regression(self):
         "least squares linear regression"
-
-        # TODO: for regression we want parameters `[1 0]` and a small
-        # residual. We want both these conditions to hold. Might be
-        # useful to look at R^2 statistic since it normalizes scale and
-        # number of data-points. (it's often used for reduction in
-        # variance.)
-
+        if self.n < 2:
+            return
         # data can't contain any NaNs
-        if not isfinite(self.got).all() or not isfinite(self.expect).all():
+        if not np.isfinite(self.got).all() or not np.isfinite(self.expect).all():
             self.tests.append(['regression',
                                'did not run due to NaNs in data',
                                0])
-            return
-
-        if self.n < 2:
-#            self.tests.append(['regression',
-#                               'too few points',
-#                               0])
             return
 
         A = np.ones((self.n, 2))

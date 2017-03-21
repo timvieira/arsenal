@@ -12,14 +12,13 @@ Highlights
 - `math/`
     Tons of math utilities
 
-    `arsenal.math.compare` is particularly useful for debugging numerical
-    algorithms
+    ``math.compare`` is particularly useful for debugging numerical algorithms
 
 - `terminal/`
     Utilities for making colorful and nicely formatting terminal output.
 
 - `viz/`
-    Utilities for making interactive plots, especially `arsenal.viz.util.{axman,lineplot}`.
+    Utilities for making interactive plots, especially ``viz.util.{axman,lineplot}``.
 
 - `alphabet.py`
     Maintain a bijective map from "things" to unique integers.

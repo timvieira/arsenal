@@ -1,8 +1,25 @@
+import numpy as np
 from arsenal.math import compare
 from arsenal.iterview import iterview
 
 
-def fdcheck(func, w, g, keys = None, eps = 1e-5):
+# TODO: should probably have one "core" routine for getting the gradient
+# estimate that the test routine will use.
+def fd(func, w, eps = 1e-5):
+    "Compute finite-difference estimate of the gradient of `func` at `w`."
+    g = np.zeros_like(w)
+    for k in range(len(w)):
+        was = w[k]
+        w[k] = was + eps
+        b = func()
+        w[k] = was - eps
+        a = func()
+        w[k] = was
+        g[k] = (b-a) / (2*eps)
+    return g
+
+
+def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar=1):
     """
     Finite-difference check.
 
@@ -15,23 +32,40 @@ def fdcheck(func, w, g, keys = None, eps = 1e-5):
     - `eps`: perturbation size
 
     """
+    if quiet:
+        verbose = 0
+        progressbar = 0
+
     if keys is None:
         if hasattr(w, 'keys'):
             keys = w.keys()
+            d = {}
         else:
-            keys = range(len(w))
-    fd = {}
-    for key in iterview(keys):
-        was = w[key]
-        w[key] = was + eps
-        b = func()
-        w[key] = was - eps
-        a = func()
-        w[key] = was
-        fd[key] = (b-a) / (2*eps)
+            d = np.zeros_like(w)
 
-    return compare([fd[k] for k in keys],
-                   [g[k] for k in keys])
+            # use flat views, if need be.
+            if len(w.shape) > 1:
+                w = w.flat
+            if len(g.shape) > 1:
+                g = g.flat
+            if len(d.shape) > 1:
+                d = d.flat
+
+            keys = range(len(w))
+
+
+    for k in (iterview(keys) if progressbar else keys):
+        was = w[k]
+        w[k] = was + eps
+        b = func()
+        w[k] = was - eps
+        a = func()
+        w[k] = was
+        d[k] = (b-a) / (2*eps)
+
+    return compare([d[k] for k in keys],
+                   [g[k] for k in keys],
+                   verbose=verbose)
 
 
 #from arsenal.misc import deprecated

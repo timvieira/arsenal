@@ -181,8 +181,8 @@ def timeit(name, fmt='{name} ({htime})', header=None):
         ht = htime(sec)
     print >> stderr, fmt.format(name=name, htime=ht, sec=sec)
 
-timesection = lambda x: timeit(header='%s...' % x,
-                               msg=' -> %s took %%.2f seconds' % x)
+#timesection = lambda x: timeit(header='%s...' % x,
+#                               msg=' -> %s took %%.2f seconds' % x)
 
 
 def main():

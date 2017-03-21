@@ -62,15 +62,15 @@ def profile_viz(cmd, global_dict=None, local_dict=None, img='profile.png', out='
     os.system('gprof2dot.py -f pstats %s | dot -Tpng -o %s && eog %s &' % (out, img, img))
 
 
-def kcachegrind(cmd, out='profile.kgrind'):
-    from arsenal.profiling.lsprofcalltree import KCacheGrind
-    p = cProfile.Profile()
-    p.run(cmd)
-    # Get the stats in a form kcachegrind can use and save it
-    k = KCacheGrind(p)
-    with file(out, 'wb') as f:
-        k.output(f)
-    os.system("kcachegrind %s &" % out)
+#def kcachegrind(cmd, out='profile.kgrind'):
+#    from arsenal.profiling.lsprofcalltree import KCacheGrind
+#    p = cProfile.Profile()
+#    p.run(cmd)
+#    # Get the stats in a form kcachegrind can use and save it
+#    k = KCacheGrind(p)
+#    with file(out, 'wb') as f:
+#        k.output(f)
+#    os.system("kcachegrind %s &" % out)
 
 
 def main():
@@ -87,8 +87,8 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    viz = kcachegrind
-    #viz = profile_viz
+    #viz = kcachegrind
+    viz = profile_viz
 
     sys.path = [os.getcwd()] + sys.path
 

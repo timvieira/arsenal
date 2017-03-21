@@ -39,6 +39,7 @@ class ddict(dict):
     """
     def __init__(self, f):
         self.f = f
+        super(ddict, self).__init__()
 
     def __missing__(self, key):
         self[key] = c = self.f(key)

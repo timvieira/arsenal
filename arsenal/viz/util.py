@@ -77,6 +77,7 @@ class NumericalDebug(object):
         "Pass in column values for the row by name as keyword arguments."
         self._data.append(kw)
         self.uptodate = False
+        return self
 
     def compare(self, expect='expect', got='got', show_regression=1, scatter=1, **kw):
         from arsenal.math import compare

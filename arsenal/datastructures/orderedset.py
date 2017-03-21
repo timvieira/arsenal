@@ -1,3 +1,7 @@
+"""
+OrderedSet -- a set which remembers insertion order.
+"""
+
 class OrderedSet(object):
     """
     Set which remembers insertion ordering allowed iteration while changing size

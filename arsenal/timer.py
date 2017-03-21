@@ -7,7 +7,7 @@ from arsenal.terminal import yellow
 from arsenal.misc import ddict
 
 def timers(title=None):
-    return Benchmark(title) #
+    return Benchmark(title)
 
 class Benchmark(object):
     def __init__(self, title):

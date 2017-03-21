@@ -1,12 +1,23 @@
 import numpy as np
 import pylab as pl
 import pandas as pd
-from scipy.linalg import norm
-from arsenal.iterview import progress
 from scipy.stats import pearsonr, spearmanr
-from arsenal.math.util import cosine, linf, relative_difference, zero_retrieval
+from scipy.linalg import lstsq, norm
 from arsenal import colors
-from scipy.linalg import lstsq
+from arsenal.iterview import progress
+from arsenal.math.util import cdf, cosine, linf, relative_difference, zero_retrieval
+
+
+def pp_plot(a, b, pts=100, show_line=True):
+    "P-P plot for samples `a` and `b`."
+    A = cdf(a)
+    B = cdf(b)
+    x = np.linspace(min(a.min(), b.min()), max(a.max(), b.max()), pts)
+
+    if show_line:
+        pl.plot(range(0,2), range(0,2), ':', alpha=0.5, c='k', lw=2)
+
+    pl.plot(A(x), B(x), alpha=1.0)
 
 
 class compare(object):
@@ -131,6 +142,7 @@ class compare(object):
         r = relative_difference(expect, got)
         r = np.mean(r[np.isfinite(r)])
         tests.append(['mean relative error', r, r <= 0.01])
+        self.mean_relative_error = r
 
         # TODO: suggest that if relative error is high and rescaled error is low (or
         # something to do wtih regression residuals) that maybe there is a
@@ -148,12 +160,13 @@ class compare(object):
                 es = 1
             if gs == 0:
                 gs = 1
-            # rescaled error
-            E = expect / es
-            G = got / gs
-            R = abs(E - G)
-            r = np.mean(R)
-            tests.append(['mean rescaled error', r, r <= 1e-5])
+            if 0:
+                # rescaled error
+                E = expect / es
+                G = got / gs
+                R = abs(E - G)
+                r = np.mean(R)
+                tests.append(['mean rescaled error', r, r <= 1e-5])
 
         if regression:
             self.regression()
@@ -318,5 +331,12 @@ if __name__ == '__main__':
         b = a + np.random.uniform(-0.01, 0.1, size=n)
         compare(a,b).show()
         compare('a', 'b', data=pd.DataFrame({'a': a, 'b': b})).show()
+
+        n = 10000
+        a = np.random.uniform(-0.1, 0.1, size=n)
+        b = np.random.uniform(-0.2, 0.1, size=n)
+        pl.figure()
+        pp_plot(a, b)
+        pl.show()
 
     test_compare()

@@ -7,7 +7,7 @@ setup(name='arsenal',
       author='Tim Vieira',
       url='https://github.com/timvieira/arsenal/',
       install_requires=[
-          'keyring',
+#          'keyring',        # this is an annoying dependency
           'numpy',
           'colored',
           'path.py',

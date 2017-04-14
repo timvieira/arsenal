@@ -121,16 +121,19 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
         xs, ys = zip(*f)
         ax.scatter(xs, ys, lw=0, alpha=0.5, c=sty['c'])
 
-    XMIN = XMIN if XMIN is not None else min(X)
-    XMAX = XMAX if XMAX is not None else max(X)
-    YMIN = YMIN if YMIN is not None else min(Y)
-    YMAX = YMAX if YMAX is not None else max(Y)
+    XMIN = min(min(X), XMIN) if XMIN is not None else min(X)
+    XMAX = max(max(X), XMAX) if XMAX is not None else max(X)
+    YMIN = min(min(Y), YMIN) if YMIN is not None else min(Y)
+    YMAX = max(max(Y), YMAX) if YMAX is not None else max(Y)
 
-    if (max(X) > XMAX or
-        min(X) < XMIN or
-        min(Y) > YMIN or
-        max(Y) < YMAX):
-        print '[PARETO] Warning: data out of bounds!'
+#    if 0:
+#        # This version lets you clip away points. I found it a little problematic to use.
+#        XMIN = XMIN if XMIN is not None else min(X)
+#        XMAX = XMAX if XMAX is not None else max(X)
+#        YMIN = YMIN if YMIN is not None else min(Y)
+#        YMAX = YMAX if YMAX is not None else max(Y)
+#        if (max(X) > XMAX or min(X) < XMIN or min(Y) > YMIN or max(Y) < YMAX):
+#            print '[PARETO] Warning: data out of bounds!'
 
     # Connect corners of frontier. The first and last points on frontier have
     # lines which surround the point cloud.

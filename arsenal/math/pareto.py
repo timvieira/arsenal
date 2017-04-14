@@ -100,7 +100,6 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
     sty = {'c': 'b', 'alpha': 0.3, 'zorder': 0}
     sty.update(style)
 
-
     if interpolation == 'linear-convex':
         # Convex hull by itself doesn't work, but what we have is ok because its
         # the intersection of the convex hull with the pareto frontier, which is
@@ -127,14 +126,14 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
     YMIN = YMIN if YMIN is not None else min(Y)
     YMAX = YMAX if YMAX is not None else max(Y)
 
-#    if max(X) > XMAX:
-#        print '[pareto] WARNING: max(X) > XMAX. Plot will not show these points.'
-#    if min(Y) < YMIN:
-#        print '[pareto] WARNING: min(X) < XIN. Plot will not show these points.'
+    if (max(X) > XMAX or
+        min(X) < XMIN or
+        min(Y) > YMIN or
+        max(Y) < YMAX):
+        print '[PARETO] Warning: data out of bounds!'
 
     # Connect corners of frontier. The first and last points on frontier have
     # lines which surround the point cloud.
-
 
     # TODO: make this look nicer...
     if maxX and maxY:

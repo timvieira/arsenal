@@ -28,11 +28,13 @@ class adagrad(object):
         self.x = x
         self.G = np.zeros_like(x) + damping
         self.i = 0
+        self.D = None
 
     def __call__(self, g, learning_rate=1.0):
         # Update parameters
         self.G += g*g
-        self.x[:] -= learning_rate*g/np.sqrt(self.G)
+        self.D = learning_rate/np.sqrt(self.G)
+        self.x[:] -= g * self.D
         self.i += 1
 
 
@@ -45,7 +47,7 @@ class adam(object):
         self.m = np.zeros_like(x)
         self.v = np.zeros_like(x) + damping
         self.i = 0
-        self.G = None
+        self.D = None
 
     def __call__(self, g, learning_rate=0.01, b1 = 0.1, b2 = 0.01, lam=1e-4):
         i = self.i
@@ -55,11 +57,15 @@ class adam(object):
         # Update second moment estimate
         ewma(self.v, g*g, b2)
         # Bias correction
-        mhat = self.m * (learning_rate/(1-(1-b1)**(i+1)))
+        mhat = self.m * (learning_rate / (1-(1-b1)**(i+1)))
         vhat = self.v / (1-(1-b2)**(i+1))
         # Update parameters
-        np.sqrt(vhat, out=vhat)# **= -0.5
+        np.sqrt(vhat, out=vhat)
         mhat /= vhat           # inplace
-        self.G = mhat   # stepsizes, in case anyone asks.
+
+        # this is the analogue of stepsize in adam. this doen't capture the
+        # momentum in the numerator
+        self.D = learning_rate/vhat
+
         self.x -= mhat
         self.i += 1

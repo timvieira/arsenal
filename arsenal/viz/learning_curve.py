@@ -57,7 +57,7 @@ class LearningCurve(object):
 
             ax.set_title(self.name)
             if self.legend:
-                ax.legend(loc=4)
+                ax.legend(loc='best')
 
     def update(self, iteration, **kwargs):
         "Update plots, if ``iteration is None`` we'll use ``iteration=len(data)``"

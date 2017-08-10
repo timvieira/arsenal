@@ -1,73 +1,47 @@
 import atexit
 import shelve
 import cPickle as pickle
-from datetime import datetime, timedelta
-from copy import deepcopy
-from threading import RLock
+
+from functools import partial
 
 
-def timed_cache(seconds=0, minutes=0, hours=0, days=0):
+# TODO:
+#  * add option to pass a reference to another cache
+class memoize(object):
+    """ cache a function's return value to avoid recalulation """
+    def __init__(self, func):
+        self.func = func
+        self.cache = {}
+        try:
+            self.__name__ = func.__name__
+            self.__doc__ = func.__doc__
+        except AttributeError:
+            pass
 
-    time_delta = timedelta( seconds=seconds,
-                            minutes=minutes,
-                            hours=hours,
-                            days=days )
+    # define __get__ in case this function is a method.
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self.func
+        return partial(self, obj)
 
-    def decorate(f):
-
-        f._lock = RLock()
-        f._updates = {}
-        f._results = {}
-
-        def do_cache(*args, **kwargs):
-
-            lock = f._lock
-            lock.acquire()
-
+    def __call__(self, *args):
+        try:
+            return self.cache[args]
+        except KeyError:
+            value = self.func(*args)
             try:
-                key = (args, tuple(sorted(kwargs.items(), key=lambda i:i[0])))
+                self.cache[args] = value
+            except TypeError:
+                # uncachable -- for instance, passing a list as an argument.
+                raise TypeError('uncachable arguments %r passed to memoized function.' % (args,))
+            return value
+        except TypeError:
+            # uncachable -- for instance, passing a list as an argument.
+            raise TypeError('uncachable arguments %r passed to memoized function.' % (args,))
 
-                updates = f._updates
-                results = f._results
+    def __repr__(self):
+        return '<memoize(%r)>' % self.func
 
-                t = datetime.now()
-                updated = updates.get(key, t)
-
-                if key not in results or t-updated > time_delta:
-                    # Calculate
-                    updates[key] = t
-                    result = f(*args, **kwargs)
-                    results[key] = deepcopy(result)
-                    return result
-
-                else:
-                    # Cache
-                    return deepcopy(results[key])
-
-            finally:
-                lock.release()
-
-        return do_cache
-
-    return decorate
-
-"""
-if __name__ == "__main__":
-
-    import time
-    class T(object):
-        @timed_cache(seconds=2)
-        def expensive_func(self, c):
-            time.sleep(.2)
-            return c
-
-    t = T ()
-    for _ in xrange(30):
-        time.sleep(.1)
-        t1 = time.clock()
-        print t.expensive_func('Calling expensive method')
-        print "t - %i milliseconds"%int( (time.clock() - t1) * 1000. )
-"""
 
 class ShelfBasedCache(object):
     """ cache a function's return value to avoid recalulation and save cache in a shelve. """
@@ -97,35 +71,6 @@ def persistent_cache(key=lambda x: x, None_is_bad=False):
         return ShelfBasedCache(f, key, None_is_bad=None_is_bad)
     return wrap
 
-
-# TODO:
-#  * add option to pass a reference to another cache (maybe memcached client)
-class memoize(object):
-    """ cache a function's return value to avoid recalulation """
-    def __init__(self, func):
-        self.func = func
-        self.cache = {}
-        try:
-            self.__name__ = func.__name__
-            self.__doc__ = func.__doc__
-        except AttributeError:
-            pass
-    def __call__(self, *args):
-        try:
-            return self.cache[args]
-        except KeyError:
-            value = self.func(*args)
-            try:
-                self.cache[args] = value
-            except TypeError:
-                # uncachable -- for instance, passing a list as an argument.
-                raise TypeError('uncachable arguments %r passed to memoized function.' % (args,))
-            return value
-        except TypeError:
-            # uncachable -- for instance, passing a list as an argument.
-            raise TypeError('uncachable arguments %r passed to memoized function.' % (args,))
-    def __repr__(self):
-        return '<memoize(%r)>' % self.func
 
 
 ## TODO: automatically make a back-up of the pickle

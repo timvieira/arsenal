@@ -53,7 +53,6 @@ def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar
 
             keys = range(len(w))
 
-
     for k in (iterview(keys) if progressbar else keys):
         was = w[k]
         w[k] = was + eps

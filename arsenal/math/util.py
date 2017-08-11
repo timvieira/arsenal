@@ -13,6 +13,7 @@ from scipy.stats import pearsonr, spearmanr
 
 
 def split_ix(N, p, randomize=1):
+    "Sample a random partition of N integers with proportions `p`."
     if randomize:
         I = np.random.permutation(N)
     else:
@@ -311,22 +312,23 @@ def kl_divergence(p, q):
 #          = sum_i p[i] log p[i] - sum_i p[i] log(q[i])
 #          = Entropy(p) + CrossEntropy(p,q)
 
-# timv: do we need to specify all three things?
-#
-#  P(x) = sum_y P(x,y) by law of total probabilty
 def mutual_information(joint):
     """
     Mutual Information
 
     MI(x,y) = KL( p(x,y) || p(x) p(y) )
 
-    joint = p(x,y)
-    p = p(x)
-    q = q(y)
+    We can compute this easily from the joint distribution
+
+      joint = p(X=x,Y=y)
+
+    because
+      p(X=x) = sum_y p(X=x, Y=y)
+      p(Y=y) = sum_x p(X=x, Y=y)
 
     relationships:
       MI(x,y) is the expected PMI(x,y) wrt p(x,y)
-      MI(x,y) = KL( p(x,y) || p(x) p(y) )
+      MI(x,y) = KL(p(x,y) || p(x) p(y))
 
     properties:
       MI(X,Y) = MI(Y,X) is symmetric

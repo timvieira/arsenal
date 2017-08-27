@@ -19,6 +19,22 @@ def fd(func, w, eps = 1e-5):
     return g
 
 
+def finite_difference(f, eps=1e-5):
+    def grad(x):
+        x = np.array(x)
+        g = np.zeros_like(x)
+        for k in range(g.shape[0]):
+            v = x[k]
+            x[k] = v + eps
+            b = f(x)
+            x[k] = v - eps
+            a = f(x)
+            x[k] = v
+            g[k] = (b-a) / 2 / eps
+        return g
+    return grad
+
+
 def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar=1):
     """
     Finite-difference check.

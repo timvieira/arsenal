@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 setup(name='arsenal',
-      version='2.0',
+      version='2.1',
       description='Arsenal of python utilities.',
       author='Tim Vieira',
       url='https://github.com/timvieira/arsenal/',

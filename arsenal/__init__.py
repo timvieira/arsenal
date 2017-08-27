@@ -8,4 +8,6 @@ from arsenal.viz import axman, update_ax
 from arsenal import math
 from arsenal.debug import ip
 #from arsenal.humanreadable import htime
-from arsenal.misc import ddict, wide_dataframe
+from arsenal.misc import ddict
+from arsenal.math import wide_dataframe
+

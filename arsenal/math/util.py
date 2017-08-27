@@ -8,8 +8,23 @@ from scipy.linalg import norm as _norm
 from scipy import stats
 from arsenal.terminal import yellow, green, red
 from arsenal.iterview import progress
-from pandas import DataFrame
 from scipy.stats import pearsonr, spearmanr
+
+
+def wide_dataframe():
+    import pandas as pd
+    from arsenal.terminal import console_width
+    pd.set_option('display.width', console_width())
+
+
+def onehot(i, n):
+    """Create a one-hot vector: a vector of length `n` with a `1` at position `i`
+    and zeros elsewhere.
+
+    """
+    x = np.zeros(n)
+    x[i] = 1
+    return x
 
 
 def split_ix(N, p, randomize=1):

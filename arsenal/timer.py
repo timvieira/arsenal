@@ -140,12 +140,12 @@ class Timer(object):
         del kw['label'] # delete label so it doesn't appear twice in the legend
 
         if 'avg' in show:
-            ax.scatter(X, Y, c=l.get_color(), lw=0, alpha=0.25, **kw)
+            ax.scatter(X, Y, c=l.get_color(), lw=0, label=None, alpha=0.25, **kw)
         elif 'scatter' in show:
             if loglog:
-                ax.scatter(np.log(df[feature]), np.log(df[timecol]), c=l.get_color(), alpha=0.25, **kw)
+                ax.scatter(np.log(df[feature]), np.log(df[timecol]), c=l.get_color(), label=None, alpha=0.25, **kw)
             else:
-                ax.scatter(df[feature], df[timecol], c=l.get_color(), alpha=0.25, **kw)
+                ax.scatter(df[feature], df[timecol], c=l.get_color(), alpha=0.25, label=None, **kw)
         #elif 'box' in show:
         #    # TODO: doen't work very well yet. need to fill out the x-axis since
         #    # feature might not be dense. Should throw an error if feature isn't an
@@ -156,8 +156,8 @@ class Timer(object):
         return a
 
     def dataframe(self, timecol='timer'):
-        from pandas import DataFrame
-        df = DataFrame(list(self.features))
+        import pandas as pd
+        df = pd.DataFrame(list(self.features))
         df[timecol] = self.times
         return df
 
@@ -165,6 +165,20 @@ class Timer(object):
         t = Timer(name)
         t.times, t.features = zip(*[(x,y) for (x,y) in zip(self.times, self.features) if f(x,y)])
         return t
+
+    def bucket_filter(self, feature_to_bucket, bucket_filter):
+        import pandas as pd
+        df = self.dataframe()
+        data = []
+        for k, d in df.groupby(feature_to_bucket):
+            d = d[bucket_filter(k, d)]
+            _, x = zip(*d.iterrows())
+            data.append(x)
+        return pd.DataFrame(data)
+
+    def trim_slow(self, feature_to_bucket, threshold):
+        f = lambda k, d: d.timer <= d.timer.quantile(threshold)
+        return self.bucket_filter(feature_to_bucket, f)
 
 
 @contextmanager

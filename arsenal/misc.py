@@ -4,12 +4,7 @@ import subprocess, tempfile, BaseHTTPServer
 from functools import wraps
 from StringIO import StringIO
 from contextlib import contextmanager
-from arsenal.terminal import colors, console_width
-
-
-def wide_dataframe():
-    import pandas as pd
-    pd.set_option('display.width', console_width())
+from arsenal.terminal import colors
 
 
 def open_diff(a, b, cmd='meld'):

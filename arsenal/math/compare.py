@@ -20,6 +20,13 @@ def pp_plot(a, b, pts=100, show_line=True):
     pl.plot(A(x), B(x), alpha=1.0)
 
 
+def check_equal(expect, got, verbose=0, **kwargs):
+    c = compare(expect, got, verbose=verbose, **kwargs)
+    if c.mean_relative_error > 0.01:
+        assert False, c.format_message()
+    return c
+
+
 class compare(object):
 
     def __init__(self, expect, got, name=None, data=None, P_LARGER=0.9,
@@ -190,11 +197,13 @@ class compare(object):
 
     def message(self):
         print
-        print 'Comparison%s:' % (' (%s)' % self.name if self.name else ''), 'n=%s' % self.n
-        #print yellow % 'expected:'
-        #print expect
-        #print yellow % 'got:'
-        #print got
+        print self.format_message()
+        print
+
+    def format_message(self):
+        lines = [
+            'Comparison%s: n=%s' % (' (%s)' % self.name if self.name else '', self.n),
+        ]
         for k, v, passed in self.tests:
             if passed == 1:
                 c = colors.green
@@ -206,8 +215,8 @@ class compare(object):
                 v = '%g' % v
             except TypeError:
                 pass
-            print '  %s: %s' % (k, c % (v,))
-        print
+            lines.append('  %s: %s' % (k, c % (v,)))
+        return '\n'.join(lines)
 
     def plot(self, regression=True, seaborn=False, ax=None, **scatter_kw):
         if ax is not None:

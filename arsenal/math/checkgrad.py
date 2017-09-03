@@ -22,16 +22,16 @@ def fd(func, w, eps = 1e-5):
 def finite_difference(f, eps=1e-5):
     def grad(x):
         x = np.array(x)
-        g = np.zeros_like(x)
-        for k in range(g.shape[0]):
+        g = []
+        for k in range(x.shape[0]):
             v = x[k]
             x[k] = v + eps
             b = f(x)
             x[k] = v - eps
             a = f(x)
             x[k] = v
-            g[k] = (b-a) / 2 / eps
-        return g
+            g.append((b-a) / 2 / eps)
+        return np.array(g)
     return grad
 
 

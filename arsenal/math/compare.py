@@ -61,10 +61,11 @@ class compare(object):
         """
 
         if isinstance(expect, dict) and isinstance(got, dict):
-            _alphabet = expect.keys() if alphabet is None else alphabet
-            assert set(got.keys()) == set(_alphabet)
-            expect = [expect[k] for k in _alphabet]
-            got = [got[k] for k in _alphabet]
+            alphabet = expect.keys() if alphabet is None else alphabet
+            assert set(got.keys()) == set(alphabet), \
+                'Keys differ.\n  got keys  = %s\n  want keys = %s' % (got.keys(), alphabet)
+            expect = [expect[k] for k in alphabet]
+            got = [got[k] for k in alphabet]
 
         if data is not None:
             assert isinstance(expect, (int, basestring)), \
@@ -192,9 +193,6 @@ class compare(object):
         if verbose:
             self.message()
 
-        if alphabet is not None:
-            self.show_largest_rel_errors()
-
     def message(self):
         print
         print self.format_message()
@@ -278,15 +276,25 @@ class compare(object):
 
         self.tests.append(['regression', '[%.3f %.3f]' % (self.coeff[0], self.coeff[1]), ok])
 
-    def show_largest_rel_errors(self):
+    def show_errors(self):
         "show largest relative errors"
 
         df = []
 
-        #es = abs(expect).max()
-        #gs = abs(got).max()
+        def dot_aligned(x):
+            sx = [('%g' % s) for s in x]
+            dots = [s.find('.') for s in sx]
+            m = max(dots)
+            y = [' '*(m - d) + s for s, d in zip(sx, dots)]
+            z = max(map(len, y))
+            fmt = '%%-%ss' % z
+            z = [fmt % s for s in y]
+            return z
 
-        for (i,(x,y)) in enumerate(zip(self.expect, self.got)):
+        s_expect = dot_aligned(self.expect)
+        s_got = dot_aligned(self.got)
+
+        for (i,(x,y,sx,sy)) in enumerate(zip(self.expect, self.got, s_expect, s_got)):
             # XXX: skip zeros.
             #if abs(x) < 1e-10 and abs(y) < 1e-10:
             #    e = 0.0
@@ -296,7 +304,7 @@ class compare(object):
             if e <= 0.001:
                 continue
 
-            df.append([e, self.alphabet[i], x, y])
+            df.append([e, self.alphabet[i], x, y, sx, sy])
 
             #df.append({'name':   alphabet[i],
             #           'error':  e,
@@ -305,10 +313,11 @@ class compare(object):
 
         df.sort(reverse=1)
 
+
         if len(df):
-            print ' Relative errors'
+            print ' Largest errors'
             print ' ==============='
-            for e, n, x, y in df:
+            for e, n, x, y, sx, sy in df:
 
                 types = []
                 if x < y:
@@ -321,7 +330,7 @@ class compare(object):
                 if (x >= 0) != (y >= 0):
                     types.append(colors.red % 'wrong sign')
 
-                print '  %-15s %.5f %g %g' % (n, e, x, y), \
+                print '  %-15s %.2f%%   %s  %s' % (n, e, sx, sy), \
                     ((colors.green % 'ok') if e <= 0.01 else colors.red % 'bad'), \
                     '(%s)' % (', '.join(types))
 

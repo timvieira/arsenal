@@ -1,10 +1,18 @@
+# -*- coding: utf-8 -*-
 import colored
 
-# TODO: Consider using fabulous for most of this. It supports a wider variety of
-# colors and might do a better job with other macs.
+# TODO: Consider using the "fabulous" package for most of this. It supports a
+# wider variety of colors and might do a better job with Macs.
 
 normal = '\x1b[0m%s\x1b[0m'
 bold = '\x1b[1m%s\x1b[0m'
+italic = "\x1b[3m%s\x1b[0m"
+underline = "\x1b[4m%s\x1b[0m"
+strike = "\x1B[9m%s\x1b[0m"
+#overline = lambda x: (u''.join(unicode(c) + u'\u0305' for c in unicode(x))).encode('utf-8')
+
+leftarrow = '←'
+rightarrow = '→'
 
 black, red, green, yellow, blue, magenta, cyan, white = \
     map('\x1b[3%sm%%s\x1b[0m'.__mod__, range(8))
@@ -33,8 +41,6 @@ def check(x, t='pass', f='fail'):
     return green % t if x else red % f
 
 
-underline = '\x1b[4m%s\x1b[0m'
-
 def test():
     for c in 'black, red, green, yellow, blue, magenta, cyan, white'.split(', '):
         print globals()[c] % c
@@ -44,6 +50,8 @@ def test():
         print globals()['bg_' + c] % c
 
     print underline % 'underline'
+    print italic % 'italic'
+    print strike % 'strike'
 
 
 # TODO: needs some work, but it's pretty fun to use

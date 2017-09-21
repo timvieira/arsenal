@@ -395,6 +395,7 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
     0 0 err=0 ok
 
     """
+    assert not np.isnan(a).any() and not np.isnan(b).any(), [a, b]
     err = inf_norm(a,b)
     if np.array(a == b).all():   # handles the non-finite cases.
         err = 0

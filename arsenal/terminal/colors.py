@@ -14,19 +14,42 @@ strike = "\x1b[9m%s\x1b[0m"
 leftarrow = '←'
 rightarrow = '→'
 
+class colorstring:
+    def __init__(self, x, color=None, light=None, bg=3, l=None, r='\x1b[0m'):
+        assert isinstance(x, basestring)
+        self.x = x
+        self.l = l or '\x1b[%s;%s%sm' % (light, bg, color)
+        self.r = r
+
+    def __str__(self):
+        return self.l + str(self.x) + self.r
+
+    def __repr__(self):
+        return 'colorstring%s' % repr((self.l, self.x, self.r))
+
+    def __call__(self, x):
+        return self % x
+
+    def __mod__(self, x):
+        if isinstance(x, colorstring):
+            return colorstring(self.x % colorstring(x.x, l=x.l, r=self.l),   # take right formatter from self
+                               l=self.l, r=self.r)
+        else:
+            return colorstring(self.x % x, l=self.l, r=self.r)
+
 
 black, red, green, yellow, blue, magenta, cyan, white = \
-    map('\x1b[3%sm%%s\x1b[0m'.__mod__, range(8))
+    [colorstring('%s', c, 0) for c in range(8)]
 
 light_black, light_red, light_green, light_yellow, light_blue, light_magenta, light_cyan, light_white = \
-    map('\x1b[1;3%sm%%s\x1b[0m'.__mod__, range(8))
+    [colorstring('%s', c, 1) for c in range(8)]
 
-# TODO: there is also the 'dim' color options \x1b[2;<COLORCODE>m
 dark_black, dark_red, dark_green, dark_yellow, dark_blue, dark_magenta, dark_cyan, dark_white = \
-    map('\x1b[2;3%sm%%s\x1b[0m'.__mod__, range(8))
+    [colorstring('%s', c, 2) for c in range(8)]
 
 bg_black, bg_red, bg_green, bg_yellow, bg_blue, bg_magenta, bg_cyan, bg_white = \
-    map('\x1b[4%sm%%s\x1b[0m'.__mod__, range(8))
+    [colorstring('%s', c, 0, bg=4) for c in range(8)]
+
 
 def padr(w):
     "get format to pad right elements"
@@ -48,7 +71,7 @@ def check(x, t='pass', f='fail'):
 
 def test():
     for c in 'black, red, green, yellow, blue, magenta, cyan, white'.split(', '):
-        print '%16s %24s %23s %19s' % (globals()[c] % c,
+        print '%18s %24s %23s %21s' % (globals()[c] % c,
                                        globals()['light_' + c] % ('light_' + c),
                                        globals()['dark_' + c] % ('dark_' + c),
                                        globals()['bg_' + c] % ('bg_' + c))
@@ -56,6 +79,11 @@ def test():
     print underline % 'underline'
     print italic % 'italic'
     print strike % 'strike'
+
+    print
+    print 'Composability'
+    print '============='
+    print 'normal %s normal' % ((red % 'red %s red') % ((blue % 'blue %s blue') % (green % 'green')))
 
 
 # TODO: needs some work, but it's pretty fun to use

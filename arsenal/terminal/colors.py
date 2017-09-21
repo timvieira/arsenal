@@ -8,17 +8,22 @@ normal = '\x1b[0m%s\x1b[0m'
 bold = '\x1b[1m%s\x1b[0m'
 italic = "\x1b[3m%s\x1b[0m"
 underline = "\x1b[4m%s\x1b[0m"
-strike = "\x1B[9m%s\x1b[0m"
+strike = "\x1b[9m%s\x1b[0m"
 #overline = lambda x: (u''.join(unicode(c) + u'\u0305' for c in unicode(x))).encode('utf-8')
 
 leftarrow = '←'
 rightarrow = '→'
+
 
 black, red, green, yellow, blue, magenta, cyan, white = \
     map('\x1b[3%sm%%s\x1b[0m'.__mod__, range(8))
 
 light_black, light_red, light_green, light_yellow, light_blue, light_magenta, light_cyan, light_white = \
     map('\x1b[1;3%sm%%s\x1b[0m'.__mod__, range(8))
+
+# TODO: there is also the 'dim' color options \x1b[2;<COLORCODE>m
+dark_black, dark_red, dark_green, dark_yellow, dark_blue, dark_magenta, dark_cyan, dark_white = \
+    map('\x1b[2;3%sm%%s\x1b[0m'.__mod__, range(8))
 
 bg_black, bg_red, bg_green, bg_yellow, bg_blue, bg_magenta, bg_cyan, bg_white = \
     map('\x1b[4%sm%%s\x1b[0m'.__mod__, range(8))
@@ -43,11 +48,10 @@ def check(x, t='pass', f='fail'):
 
 def test():
     for c in 'black, red, green, yellow, blue, magenta, cyan, white'.split(', '):
-        print globals()[c] % c
-        print globals()['light_' + c] % ('light_' + c)
-
-    for c in 'black, red, green, yellow, blue, magenta, cyan, white'.split(', '):
-        print globals()['bg_' + c] % c
+        print '%16s %24s %23s %19s' % (globals()[c] % c,
+                                       globals()['light_' + c] % ('light_' + c),
+                                       globals()['dark_' + c] % ('dark_' + c),
+                                       globals()['bg_' + c] % ('bg_' + c))
 
     print underline % 'underline'
     print italic % 'italic'

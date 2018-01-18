@@ -67,6 +67,11 @@ class compare(object):
             expect = [expect[k] for k in alphabet]
             got = [got[k] for k in alphabet]
 
+        if isinstance(expect, np.ndarray) and isinstance(got, np.ndarray):
+            assert expect.shape == got.shape
+            expect = expect.flatten()
+            got = got.flatten()
+
         if data is not None:
             assert isinstance(expect, (int, basestring)), \
                 'expected a column name got %s' % type(expect)

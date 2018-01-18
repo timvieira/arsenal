@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from fnmatch import fnmatch
 from arsenal.iterextras import atmost
 from subprocess import Popen, PIPE
-from path import path
+from path import Path
 
 
 def filesize(f):
@@ -18,7 +18,7 @@ def filesize(f):
     $ du -hs filename
 
     """
-    f = path(f)
+    f = Path(f)
     if not f.exists():
         return 'unknown'
     try:

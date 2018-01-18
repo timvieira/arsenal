@@ -1,5 +1,5 @@
 import numpy as np
-from arsenal.math import compare
+from arsenal.math import compare, spherical
 from arsenal.iterview import iterview
 
 
@@ -81,6 +81,26 @@ def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar
     return compare([d[k] for k in keys],
                    [g[k] for k in keys],
                    verbose=verbose)
+
+
+def quick_fdcheck(func, w, g, n_checks, eps = 1e-5, verbose=1, progressbar=1):
+    "Check gradient along random directions (a faster alternative to axis-aligned directions)."
+    keys = ['rand_%s' % i for i in range(n_checks)]
+    H = {}
+    G = {}
+
+    was = w.copy()
+    for k in (iterview(keys) if progressbar else keys):
+        d = spherical(w.shape[0])
+        G[k] = g.dot(d)
+        w[:] = was + eps*d
+        b = func()
+        w[:] = was - eps*d
+        a = func()
+        w[:] = was
+        H[k] = (b-a) / (2*eps)
+
+    return compare(H, G, verbose=verbose)
 
 
 #from arsenal.misc import deprecated

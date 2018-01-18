@@ -137,13 +137,14 @@ def update_ax(ax, clear=True):
     if clear:
         ax.clear()
     yield
-    try:
-        ax.figure.canvas.draw()
-        ax.figure.canvas.flush_events()
-        pl.show(block=False)
-    except (NotImplementedError, AttributeError):
-        #print >> stderr, 'warning failed to update plot.'
-        pass
+    for _ in range(2):
+        try:
+            ax.figure.canvas.draw()
+            ax.figure.canvas.flush_events()
+            pl.show(block=False)
+        except (NotImplementedError, AttributeError):
+            #print >> stderr, 'warning failed to update plot.'
+            pass
 
 
 @contextmanager

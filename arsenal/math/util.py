@@ -261,7 +261,7 @@ def lidstone(p, delta):
 
 
 # based on implementation from scikits-learn
-def logsumexp(arr, axis=0):
+def logsumexp(arr, axis=None):
     """Computes the sum of arr assuming arr is in the log domain.
 
     Returns log(sum(exp(arr))) while minimizing the possibility of
@@ -275,9 +275,23 @@ def logsumexp(arr, axis=0):
     9.4586297444267107
     >>> logsumexp(a)
     9.4586297444267107
+
+    >>> x = [[0, 0, 1000.0], [1000.0, 0, 0]]
+    >>> logsumexp(x, axis=1)
+    array([ 1000.,  1000.])
+
+    >>> logsumexp(x)
+    1000.6931471805599
+
+    >>> logsumexp(x, axis=0)
+    array([  1.00000000e+03,   6.93147181e-01,   1.00000000e+03])
+
     """
     arr = np.array(arr, dtype=np.double)
-    arr = np.rollaxis(arr, axis)
+    if axis is None:
+        arr = arr.ravel()
+    else:
+        arr = np.rollaxis(arr, axis)
     # Use the max to normalize, as with the log this is what accumulates the
     # less errors
     vmax = arr.max(axis=0)
@@ -288,7 +302,7 @@ def logsumexp(arr, axis=0):
     return out
 
 
-def exp_normalize(x): # T=1.0):
+def exp_normalize(x, axis=None):
     """
     >>> x = [1, -10, 100, .5]
     >>> exp_normalize(x)
@@ -297,13 +311,34 @@ def exp_normalize(x): # T=1.0):
     >>> exp(x) / exp(x).sum()
     array([  1.01122149e-43,   1.68891188e-48,   1.00000000e+00,
              6.13336839e-44])
+
+    >>> x = [[0, 0, 1000], [1000, 0, 0]]
+
+    Normalize by row:
+    >>> exp_normalize(x, axis=0)
+    array([[ 0. ,  0.5,  1. ],
+           [ 1. ,  0.5,  0. ]])
+
+    Normalize by column:
+    >>> exp_normalize(x, axis=1)
+    array([[ 0.,  0.,  1.],
+           [ 1.,  0.,  0.]])
+
+    Normalize by cell:
+    >>> exp_normalize(x, axis=None)
+    array([[ 0. ,  0. ,  0.5],
+           [ 0.5,  0. ,  0. ]])
+
     """
-    y = array(x)      # creates copy
-#    y /= T
-    y -= y.max()
-    exp(y, out=y)
-    y /= y.sum()
-    return y
+    a = np.array(x, dtype=np.double)
+    if axis is None:
+        v = a.ravel()
+    else:
+        v = np.rollaxis(a, axis)
+    v -= v.max(axis=0)
+    exp(v, out=v)
+    v /= v.sum(axis=0)
+    return a
 
 
 log_of_2 = log(2)
@@ -395,7 +430,16 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
     0 0 err=0 ok
 
     """
-    assert not np.isnan(a).any() and not np.isnan(b).any(), [a, b]
+    try:
+        assert not np.isnan(a).any() and not np.isnan(b).any()
+    except (TypeError, AssertionError):
+        msg = '%sexpected %s, got %s' % ('%s: ' % name if name else '',
+                                         a, b)
+        if throw:
+            raise AssertionError(msg)
+        else:
+            print msg
+
     err = inf_norm(a,b)
     if np.array(a == b).all():   # handles the non-finite cases.
         err = 0

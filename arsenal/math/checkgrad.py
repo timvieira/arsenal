@@ -1,6 +1,40 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from arsenal.math import compare, spherical
 from arsenal.iterview import iterview
+
+
+# cg: Solve a linear systems, A x = b, using only A-x products. Assumes the
+# matrix `A` is positive definite (same conditions as conjugate gradient). The
+# cg solver requires that the Ax operator is an instance of LinearOperator
+from scipy.sparse.linalg import cg as implicit_cg
+from scipy.sparse.linalg import LinearOperator
+
+
+def fd_Jv(f, x, shape=None):
+    """Finite-difference approximation to a Jacobian-vector product, J[f](x) v,
+    where f: Rⁿ ↦ Rᵐ.
+
+    Example: If f is a gradient, this function approximates Hessian-vector
+    products.
+
+    Solve a linear system for second-order gradient methods without
+    materializing the Hessian or Fisher matrix. For example, the natural
+    gradient direction in an exponential family:
+
+      g = Euclidean_gradient(w)
+      Fvp = fd_Jv(dlogZ, w)     # Fisher-vector products
+      ng = implicit_cg(Fvp, g)[0]
+
+    """
+    if shape is None:
+        [N] = x.shape
+        [M] = f(x).shape
+    else:
+        N,M = shape
+    def Jv(v, eps=1e-5):
+        return (f(x + eps*v) - f(x - eps*v)) / (2*eps)
+    return LinearOperator((N, M), matvec=Jv)
 
 
 # TODO: should probably have one "core" routine for getting the gradient

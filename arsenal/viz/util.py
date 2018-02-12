@@ -8,7 +8,7 @@ if not environ.get('DISPLAY'):
 
 import pandas as pd
 import pylab as pl
-#import numpy as np
+import numpy as np
 #from sys import stderr
 from collections import defaultdict
 from contextlib import contextmanager
@@ -34,6 +34,19 @@ def newax():
 AX = defaultdict(newax)
 DATA = defaultdict(list)
 
+
+def contour_plot(f, xdomain, ydomain, color=True):
+    "Contour plot of a function of two variables."
+    [xmin, xmax, _] = xdomain; [ymin, ymax, _] = ydomain
+    X, Y = np.meshgrid(np.linspace(*xdomain), np.linspace(*ydomain))
+    Z = np.array([f([x,y]) for (x,y) in zip(X.flat, Y.flat)]).reshape(X.shape)
+    contours = pl.contour(X, Y, Z, 20, colors='black')
+    pl.clabel(contours, inline=True, fontsize=8)
+    if color:
+        pl.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin='lower', cmap='RdGy', alpha=0.5)
+        pl.axis(aspect='scalar')
+    pl.gcf().tight_layout()
+    pl.xlim(xmin,xmax); pl.ylim(ymin,ymax)
 
 
 class NumericalDebug(object):

@@ -128,6 +128,8 @@ def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newli
                 length = len(x)
             except TypeError:
                 length = sys.maxint
+        else:
+            length = int(length)
 
         if length == 0:
             raise StopIteration

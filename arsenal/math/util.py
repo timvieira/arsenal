@@ -302,10 +302,10 @@ def logsumexp(arr, axis=None):
     return out
 
 
-def exp_normalize(x, axis=None):
+def softmax(x, axis=None):
     """
     >>> x = [1, -10, 100, .5]
-    >>> exp_normalize(x)
+    >>> softmax(x)
     array([  1.01122149e-43,   1.68891188e-48,   1.00000000e+00,
              6.13336839e-44])
     >>> exp(x) / exp(x).sum()
@@ -315,17 +315,17 @@ def exp_normalize(x, axis=None):
     >>> x = [[0, 0, 1000], [1000, 0, 0]]
 
     Normalize by row:
-    >>> exp_normalize(x, axis=0)
+    >>> softmax(x, axis=0)
     array([[ 0. ,  0.5,  1. ],
            [ 1. ,  0.5,  0. ]])
 
     Normalize by column:
-    >>> exp_normalize(x, axis=1)
+    >>> softmax(x, axis=1)
     array([[ 0.,  0.,  1.],
            [ 1.,  0.,  0.]])
 
     Normalize by cell:
-    >>> exp_normalize(x, axis=None)
+    >>> softmax(x, axis=None)
     array([[ 0. ,  0. ,  0.5],
            [ 0.5,  0. ,  0. ]])
 
@@ -339,6 +339,22 @@ def exp_normalize(x, axis=None):
     exp(v, out=v)
     v /= v.sum(axis=0)
     return a
+
+
+from arsenal.misc import deprecated
+@deprecated('softmax')
+def exp_normalize(arr, axis=None):
+    return softmax(arr, axis=axis)
+
+
+# TODO: add support for the axis argument.
+def d_softmax(out, x, adj):
+    """
+    out = softmax(x), adj are the adjoints we're chain-ruling together.
+    """
+    g = adj - adj.dot(out)
+    g *= out
+    return g
 
 
 log_of_2 = log(2)
@@ -491,9 +507,19 @@ if __name__ == '__main__':
         mi_independent_is_zero(array([0.1, 0.1, 0.2, 0.6]),   # non-square joint
                                array([0.9, 0.1]))
 
+        def test_softmax_grad():
+            from arsenal.math.checkgrad import fdcheck
+            n = 20
+            adj = np.random.uniform(-1,1,size=n)
+            x = np.random.uniform(-1,1,size=n)
+            out = softmax(x)
+            g = d_softmax(out, x, adj)
+            fdcheck(lambda: softmax(x).dot(adj), x, g)
+
+        test_softmax_grad()
+
+        assert relative_difference(np.inf, np.inf) == 0.0
 
         print 'passed tests.'
 
     run_tests()
-
-    print relative_difference(np.inf, np.inf)

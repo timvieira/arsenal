@@ -128,15 +128,14 @@ class compare(object):
             tests.append(['zero F1', F, F > 0.99])
 
         if n > 1:
-            c = cosine(expect, got)
-            self.cosine = c
-            tests.append(['cosine-sim', c, (c > 0.99999)])   # cosine similarities must be really high.
+            self.cosine = cosine(expect, got)
+            tests.append(['cosine', self.cosine, (self.cosine > 0.99999)])   # cosine similarities must be really high.
 
-            self.pearsonr = 1.0 if ne == ng == 0 else pearsonr(expect, got)[0]
-            tests.append(['pearson', self.pearsonr, (self.pearsonr > 0.99999)])
+            self.pearson = 1.0 if ne == ng == 0 else pearsonr(expect, got)[0]
+            tests.append(['pearson', self.pearson, (self.pearson > 0.99999)])
 
-            p = spearmanr(expect, got)[0]
-            tests.append(['spearman', p, (p > 0.99999)])
+            self.spearman = spearmanr(expect, got)[0]
+            tests.append(['spearman', self.spearman, (self.spearman > 0.99999)])
 
         # TODO: this check should probably take into account the scale of the data.
         d = linf(expect, got)
@@ -229,7 +228,7 @@ class compare(object):
             sns.set_context(rc={"figure.figsize": (7, 5)})
             g = sns.JointGrid(self.got_label, self.expect_label, data=self.data)
             g.plot(sns.regplot, sns.distplot, spearmanr)
-            print "Pearson's r: {0}".format(self.pearsonr)
+            print "Pearson's r: {0}".format(self.pearson)
         else:
             if self.ax is None:
                 self.ax = pl.figure().add_subplot(111)

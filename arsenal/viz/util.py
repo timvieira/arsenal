@@ -49,6 +49,16 @@ def contour_plot(f, xdomain, ydomain, color=True):
     pl.xlim(xmin,xmax); pl.ylim(ymin,ymax)
 
 
+def plot3d(f, xdomain, ydomain, color=True):
+    "3d surface plot of a function of two variables."
+    from mpl_toolkits.mplot3d import Axes3D
+    [xmin, xmax, _] = xdomain; [ymin, ymax, _] = ydomain
+    X, Y = np.meshgrid(np.linspace(*xdomain), np.linspace(*ydomain))
+    Z = np.array([f(np.array([x,y])) for (x,y) in zip(X.flat, Y.flat)]).reshape(X.shape)
+    ax = pl.figure().gca(projection='3d')
+    ax.plot_surface(X, Y, Z, cmap='viridis', linewidth=0, antialiased=True)
+
+
 class NumericalDebug(object):
     """Incrementally builds a DataFrame, includes plotting and comparison method.
 
@@ -147,14 +157,18 @@ def _try_sca(ax):
 @contextmanager
 def update_ax(ax, clear=True):
     "Manages clearing and updating a plot."
+    if not hasattr(ax, '_did_show'):
+        ax._did_show = False
     if clear:
         ax.clear()
     yield
     for _ in range(2):
         try:
-            ax.figure.canvas.draw()
+            ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()
-            pl.show(block=False)
+            if not ax._did_show:
+                pl.show(block=False)
+                ax._did_show = True
         except (NotImplementedError, AttributeError):
             #print >> stderr, 'warning failed to update plot.'
             pass

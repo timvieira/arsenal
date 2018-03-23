@@ -249,8 +249,8 @@ def mean_confidence_interval(a, confidence=0.95):
     return m, m-h, m+h
 
 
-def normalize(p):
-    return p / p.sum()
+def normalize(x, p=1):
+    return x / norm(x, p)
 
 
 def lidstone(p, delta):
@@ -355,6 +355,32 @@ def d_softmax(out, x, adj):
     g = adj - adj.dot(out)
     g *= out
     return g
+
+
+# TODO: implement projection onto l1 ball -- see code in notes.
+def project_onto_simplex(a, radius=1.0):
+    """
+    Project point a to the probability simplex.
+    Returns (the projected point x, the zero threshold, and the residual value).
+
+    """
+    a = np.array(a)
+    x0 = a.copy()
+    d = len(x0)
+    ind_sort = np.argsort(-x0)
+    y0 = x0[ind_sort]
+    ycum = np.cumsum(y0)
+    val = 1.0/np.arange(1,d+1) * (ycum - radius)
+    ind = np.nonzero(y0 > val)[0]
+    rho = ind[-1]
+    tau = val[rho]
+    y = y0 - tau
+    ind = np.nonzero(y < 0)
+    y[ind] = 0
+    x = x0.copy()
+    x[ind_sort] = y
+    return x, tau, .5*np.dot(x-a, x-a)
+
 
 
 log_of_2 = log(2)

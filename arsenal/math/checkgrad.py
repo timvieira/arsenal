@@ -103,6 +103,9 @@ def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar
 
             keys = range(len(w))
 
+    else:
+        d = {}
+
     for k in (iterview(keys) if progressbar else keys):
         was = w[k]
         w[k] = was + eps
@@ -117,15 +120,21 @@ def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar
                    verbose=verbose)
 
 
-def quick_fdcheck(func, w, g, n_checks, eps = 1e-5, verbose=1, progressbar=1):
+def quick_fdcheck(func, w, g, n_checks = 20, eps = 1e-5, verbose=1, progressbar=1):
     "Check gradient along random directions (a faster alternative to axis-aligned directions)."
     keys = ['rand_%s' % i for i in range(n_checks)]
     H = {}
     G = {}
 
-    was = w.copy()
+    was = w.flatten()
+
+    w = np.asarray(w.flat)
+    g = np.asarray(g.flat)
+
+    dim = len(w)
+
     for k in (iterview(keys) if progressbar else keys):
-        d = spherical(w.shape[0])
+        d = spherical(dim)
         G[k] = g.dot(d)
         w[:] = was + eps*d
         b = func()

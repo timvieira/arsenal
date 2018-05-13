@@ -128,8 +128,8 @@ class compare(object):
             tests.append(['zero F1', F, F > 0.99])
 
         if n > 1:
-            self.cosine = cosine(expect, got)
-            tests.append(['cosine', self.cosine, (self.cosine > 0.99999)])   # cosine similarities must be really high.
+            #self.cosine = cosine(expect, got)
+            #tests.append(['cosine', self.cosine, (self.cosine > 0.99999)])   # cosine similarities must be really high.
 
             self.pearson = 1.0 if ne == ng == 0 else pearsonr(expect, got)[0]
             tests.append(['pearson', self.pearson, (self.pearson > 0.99999)])
@@ -220,7 +220,7 @@ class compare(object):
             lines.append('  %s: %s' % (k, c % (v,)))
         return '\n'.join(lines)
 
-    def plot(self, regression=True, seaborn=False, ax=None, **scatter_kw):
+    def plot(self, regression=True, seaborn=False, ax=None, title=None, **scatter_kw):
         if ax is not None:
             self.ax = ax
         if seaborn:
@@ -237,6 +237,15 @@ class compare(object):
                 self.ax.set_title(self.name)
             self.ax.set_xlabel(self.got_label)
             self.ax.set_ylabel(self.expect_label)
+            # Keeps the plot region tight against the data (allow 5% of the
+            # data-range for padding so that points in the scatter plot aren't
+            # partially clipped.)
+            xeps = 0.05 * self.got.ptp()
+            self.ax.set_xlim(self.got.min() - xeps, self.got.max() + xeps)
+            yeps = 0.05 * self.expect.ptp()
+            self.ax.set_ylim(self.expect.min() - yeps, self.expect.max() + yeps)
+        if title is not None:
+            self.ax.set_title(title)
         if regression:
             self.regression_line()
         return self
@@ -297,6 +306,9 @@ class compare(object):
 
         s_expect = dot_aligned(self.expect)
         s_got = dot_aligned(self.got)
+
+        if self.alphabet is None:
+            self.alphabet = range(self.n)
 
         for (i,(x,y,sx,sy)) in enumerate(zip(self.expect, self.got, s_expect, s_got)):
             # XXX: skip zeros.

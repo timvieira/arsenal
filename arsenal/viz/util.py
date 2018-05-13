@@ -35,28 +35,53 @@ AX = defaultdict(newax)
 DATA = defaultdict(list)
 
 
-def contour_plot(f, xdomain, ydomain, color=True):
+# TODO: [2018-04-18 Wed] Add support for visualizing constraints. Apparently,
+# I'm constantly plotting constraints these days.
+#
+#  - There may be better ways to implement this (better defaults at least)
+#
+#    - Look into rasbt's decision boundary plotting script for some example usage of all these things.
+#       https://github.com/rasbt/mlxtend/blob/62aea2a9fb6fafdecedfa041a2121c002e47dac9/mlxtend/plotting/decision_regions.py
+#
+#    - figure out the difference between contoutr/contourf)
+#
+#    - Look into value interpolation strategies
+#      https://matplotlib.org/gallery/images_contours_and_fields/triinterp_demo.html#sphx-glr-gallery-images-contours-and-fields-triinterp-demo-py.
+#
+#    - For constraints look at value mask:
+#      https://matplotlib.org/gallery/images_contours_and_fields/contour_corner_mask.html#sphx-glr-gallery-images-contours-and-fields-contour-corner-mask-py
+#
+# - For rendering constraints, we might want to use hatching instead of
+#   something opaque.
+#
+def contour_plot(f, xdomain, ydomain, color='viridis', alpha=0.5, levels=None):
     "Contour plot of a function of two variables."
     [xmin, xmax, _] = xdomain; [ymin, ymax, _] = ydomain
     X, Y = np.meshgrid(np.linspace(*xdomain), np.linspace(*ydomain))
-    Z = np.array([f([x,y]) for (x,y) in zip(X.flat, Y.flat)]).reshape(X.shape)
-    contours = pl.contour(X, Y, Z, 20, colors='black')
+    Z = np.array([f(np.array([x,y])) for (x,y) in zip(X.flat, Y.flat)]).reshape(X.shape)
+    contours = pl.contour(X, Y, Z, 20, colors='black', levels=levels)
     pl.clabel(contours, inline=True, fontsize=8)
-    if color:
-        pl.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin='lower', cmap='RdGy', alpha=0.5)
+    if color is not None:
+        pl.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin='lower', cmap=color, alpha=alpha)
         pl.axis(aspect='scalar')
     pl.gcf().tight_layout()
     pl.xlim(xmin,xmax); pl.ylim(ymin,ymax)
 
+# TODO: No need to say "plot" we're already in a module called "viz". The whole
+# point is reduce clutter when plotting.
+contour = contour_plot
 
-def plot3d(f, xdomain, ydomain, color=True):
+# TODO: Create an alias which case-analyzes and plots 3d vs 2d accordingly?
+# TODO: also support interactive sliders and animation for when there are more parameters. use the same range notation.
+def plot3d(f, xdomain, ydomain, color=True, ax=None):
     "3d surface plot of a function of two variables."
     from mpl_toolkits.mplot3d import Axes3D
     [xmin, xmax, _] = xdomain; [ymin, ymax, _] = ydomain
     X, Y = np.meshgrid(np.linspace(*xdomain), np.linspace(*ydomain))
     Z = np.array([f(np.array([x,y])) for (x,y) in zip(X.flat, Y.flat)]).reshape(X.shape)
-    ax = pl.figure().gca(projection='3d')
+    ax = pl.figure().gca(projection='3d') if ax is None else ax
     ax.plot_surface(X, Y, Z, cmap='viridis', linewidth=0, antialiased=True)
+    return ax
 
 
 class NumericalDebug(object):

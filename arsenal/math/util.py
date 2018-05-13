@@ -396,7 +396,11 @@ def kl_divergence(p, q):
     """ Compute KL divergence of two vectors, K(p || q).
     NOTE: If any value in q is 0.0 then the KL-divergence is infinite.
     """
-    return dot(p, log(p) - log(q)) / log_of_2
+    nz = p.nonzero()
+    p = p[nz]
+    q = q[nz]
+    return p.dot(log(p) - log(q)) / log_of_2
+#    return dot(p, log(p) - log(q)) / log_of_2
 
 
 # KL(p||q) = sum_i p[i] log(p[i] / q[i])

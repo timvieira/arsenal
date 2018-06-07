@@ -87,22 +87,15 @@ def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar
         progressbar = 0
 
     if keys is None:
-        if hasattr(w, 'keys'):
+        if hasattr(w, 'keys'):  # support for sparse vectors represented as a dictionary-like object.
             keys = w.keys()
             d = {}
         else:
-            d = np.zeros_like(w)
-
             # use flat views, if need be.
-            if len(w.shape) > 1:
-                w = w.flat
-            if len(g.shape) > 1:
-                g = g.flat
-            if len(d.shape) > 1:
-                d = d.flat
-
-            keys = range(len(w))
-
+            if len(w.shape) > 1: w = w.flat
+            if len(g.shape) > 1: g = g.flat
+            d = np.zeros_like(w)
+            keys = range(len(w))    # TODO: these keys have lost their names. So not good for debugging.
     else:
         d = {}
 

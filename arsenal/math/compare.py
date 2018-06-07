@@ -27,6 +27,30 @@ def check_equal(expect, got, verbose=0, **kwargs):
     return c
 
 
+def align(X, Y, distance=lambda x,y: abs(x - y)):
+    """
+    Find a cheap alignment of X and Y.
+    """
+    from scipy.optimize import linear_sum_assignment
+    assert len(X) == len(Y)
+    n = len(X)
+    c = np.zeros((n, n))
+    for i, x in enumerate(X):
+        for j, y in enumerate(Y):
+            c[i,j] = distance(x, y)
+
+    rs,cs = linear_sum_assignment(c)
+
+    class result:
+        cost = c[rs,cs].sum()
+        x = list(X[r] for r in rs)
+        y = list(Y[c] for c in cs)
+        x_ind = rs
+        y_ind = cs
+
+    return result
+
+
 class compare(object):
 
     def __init__(self, expect, got, name=None, data=None, P_LARGER=0.9,
@@ -58,7 +82,13 @@ class compare(object):
 
          - Indicate which dimensions have the largest errors.
 
+         - Add option to allow alignment/matchings?
+
         """
+
+        from arsenal import Alphabet
+        if isinstance(alphabet, Alphabet):
+            alphabet = alphabet.tolist()
 
         if isinstance(expect, dict) and isinstance(got, dict):
             alphabet = expect.keys() if alphabet is None else alphabet
@@ -329,7 +359,6 @@ class compare(object):
 
         df.sort(reverse=1)
 
-
         if len(df):
             print ' Largest errors'
             print ' ==============='
@@ -354,6 +383,7 @@ class compare(object):
         #df = DataFrame(df)
         #df.set_index('name', inplace=1)
         #print df.sort('error', ascending=0)
+        return self
 
 
 if __name__ == '__main__':

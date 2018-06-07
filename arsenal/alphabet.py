@@ -1,7 +1,7 @@
 import os
 from numpy.random import randint
 
-
+# TODO: create separate classes for randomized integerization
 class Alphabet(object):
     """
     Bijective mapping from strings to integers.
@@ -127,14 +127,21 @@ class Alphabet(object):
             yield self._flip[i]
 
     def enum(self):
+        assert not self._random_int
         for i in xrange(len(self)):
             yield (i, self._flip[i])
+
+    def tolist(self):
+        "Ordered list of the alphabet's keys."
+        assert not self._random_int
+        return [self._flip[i] for i in xrange(len(self))]
 
     def __len__(self):
         return len(self._mapping)
 
     def plaintext(self):
         "assumes keys are strings"
+        assert not self._random_int
         return '\n'.join(self)
 
     @classmethod

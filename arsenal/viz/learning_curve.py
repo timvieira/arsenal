@@ -25,6 +25,9 @@ class LearningCurve(object):
         self.legend = legend
         self.averaging = averaging
 
+        self.yscale = None
+        self.xscale = None
+
     def plot(self):
         if self.ax is None:
             self.ax = pl.figure().add_subplot(111)
@@ -70,9 +73,10 @@ class LearningCurve(object):
                     ax.plot(xs, M, lw=2, c=l.get_color())
                     ax.fill_between(xs, U, L, color=l.get_color(), alpha=0.25)
 
-            ax.set_title(self.name)
-            if self.legend:
-                ax.legend(loc='best')
+            if self.xscale: ax.set_xscale(self.xscale)
+            if self.yscale: ax.set_yscale(self.yscale)
+            if self.name:   ax.set_title(self.name)
+            if self.legend: ax.legend(loc='best')
 
     def update(self, iteration, **kwargs):
         "Update plots, if ``iteration is None`` we'll use ``iteration=len(data)``"

@@ -9,12 +9,22 @@ from scipy import stats
 from arsenal.terminal import yellow, green, red
 from arsenal.iterview import progress
 from scipy.stats import pearsonr, spearmanr
+from contextlib import contextmanager
 
 
 def wide_dataframe():
     import pandas as pd
     from arsenal.terminal import console_width
     pd.set_option('display.width', console_width())
+
+
+@contextmanager
+def set_printoptions(*args, **kw):
+    "Context manager for numpy's print options."
+    was = np.get_printoptions()
+    np.set_printoptions(*args, **kw)
+    yield
+    np.set_printoptions(**was)
 
 
 def onehot(i, n):

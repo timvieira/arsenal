@@ -1,7 +1,7 @@
 """Caching with pickle and the file system.
 
 """
-import cPickle
+import pickle
 from path import path
 from arsenal.fsutils import filesize
 from arsenal.timer import timeit
@@ -12,13 +12,13 @@ def load(filename, default=None, saveit=False, verbose=False):
     f = path(filename)
     if f.exists():
         if verbose:
-            print '[load] %s, size = %s' % (f, filesize(f))
+            print('[load] %s, size = %s' % (f, filesize(f)))
             with timeit('[load] %s' % filename):
                 with file(f) as pkl:
-                    return cPickle.load(pkl)
+                    return pickle.load(pkl)
         else:
             with file(f) as pkl:
-                return cPickle.load(pkl)
+                return pickle.load(pkl)
     else:
         if default is None:
             raise OSError("File not found '%s'" % filename)
@@ -34,9 +34,9 @@ def save(filename, val, verbose=False):
     if verbose:
         with timeit('[save] %s' % filename):
             with file(filename, 'wb') as pkl:
-                cPickle.dump(val, pkl)
-            print '[save] %s, size = %s' % (filename, filesize(filename))
+                pickle.dump(val, pkl)
+            print('[save] %s, size = %s' % (filename, filesize(filename)))
     else:
         with file(filename, 'wb') as pkl:
-            cPickle.dump(val, pkl)
+            pickle.dump(val, pkl)
     return val

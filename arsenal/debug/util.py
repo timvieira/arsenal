@@ -8,7 +8,7 @@ import inspect
 import traceback
 
 
-from arsenal.debug import saverr  # registers hook
+#from arsenal.debug import saverr  # registers hook
 try:
     from IPython import embed as ip
 except ImportError:
@@ -75,15 +75,15 @@ def dumpobj(o, callables=False, private=False):
                        x: int
                        y: str
     """
-    print repr(o)
-    print 'instance of:', type(o).__name__
+    print(repr(o))
+    print('instance of:', type(o).__name__)
     for a in dir(o):
         if not callables and callable(getattr(o, a)):
             continue
         if not private and a.startswith('__'):
             continue
         try:
-            print '%20s: %s' % (a, type(getattr(o,a)).__name__)
+            print('%20s: %s' % (a, type(getattr(o,a)).__name__))
         except:
             pass
 
@@ -100,7 +100,7 @@ def debug(s, *args, **kwargs):
     c_args, c_varargs, c_varkw, c_locals = inspect.getargvalues(c_frame)
     d = dict(c_locals)
     d.update(kwargs)
-    print s.format(*args, **d)
+    print(s.format(*args, **d))
 
 
 debug_expr_fmt = '[DEBUG:%s] %s -> %r'
@@ -130,14 +130,14 @@ def debug_expr(expr):
     """
     cf = sys._getframe(1)   # caller frame
     val = eval(expr, cf.f_globals, cf.f_locals)
-    print debug_expr_fmt % (cf.f_code.co_name, expr, val)
+    print(debug_expr_fmt % (cf.f_code.co_name, expr, val))
 
 
 def debugx(obj):
     """
     I often write debugging print statements which look like
       >>> somevar = 'somevalue'
-      >>> print 'somevar:', somevar
+      >>> print('somevar:', somevar)
       somevar: somevalue
 
     What this function attempts to do is provide a shortcut
@@ -164,7 +164,7 @@ def debugx(obj):
     ctx_lines = inspect.getframeinfo(cf).code_context
     code = ''.join(map(str.strip, ctx_lines))
     code = re.sub('debugx\((.*)\)', r'\1', code)
-    print code + ':', obj
+    print(code + ':', obj)
 
 
 # TIMV: would it be possibe to change this function to work without raising
@@ -196,21 +196,21 @@ def framedump():
         f = f.f_back
     stack.reverse()
 
-    print 'Traceback:'
-    print '=========='
-    print traceback.format_exc()
+    print('Traceback:')
+    print('==========')
+    print(traceback.format_exc())
 
-    print 'Locals by frame:'
-    print '================'
+    print('Locals by frame:')
+    print('================')
     for frame in stack:
-        print 'Frame %s in %s at line %s' % (frame.f_code.co_name,
+        print('Frame %s in %s at line %s' % (frame.f_code.co_name,
                                              frame.f_code.co_filename,
-                                             frame.f_lineno)
-        for key, value in frame.f_locals.iteritems():
-            print '%20s = %r' % (key, value)
+                                             frame.f_lineno))
+        for key, value in frame.f_locals.items():
+            print('%20s = %r' % (key, value))
 
-        print
-        print
+        print()
+        print()
 
 
 if __name__ == '__main__':
@@ -231,22 +231,22 @@ if __name__ == '__main__':
             """Pad each string in seq with zeros, to four places."""
             return_value = []
             for thing in seq:
-                return_value.append("0" * (4 - len(thing)) + thing)
+                return_value.append("0" * (4 - len(thing)) + thing)   # intensionally buggy
             return return_value
 
-        print '============================================================'
-        print 'The usual information'
-        print '============================================================'
+        print('============================================================')
+        print('The usual information')
+        print('============================================================')
         # First, show the information we get from a normal traceback.print_exc().
         try:
             pad4(data)
         except:
             traceback.print_exc()
 
-        print
-        print '============================================================'
-        print 'Tracebacks with the frame dump'
-        print '============================================================'
+        print()
+        print('============================================================')
+        print('Tracebacks with the frame dump')
+        print('============================================================')
 
         # With our new function it is to see the bad data that
         # caused the problem. The variable 'thing' has the value 3, so we know

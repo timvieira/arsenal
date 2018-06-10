@@ -72,10 +72,10 @@ class Alphabet(object):
         return inst
 
     def keys(self):
-        return self._mapping.iterkeys()
+        return iter(self._mapping.keys())
 
     def items(self):
-        return self._mapping.iteritems()
+        return iter(self._mapping.items())
 
     def imap(self, seq, emit_none=False):
         """
@@ -139,11 +139,11 @@ class Alphabet(object):
         self._flip[v] = k
 
     def __iter__(self):
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             yield self._flip[i]
 
     def enum(self):
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             yield (i, self._flip[i])
 
     def __len__(self):
@@ -152,22 +152,6 @@ class Alphabet(object):
     def plaintext(self):
         "assumes keys are strings"
         return '\n'.join(self)
-
-    @classmethod
-    def load(cls, filename):
-        if not os.path.exists(filename):
-            return cls()
-        with file(filename) as f:
-            return cls.from_iterable(l.strip() for l in f)
-
-    def save(self, filename):
-        with file(filename, 'wb') as f:
-            f.write(self.plaintext())
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
 
 
 def normalize(p):
@@ -233,11 +217,11 @@ def kl_filter(data,
         label_count = defaultdict(int)
         for label, _ in data:
             label_count[label] += 1
-        label_count = label_count.items()
+        label_count = list(label_count.items())
         label_count.sort(key=lambda x: -x[1])  # sort by count
-        print 'label count'
+        print('label count')
         for k,v in label_count:
-            print '%20s => %s' % (k, v)
+            print('%20s => %s' % (k, v))
         sys.exit(0)
 
     K = len(L)
@@ -249,7 +233,7 @@ def kl_filter(data,
         iterview = lambda x, *a, **kw: x
 
     if progress:
-        print >> sys.stderr, '\nTally'
+        print('\nTally', file=sys.stderr)
 
     # label-feature tally (note: we ignore dulicate features)
     counts = zeros((K,M))
@@ -262,12 +246,12 @@ def kl_filter(data,
         cut = feature_counts < feature_count_cuttoff
 
         #if verbose:
-        print >> sys.stderr, '%s of %s below cutoff of %s' \
-            % (cut.sum(), len(feature_counts), feature_count_cuttoff)
+        print('%s of %s below cutoff of %s' \
+            % (cut.sum(), len(feature_counts), feature_count_cuttoff), file=sys.stderr)
 
         if progress:
-            print >> sys.stderr, '%s / %s (%.2f%%) features below cuttoff' % \
-                (cut.sum(), M, cut.sum()*100.0/M)
+            print('%s / %s (%.2f%%) features below cuttoff' % \
+                (cut.sum(), M, cut.sum()*100.0/M), file=sys.stderr)
 
         # zero-out features below cuttoff
         counts[:, cut] = 0
@@ -276,8 +260,8 @@ def kl_filter(data,
         cut = counts < feature_label_cuttoff
 
         if progress:
-            print >> sys.stderr, '%s / %s (%.2f%%) feature-label pairs below cuttoff' % \
-                (cut.sum(), K*M, cut.sum()*100.0/(K*M))
+            print('%s / %s (%.2f%%) feature-label pairs below cuttoff' % \
+                (cut.sum(), K*M, cut.sum()*100.0/(K*M)), file=sys.stderr)
 
         # zero-out features below cuffoff
         counts[cut] = 0
@@ -286,10 +270,10 @@ def kl_filter(data,
 
     # compute KL
     if progress:
-        print >> sys.stderr, '\nKL'
+        print('\nKL', file=sys.stderr)
 
     KL = zeros(M)
-    for f in iterview(xrange(M)):
+    for f in iterview(range(M)):
         label_given_f = lidstone(counts[:,f], 0.001)   # avoids divide-by-zero
         KL[f] = -kl_divergence(label_prior, label_given_f)
 
@@ -309,7 +293,7 @@ def kl_filter(data,
         z = (-KL[i], F.lookup(i), l)
 
         if verbose:
-            print >> out, '%8.6f\t%s\t%s' % (-KL[i], int(counts[:,i].sum()), F.lookup(i)), '\t\033[32m', ' '.join('%s(%.4f)' % (k,v) for v, k in l), '\033[0m'
+            print('%8.6f\t%s\t%s' % (-KL[i], int(counts[:,i].sum()), F.lookup(i)), '\t\033[32m', ' '.join('%s(%.4f)' % (k,v) for v, k in l), '\033[0m', file=out)
 
         yield z
 
@@ -317,7 +301,7 @@ def kl_filter(data,
 if __name__ == '__main__':
     from argparse import ArgumentParser
     p = ArgumentParser()
-    p.add_argument('input', type=file)
+    p.add_argument('input', type=open)
     p.add_argument('--feature-cuttoff', type=int, default=0)
     p.add_argument('--feature-label-cuttoff', type=int, default=0)
     p.add_argument('--progress', action='store_true')

@@ -123,18 +123,18 @@ class Alphabet(object):
         self._flip[v] = k
 
     def __iter__(self):
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             yield self._flip[i]
 
     def enum(self):
         assert not self._random_int
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             yield (i, self._flip[i])
 
     def tolist(self):
         "Ordered list of the alphabet's keys."
         assert not self._random_int
-        return [self._flip[i] for i in xrange(len(self))]
+        return [self._flip[i] for i in range(len(self))]
 
     def __len__(self):
         return len(self._mapping)

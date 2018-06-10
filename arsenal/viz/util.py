@@ -14,7 +14,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from matplotlib.backends.backend_pdf import PdfPages
 from arsenal.terminal import yellow
-from arsenal.viz.covariance_ellipse import covariance_ellipse
+#from arsenal.viz.covariance_ellipse import covariance_ellipse
 from arsenal.misc import ddict
 
 
@@ -25,7 +25,7 @@ def save_plots(pdf):
         pl.figure(i)
         pl.savefig(pp, format='pdf')
     pp.close()
-    print yellow % 'saved plots to "%s"' % pdf
+    print(yellow % 'saved plots to "%s"' % pdf)
 
 
 # global reference to all of the plots
@@ -147,7 +147,7 @@ def lineplot(name, with_ax=False, halflife=20, xlabel=None, ylabel=None, title=N
             yield (data, ax)
         else:
             yield data
-        ax.plot(range(len(data)), data, alpha=0.5, **style)
+        ax.plot(list(range(len(data))), data, alpha=0.5, **style)
         if halflife:
             ax.plot(pd.Series(data).ewm(halflife=halflife).mean(), alpha=0.5, c='k', lw=2)
 
@@ -207,5 +207,5 @@ def scatter_manager(name, with_ax=False, xlabel=None, ylabel=None, title=None, *
             yield (data, ax)
         else:
             yield data
-        x,y = zip(*data)
+        x,y = list(zip(*data))
         ax.scatter(x, y, alpha=0.5, lw=0, **style)

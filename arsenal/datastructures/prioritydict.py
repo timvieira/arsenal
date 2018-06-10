@@ -31,7 +31,7 @@ class prioritydict(dict):
         self._rebuild_heap()
 
     def _rebuild_heap(self):
-        self._heap = [(v, k) for k, v in self.iteritems()]
+        self._heap = [(v, k) for k, v in self.items()]
         heapify(self._heap)
 
     def pop_smallest(self, value=False):

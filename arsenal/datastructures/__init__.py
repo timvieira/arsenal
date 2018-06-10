@@ -1,1 +1,1 @@
-from orderedset import OrderedSet
+from .orderedset import OrderedSet

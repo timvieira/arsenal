@@ -6,9 +6,9 @@ def find_filename(obj, verbose=False):
     """Return the full filename of an instance. """
 
     if verbose:
-        print '[find_filename] %r' % (obj,)
+        print('[find_filename] %r' % (obj,))
 
-    if not isinstance(obj, basestring):
+    if not isinstance(obj, str):
 
         # Return the name of the Python source file in which an object was defined.
         # This will fail with a TypeError if the object is a built-in module, class,
@@ -17,11 +17,11 @@ def find_filename(obj, verbose=False):
             f = inspect.getsourcefile(obj)
         except TypeError as e:
             if verbose:
-                print '[find_filename] inspect.getsourcefile raised TypeError:', e
+                print('[find_filename] inspect.getsourcefile raised TypeError:', e)
             return None
 
     if verbose:
-        print '[find_filename] found filename', f
+        print('[find_filename] found filename', f)
 
     # don't visit *.pyc files
     f = os.path.splitext(f)
@@ -48,7 +48,7 @@ def edit(obj, verbose=True):
     filename = find_filename(obj, verbose=verbose)
     if not filename:
         if verbose:
-            print '[edit] no file found for %r' % (obj,)
+            print('[edit] no file found for %r' % (obj,))
         return
 
     try:
@@ -76,13 +76,13 @@ if __name__ == '__main__':
     import sys
     X = {}
     if len(sys.argv) == 2:
-        exec 'import %s as THING' % sys.argv[1] in X
+        exec('import %s as THING' % sys.argv[1], X)
     elif len(sys.argv) == 3:
 
         grab = '.'.join(['THING'] + sys.argv[2].split('.')[1:])
-        exec """from %s import %s as THING; THING=%s""" % (sys.argv[1], sys.argv[2].split('.')[0], grab) in X
+        exec("""from %s import %s as THING; THING=%s""" % (sys.argv[1], sys.argv[2].split('.')[0], grab), X)
 
     else:
-        print '%s <module> or %s <module> <object>' % (sys.argv[0], sys.argv[0])
+        print('%s <module> or %s <module> <object>' % (sys.argv[0], sys.argv[0]))
         sys.exit(1)
     edit(X['THING'])

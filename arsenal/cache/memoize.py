@@ -1,6 +1,6 @@
 import atexit
 import shelve
-import cPickle as pickle
+import pickle as pickle
 
 from functools import partial
 
@@ -94,9 +94,9 @@ class memoize_persistent(object):
     def save(self):
         if self.cache and self.dirty:
             pickle.dump((self.cache, self.key), file(self.filename,'wb'))
-            print '[ATEXIT] saved persistent cache for {self.func.__name__} to file "{self.filename}"'.format(self=self)
+            print('[ATEXIT] saved persistent cache for {self.func.__name__} to file "{self.filename}"'.format(self=self))
         else:
-            print "[ATEXIT] found nothing to save in {self.func.__name__}'s cache.".format(self=self)
+            print("[ATEXIT] found nothing to save in {self.func.__name__}'s cache.".format(self=self))
 
     def load(self):
         self.loaded = True

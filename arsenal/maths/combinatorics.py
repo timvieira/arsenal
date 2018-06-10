@@ -4,7 +4,7 @@ def k_subsets_i(n, k):
     if k == 0 or n < k:
         yield []
     elif n == k:
-        yield range(n)
+        yield list(range(n))
     else:
         # Use recursive formula based on binomial coeffecients:
         # choose(n, k) = choose(n-1, k-1) + choose(n-1, k)
@@ -28,58 +28,52 @@ def powerset(S):
         for s in k_subsets(S, k):
             yield list(s)
 
-# __________________________________________________________________________
-
-def xcombinations(items, n):
+def combinations(items, n):
+    "Ordered combinations"
     if n==0: yield []
     else:
-        for i in xrange(len(items)):
-            for cc in xcombinations(items[:i]+items[i+1:],n-1):
+        for i in range(len(items)):
+            for cc in combinations(items[:i]+items[i+1:],n-1):
                 yield [items[i]]+cc
 
-def xuniqueCombinations(items, n):
+def unordered_combinations(items, n):
+    "Unordered combinations"
     if n==0: yield []
     else:
-        for i in xrange(len(items)):
-            for cc in xuniqueCombinations(items[i+1:],n-1):
+        for i in range(len(items)):
+            for cc in unordered_combinations(items[i+1:],n-1):
                 yield [items[i]]+cc
 
-def xselections(items, n):
+def selections(items, n):
+    "Combinations with replacement"
     if n==0: yield []
     else:
-        for i in xrange(len(items)):
-            for ss in xselections(items, n-1):
+        for i in range(len(items)):
+            for ss in selections(items, n-1):
                 yield [items[i]]+ss
 
-def xpermutations(items):
-    return xcombinations(items, len(items))
-
-permutations = xpermutations
+def permutations(items):
+    "Permutations"
+    return combinations(items, len(items))
 
 
 if __name__ == '__main__':
 
     def test():
-        print "Permutations of 'love'"
-        for p in xpermutations(['l','o','v','e']):
-            print ''.join(p)
+        from scipy.special import factorial, binom
+        A = list(permutations(['l','o','v','e']))
+        assert(len(A) == factorial(4))
 
-        print
-        print "Combinations of 2 letters from 'love'"
-        for c in xcombinations(['l','o','v','e'],2):
-            print ''.join(c)
+        A = list(combinations(['l','o','v','e'], 2))
+        assert(len(A) == 2*binom(4, 2))
 
-        print
-        print "Unique Combinations of 2 letters from 'love'"
-        for uc in xuniqueCombinations(['l','o','v','e'],2):
-            print ''.join(uc)
+        A = list(unordered_combinations(['l','o','v','e'], 2))
+        assert(len(A) == binom(4, 2))
 
-        print
-        print "Selections of 2 letters from 'love'"
-        for s in xselections(['l','o','v','e'],2):
-            print ''.join(s)
+        A = list(selections(['l','o','v','e'], 2))
+        assert(len(A) == 4*4)
 
-        print
-        print map(''.join, list(xpermutations('done')))
+        A = list(powerset(['l','o','v','e']))
+        assert(len(A) == 2**4)
 
     test()

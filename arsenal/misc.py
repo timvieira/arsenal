@@ -1,16 +1,15 @@
-# stdlib
 import re, os, sys, traceback, warnings, webbrowser
-import subprocess, tempfile, BaseHTTPServer
+import subprocess, tempfile, http.server
 from functools import wraps
-from StringIO import StringIO
+from io import StringIO
 from contextlib import contextmanager
 from arsenal.terminal import colors
 
 
 def open_diff(a, b, cmd='meld'):
     "View diff of string representations in dedicated diff program."
-    print >> file('/tmp/a','wb'), a
-    print >> file('/tmp/b','wb'), b
+    print(a, file=open('/tmp/a','wb'))
+    print(b, file=open('/tmp/b','wb'))
     os.system('%s /tmp/a /tmp/b' % cmd)
 
 
@@ -59,9 +58,9 @@ def ignore_error(color='red'):
         else:
             color = '%s'
 
-        print color % '*'*80
-        print color % tb
-        print color % '*'*80
+        print(color % '*'*80)
+        print(color % tb)
+        print(color % '*'*80)
 
 
 #@deprecated
@@ -160,13 +159,13 @@ def browser(html):
     to retrieve html from that server.
     """
 
-    class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    class RequestHandler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
             bufferSize = 1024*1024
-            for i in xrange(0, len(html), bufferSize):
+            for i in range(0, len(html), bufferSize):
                 self.wfile.write(html[i:i+bufferSize])
 
-    server = BaseHTTPServer.HTTPServer(('127.0.0.1', 0), RequestHandler)
+    server = http.server.HTTPServer(('127.0.0.1', 0), RequestHandler)
     webbrowser.open('http://127.0.0.1:%s' % server.server_port)
     server.handle_request()
 
@@ -201,7 +200,7 @@ def ctx_redirect_io(f=None):
     r"""
     Usage example:
       >>> with ctx_redirect_io() as io_target:
-      ...    print 'how is this for io?'
+      ...    print('how is this for io?')
       >>> io_target.getvalue()
       'how is this for io?\n'
     """
@@ -227,9 +226,9 @@ def redirect_io(f):
     Usage Example:
         >>> @redirect_io
         ... def foo(x):
-        ...    print x
+        ...    print(x)
         >>> foo('hello?')
-        >>> print foo.io_target.getvalue()    # doctest:+NORMALIZE_WHITESPACE
+        >>> print(foo.io_target.getvalue())    # doctest:+NORMALIZE_WHITESPACE
         hello?
         >>>
     """
@@ -250,7 +249,7 @@ if __name__ == '__main__':
         def test_redirect_io():
             @redirect_io
             def foo(x):
-                print x
+                print(x)
             msg = 'hello there?'
             foo(msg)
             assert str(foo.io_target.getvalue().strip()) == msg
@@ -258,7 +257,7 @@ if __name__ == '__main__':
         test_redirect_io()
 
     run_tests()
-    print 'passed'
+    print('passed')
 
     doctest.testmod()
 

@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 import numpy as np
 import pylab as pl
 from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
@@ -494,7 +494,7 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
         if throw:
             raise AssertionError(msg)
         else:
-            print msg
+            print(msg)
 
     err = inf_norm(a,b)
     if np.array(a == b).all():   # handles the non-finite cases.
@@ -507,9 +507,9 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
             raise AssertionError(msg + ' >= tolerance (%s)' % tol)
         else:
             if not color:
-                print msg, 'ok' if err < tol else 'fail'
+                print(msg, 'ok' if err < tol else 'fail', sep=' ')
             else:
-                print msg, green % 'ok' if err < tol else red % 'fail'
+                print(msg, green % 'ok' if err < tol else red % 'fail', sep=' ')
 
 
 if __name__ == '__main__':
@@ -548,7 +548,7 @@ if __name__ == '__main__':
                                array([0.9, 0.1]))
 
         def test_softmax_grad():
-            from arsenal.math.checkgrad import fdcheck
+            from arsenal.maths.checkgrad import fdcheck
             n = 20
             adj = np.random.uniform(-1,1,size=n)
             x = np.random.uniform(-1,1,size=n)
@@ -560,6 +560,6 @@ if __name__ == '__main__':
 
         assert relative_difference(np.inf, np.inf) == 0.0
 
-        print 'passed tests.'
+        print('passed tests.')
 
     run_tests()

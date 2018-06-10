@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from arsenal.math import compare, spherical
+from arsenal.maths import compare, spherical
 from arsenal.iterview import iterview
 
 
@@ -88,14 +88,14 @@ def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar
 
     if keys is None:
         if hasattr(w, 'keys'):  # support for sparse vectors represented as a dictionary-like object.
-            keys = w.keys()
+            keys = list(w.keys())
             d = {}
         else:
             # use flat views, if need be.
             if len(w.shape) > 1: w = w.flat
             if len(g.shape) > 1: g = g.flat
             d = np.zeros_like(w)
-            keys = range(len(w))    # TODO: these keys have lost their names. So not good for debugging.
+            keys = list(range(len(w)))    # TODO: these keys have lost their names. So not good for debugging.
     else:
         d = {}
 
@@ -184,10 +184,10 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
 
     if keys is None:
         if alphabet is not None:
-            keys = alphabet._flip.keys()
+            keys = list(alphabet._flip.keys())
             assert len(alphabet), 'Alphabet is empty.'
         else:
-            keys = range(len(theta))
+            keys = list(range(len(theta)))
         if random_subset is not None:
             if hasattr(random_subset, '__iter__'):
                 keys = list(random_subset)
@@ -210,7 +210,7 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
         # centered difference
         fd[i] = (right - left) / (2*eps)
 
-    w = max(map(len, alphabet.keys())) if alphabet is not None else 0
+    w = max(list(map(len, list(alphabet.keys())))) if alphabet is not None else 0
 
     nzeros = 0
 
@@ -227,24 +227,24 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
             fails += 1
 
             if verbose:
-                print red % 'dim = %s rel-err = %5.3f' % (('%%-%ss' % w) % (name,), relative_error), \
-                    'want: %g; got: %g' % (fd[i], grad[i])
+                print(red % 'dim = %s rel-err = %5.3f' % (('%%-%ss' % w) % (name,), relative_error), \
+                    'want: %g; got: %g' % (fd[i], grad[i]))
             else:
                 assert False, \
                     'dim = %s rel-err = %5.3f, want: %g; got: %g' \
                     % (('%%-%ss' % w) % (name,), relative_error, fd[i], grad[i])
 
     if nzeros * 1.0 / len(keys) >= 0.75:
-        print yellow % '[warning] checkgradient skipped a lot of approximately zero components ' \
-            'percentage= %g (%s/%s)' % (nzeros * 1.0 / len(keys), nzeros, len(keys))
+        print(yellow % '[warning] checkgradient skipped a lot of approximately zero components ' \
+            'percentage= %g (%s/%s)' % (nzeros * 1.0 / len(keys), nzeros, len(keys)))
 
     if verbose:
-        print 'gradient:',
+        print('gradient:', end=' ')
         if not fails:
-            print green % 'OK',
+            print(green % 'OK', end=' ')
         else:
-            print red % 'failed %s of %s' % (fails, len(keys)),
+            print(red % 'failed %s of %s' % (fails, len(keys)), end=' ')
 
-        print 'cosine similarity: %g' % cosine(grad[keys], fd[keys])
+        print('cosine similarity: %g' % cosine(grad[keys], fd[keys]))
 
         # TODO: add sign check.

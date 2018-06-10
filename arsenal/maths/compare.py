@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import pylab as pl
 import pandas as pd
@@ -5,7 +6,7 @@ from scipy.stats import pearsonr, spearmanr
 from scipy.linalg import lstsq, norm
 from arsenal import colors
 from arsenal.iterview import progress
-from arsenal.math.util import cdf, cosine, linf, relative_difference, zero_retrieval
+from arsenal.maths.util import cdf, cosine, linf, relative_difference, zero_retrieval
 
 
 def pp_plot(a, b, pts=100, show_line=True):
@@ -228,9 +229,9 @@ class compare(object):
             self.message()
 
     def message(self):
-        print
-        print self.format_message()
-        print
+        print()
+        print(self.format_message())
+        print()
 
     def format_message(self):
         lines = [
@@ -258,7 +259,7 @@ class compare(object):
             sns.set_context(rc={"figure.figsize": (7, 5)})
             g = sns.JointGrid(self.got_label, self.expect_label, data=self.data)
             g.plot(sns.regplot, sns.distplot, spearmanr)
-            print "Pearson's r: {0}".format(self.pearson)
+            print("Pearson's r: {0}".format(self.pearson))
         else:
             if self.ax is None:
                 self.ax = pl.figure().add_subplot(111)
@@ -360,8 +361,8 @@ class compare(object):
         df.sort(reverse=1)
 
         if len(df):
-            print ' Largest errors'
-            print ' ==============='
+            print(' Largest errors')
+            print(' ===============')
             for e, n, x, y, sx, sy in df:
 
                 types = []
@@ -375,9 +376,9 @@ class compare(object):
                 if (x >= 0) != (y >= 0):
                     types.append(colors.red % 'wrong sign')
 
-                print '  %-15s %.2f%%   %s  %s' % (n, e, sx, sy), \
+                print('  %-15s %.2f%%   %s  %s' % (n, e, sx, sy), \
                     ((colors.green % 'ok') if e <= 0.01 else colors.red % 'bad'), \
-                    '(%s)' % (', '.join(types))
+                    '(%s)' % (', '.join(types)))
 
         #from pandas import DataFrame
         #df = DataFrame(df)

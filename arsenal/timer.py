@@ -1,3 +1,4 @@
+from __future__ import division, print_function
 import numpy as np
 from sys import stderr
 from time import time
@@ -89,10 +90,10 @@ class Timer(object):
 
     def compare(self, other, attr='avg', verbose=True):
         if len(self.times) == 0 or len(other.times) == 0:
-            print '%s %s %s' % (self.name, '???', other.name)
+            print('%s %s %s' % (self.name, '???', other.name))
             return
         if getattr(self, attr) <= getattr(other, attr):
-            print '%s is %6.4fx faster than %s %s' \
+            print('%s is %6.4fx faster than %s %s' \
                 % (self.name,
                    getattr(other, attr) / getattr(self, attr),
                    other.name,
@@ -100,7 +101,7 @@ class Timer(object):
                                                       other.name, getattr(other, attr),
                                                       self.name, getattr(self, attr)))
                     if verbose else '')
-                )
+                ))
         else:
             other.compare(self, attr=attr, verbose=verbose)
 
@@ -185,7 +186,7 @@ class Timer(object):
 def timeit(name, fmt='{name} ({htime})', header=None):
     """Context Manager which prints the time it took to run code block."""
     if header is not None:
-        print header
+        print(header)
     b4 = time()
     yield
     sec = time() - b4
@@ -193,7 +194,7 @@ def timeit(name, fmt='{name} ({htime})', header=None):
         ht = '%.4f sec' % sec
     else:
         ht = htime(sec)
-    print >> stderr, fmt.format(name=name, htime=ht, sec=sec)
+    print(fmt.format(name=name, htime=ht, sec=sec), file=stderr)
 
 #timesection = lambda x: timeit(header='%s...' % x,
 #                               msg=' -> %s took %%.2f seconds' % x)
@@ -214,7 +215,7 @@ def main():
                 sleep(z)
 
     a = t.plot_feature('i')
-    print a
+    print(a)
     pl.show()
 
 

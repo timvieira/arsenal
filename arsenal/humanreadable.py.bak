@@ -160,12 +160,12 @@ def print_elapsed_time():
         secs = clock() - begin
         mins, secs = divmod(secs, 60)
         hrs, mins = divmod(mins, 60)
-        print()
-        print('======================================================================')
-        print('Started on', strftime("%B %d, %Y at %I:%M:%S %p", started))
-        print('Finished on', strftime("%B %d, %Y at %I:%M:%S %p", localtime()))
-        print('Total time: %02d:%02d:%02d' % (hrs, mins, secs))
-        print()
+        print
+        print '======================================================================'
+        print 'Started on', strftime("%B %d, %Y at %I:%M:%S %p", started)
+        print 'Finished on', strftime("%B %d, %Y at %I:%M:%S %p", localtime())
+        print 'Total time: %02d:%02d:%02d' % (hrs, mins, secs)
+        print
     atexit.register(hook)
 
 
@@ -188,7 +188,7 @@ if __name__ == '__main__':
             timedelta(days=2): '2 days ago',
         }
 
-        for t, v in list(examples.items()):
+        for t, v in examples.items():
             assert datestr(d, now=d+t) == v
 
     test()
@@ -250,4 +250,4 @@ def str2bool(s):
             'on'   : True,  'off'  : False,
         }[s.lower()]
     except KeyError:
-        raise ValueError('Unrecognized boolean string: "%s"' % s)
+        raise ValueError, 'Unrecognized boolean string: "%s"' % s

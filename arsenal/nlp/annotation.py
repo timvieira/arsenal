@@ -1,6 +1,6 @@
 import re
 from arsenal.misc import force
-from itertools import imap
+
 
 class ParseError(Exception):
     """ Custom exception class used by this module. """
@@ -81,7 +81,7 @@ def sgml2bio(x):
     """
     for (tag, tokens) in sgml2segmentation(x):
         tokens = iter(tokens)
-        yield ('B-' + tag, tokens.next())
+        yield ('B-' + tag, next(tokens))
         for w in tokens:
             yield ('I-' + tag, w)
 
@@ -112,7 +112,7 @@ def bracket2bio(x):
             yield ('O', word)
         else:
             words = iter(tagged.split())
-            yield ('B-%s' % label, words.next())
+            yield ('B-%s' % label, next(words))
             for w in words:
                 if '[' in w or ']' in w:
                     raise ParseError('brackets can not appear within a word.')
@@ -148,7 +148,7 @@ def extract_contiguous(s, labeler=None):
     [Span(label='A', begins=0, ends=2), Span(label='B', begins=2, ends=5)]
     """
     if labeler is not None:
-        s = imap(labeler, s)
+        s = map(labeler, s)
     prev = None
     b = e = 0
     for e, token in enumerate(s):
@@ -165,7 +165,7 @@ def extract_contiguous(s, labeler=None):
 @force
 def bio2span(seq, tagger=None, include_O=True):
     if tagger is not None:
-        seq = imap(tagger, seq)
+        seq = map(tagger, seq)
     phrase = None
     intag = None
     for i, lbl in enumerate(seq):
@@ -203,6 +203,6 @@ if __name__ == '__main__':
     def main():
         for line in piped() or []:
             for (label, w) in sgml2bio(line):
-                print '%s\t%s' % (label, w)
-            print
+                print('%s\t%s' % (label, w))
+            print()
     main()

@@ -1,4 +1,5 @@
-from __future__ import division, print_function
+import pylab as pl
+import pandas as pd
 import numpy as np
 from sys import stderr
 from time import time
@@ -7,8 +8,10 @@ from arsenal.humanreadable import htime
 from arsenal.terminal import yellow
 from arsenal.misc import ddict
 
+
 def timers(title=None):
     return Benchmark(title)
+
 
 class Benchmark(object):
     def __init__(self, title):
@@ -17,22 +20,21 @@ class Benchmark(object):
     def __getitem__(self, name):
         return self.timers[name]
     def compare(self):
-        Timer.compare_many(*self.timers.values())
+        Timer.compare_many(*list(self.timers.values()))
     def values(self):
-        return self.timers.values()
+        return list(self.timers.values())
     def keys(self):
-        return self.timers.keys()
+        return list(self.timers.keys())
     def items(self):
-        return self.timers.items()
+        return list(self.timers.items())
     def __len__(self):
         return len(self.timers)
     def __iter__(self):
         return iter(sorted(self.keys()))
     def plot_feature(self, feature, timecol='timer', ax=None, **kw):
         if ax is None:
-            import pylab as pl
             ax = pl.figure().add_subplot(111)
-        for t in self.timers.values():
+        for t in list(self.timers.values()):
             t.plot_feature(feature=feature,
                            timecol=timecol,
                            ax=ax,
@@ -111,6 +113,8 @@ class Timer(object):
                 self.compare(x, **kw)
 
     def plot_feature(self, feature, timecol='timer', ax=None, show='avg', **kw):
+        if ax is None:
+            ax = pl.figure().add_subplot(111)
         df = self.dataframe(timecol)
         a = df.groupby(feature).mean()
 
@@ -130,7 +134,6 @@ class Timer(object):
             ax.set_ylabel('average time (seconds)')
 
         if ax is None:
-            import pylab as pl
             ax = pl.figure().add_subplot(111)
 
         if 'label' not in kw:
@@ -157,23 +160,21 @@ class Timer(object):
         return a
 
     def dataframe(self, timecol='timer'):
-        import pandas as pd
         df = pd.DataFrame(list(self.features))
         df[timecol] = self.times
         return df
 
     def filter(self, f, name=None):
         t = Timer(name)
-        t.times, t.features = zip(*[(x,y) for (x,y) in zip(self.times, self.features) if f(x,y)])
+        t.times, t.features = list(zip(*[(x,y) for (x,y) in zip(self.times, self.features) if f(x,y)]))
         return t
 
     def bucket_filter(self, feature_to_bucket, bucket_filter):
-        import pandas as pd
         df = self.dataframe()
         data = []
         for k, d in df.groupby(feature_to_bucket):
             d = d[bucket_filter(k, d)]
-            _, x = zip(*d.iterrows())
+            _, x = list(zip(*d.iterrows()))
             data.append(x)
         return pd.DataFrame(data)
 
@@ -196,19 +197,15 @@ def timeit(name, fmt='{name} ({htime})', header=None):
         ht = htime(sec)
     print(fmt.format(name=name, htime=ht, sec=sec), file=stderr)
 
-#timesection = lambda x: timeit(header='%s...' % x,
-#                               msg=' -> %s took %%.2f seconds' % x)
-
 
 def main():
-    import pylab as pl
     from arsenal.iterview import iterview
     from time import sleep
     from numpy.random import uniform
     t = Timer('test')
 
-    for i in iterview(xrange(1, 20)):
-        for _ in xrange(10):
+    for i in iterview(range(1, 20)):
+        for _ in range(10):
             with t(i=i):
                 c = 0.01
                 z = max(i**2 * 0.0001 + uniform(-c, c), 0.0)

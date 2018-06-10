@@ -8,7 +8,7 @@ TODO: Have a look at
 
 """
 
-from __future__ import division
+
 from collections import defaultdict
 
 
@@ -41,14 +41,14 @@ class F1:
         relevant  = self.relevant
         retrieved = self.retrieved
 
-        print r"""
+        print(r"""
 \begin{tabular}{|l|c|c|c|c|}
 \hline
  Label         &   Count   &   Precision   &   Recall   &   $F_1$   \\
-\hline"""
+\hline""")
 
         tbl = []
-        labels = self.relevant.keys()
+        labels = list(self.relevant.keys())
         labels.sort()
         for label in labels:
             R = P = F = 0
@@ -60,29 +60,29 @@ class F1:
                 P = len(top) / len(retrieved[label])
             if P + R != 0:
                 F = 2*P*R / (P + R)
-            print r' %8s & %5d & %5.1f & %5.1f & %5.1f \\' % (label, count, P*100, R*100, F*100)
+            print(r' %8s & %5d & %5.1f & %5.1f & %5.1f \\' % (label, count, P*100, R*100, F*100))
             tbl.append((label,count,P,R,F))
 
-        print r"""\hline
+        print(r"""\hline
 \end{tabular}
-"""
+""")
         return tbl
 
     def scores(self, verbose=True):
         relevant  = self.relevant
         retrieved = self.retrieved
         if verbose:
-            m = max(map(len, self.relevant)) if self.relevant else 0
+            m = max(list(map(len, self.relevant))) if self.relevant else 0
             fmt = ' | %{0}s | %5d | %5.1f | %5.1f | %5.1f |'.format(m)
 
             line = ' |' + '='*m + '==================================|'
 
-            print line
-            print ' |', ' '*m, '|   C   |   P   |   R   |   F   |'
-            print line
+            print(line)
+            print(' |', ' '*m, '|   C   |   P   |   R   |   F   |')
+            print(line)
 
         tbl = []
-        labels = self.relevant.keys()
+        labels = list(self.relevant.keys())
         labels.sort()
         for label in labels:
             R = P = F = 0
@@ -95,24 +95,24 @@ class F1:
             if P + R != 0:
                 F = 2*P*R / (P + R)
             if verbose:
-                print fmt % (label, count, P*100, R*100, F*100)
+                print(fmt % (label, count, P*100, R*100, F*100))
                 #t.add_row([label, P*100, R*100, F*100])
             tbl.append((label,count,P,R,F))
         if verbose:
-            print line
+            print(line)
             #print t
         return tbl
 
     def confusion(self):
         assert self.confusion_matrix is not None
-        for t, predictions in self.confusion_matrix.iteritems():
-            incorrect = sum(cnt for p,cnt in predictions.items() if t != p)
-            print '%s [correct: %s; incorrect: %s]' % (t, predictions[t], incorrect)
-            for predicted, cnt in predictions.iteritems():
+        for t, predictions in self.confusion_matrix.items():
+            incorrect = sum(cnt for p,cnt in list(predictions.items()) if t != p)
+            print('%s [correct: %s; incorrect: %s]' % (t, predictions[t], incorrect))
+            for predicted, cnt in predictions.items():
                 if t != predicted:
                     incorrect += cnt
-                    print '      %6s -> %s' % (predicted, cnt)
-            print
+                    print('      %6s -> %s' % (predicted, cnt))
+            print()
 
 
 def plot_confusion(y_true, y_pred, alphabet, normalized=False):
@@ -147,7 +147,7 @@ def plot_confusion(y_true, y_pred, alphabet, normalized=False):
     if normalized:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
-    print cm
+    print(cm)
 
     pl.figure()
     plot_confusion_matrix(cm, title='Confusion matrix')

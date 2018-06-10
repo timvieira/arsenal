@@ -40,12 +40,12 @@ def mkdir(d, verbose=False):
         os.makedirs(d)
     except OSError as e:
         if verbose:
-            print '[ensuredir]', d, 'suppressing:', e
+            print('[ensuredir]', d, 'suppressing:', e)
         if e.errno != 17:  # errno 17: File exists (you probably don't have permissions)
             raise
     else:
         if verbose:
-            print '[ensuredir] created', d
+            print('[ensuredir] created', d)
     return d
 
 
@@ -112,7 +112,7 @@ class preserve_cwd(object):
 
 
 @contextmanager
-def atomicwrite(filename, mode=0666, verbose=False):
+def atomicwrite(filename, mode=0o666, verbose=False):
     """
     Write to `filename` atomically, if for some reason an error occurs in this
     context the contents of the file prior to entering will not be lost.
@@ -127,9 +127,9 @@ def atomicwrite(filename, mode=0666, verbose=False):
                                        dir=os.path.dirname(filename))
 
     if verbose:
-        print '[atomicwrite] using temporary file:', tmp_filename
+        print('[atomicwrite] using temporary file:', tmp_filename)
 
-    with file(tmp_filename, 'wb') as f:
+    with open(tmp_filename, 'wb') as f:
         yield f
 
     try:
@@ -170,9 +170,9 @@ def secure_filename(filename):
     to ensure that the filename is unique and that you generate random
     filename if the function returned an empty one.
     """
-    if isinstance(filename, unicode):
+    if isinstance(filename, str):
         from unicodedata import normalize
-        filename = normalize('NFKD', filename).encode('ascii', 'ignore')
+        filename = normalize('NFKD', filename).encode('ascii', 'ignore').decode('ascii')
     for sep in os.path.sep, os.path.altsep:
         if sep:
             filename = filename.replace(sep, ' ')
@@ -215,7 +215,7 @@ def find_new_title(d, filename):
 
 
 def files(d, abspath=False):
-    """ recursively list all files. """
+    "Recursively list all files."
     for dirpath, _, filenames in os.walk(d):
         for f in filenames:
             f = os.path.join(dirpath, f)
@@ -279,6 +279,6 @@ if __name__ == '__main__':
             assert os.getcwd() == cwd_before
 
         test_preserve_cwd()
-        print 'done.'
+        print('done.')
 
     run_tests()

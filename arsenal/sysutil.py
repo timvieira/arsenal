@@ -1,4 +1,4 @@
-from __future__ import division
+
 from psutil import Process
 from os import getpid
 
@@ -10,4 +10,4 @@ def memory_usage():
 
 
 if __name__ == '__main__':
-    print 'memory usage: %.2f MB' % memory_usage()
+    print('memory usage: %.2f MB' % memory_usage())

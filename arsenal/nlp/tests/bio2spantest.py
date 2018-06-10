@@ -56,19 +56,19 @@ def test_bio2span():
     ]
 
     for x, expected in tests:
-        print x
+        print(x)
         got = bio2span(x, include_O=False)
         if expected == got:
-            print '\033[32mpassed\033[0m'
+            print('\033[32mpassed\033[0m')
         else:
-            print '\033[31mfailed:\033[0m'
-            print '  expected:', expected
-            print '       got:', got
-        print
+            print('\033[31mfailed:\033[0m')
+            print('  expected:', expected)
+            print('       got:', got)
+        print()
 
 
-    print '*************************************************************************'
-    print '** Including O Spans.'
+    print('*************************************************************************')
+    print('** Including O Spans.')
 
     include_O = [
         (['O','B-NUM','I-DATE'], 
@@ -94,18 +94,18 @@ def test_bio2span():
     ]
 
     for x, expected in include_O:
-        print x
+        print(x)
         got = bio2span(x, include_O=True)
         if expected == got:
-            print '\033[32mpassed\033[0m'
+            print('\033[32mpassed\033[0m')
         else:
-            print '\033[31mfailed:\033[0m'
-            print '  expected:', expected
-            print '       got:', got
+            print('\033[31mfailed:\033[0m')
+            print('  expected:', expected)
+            print('       got:', got)
             raise AssertionError
-        print
+        print()
 
-    print 'passed test_bio2span'
+    print('passed test_bio2span')
 
 
 if __name__ == '__main__':

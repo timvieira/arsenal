@@ -2,7 +2,7 @@ import os
 from arsenal.fsutils import mkdir, secure_filename
 from arsenal.robust import timelimit, retry
 from arsenal.misc import ignore_error
-from urllib2 import Request, build_opener
+from urllib.request import Request, build_opener
 
 
 def urlread(url):
@@ -20,41 +20,6 @@ def urlread(url):
     headers = response.headers
     contents = response.read()
     return code, headers, contents
-
-
-#from functools import wraps
-#
-# TODO: use this decorator in download... and test it...
-#def cached_to_file(args2filename):
-#    """
-#    Decorator to cache output of function to file. If file exists contents are
-#    returned and function is never called.
-#    """
-#
-#    def _f1(fn):
-#
-#        @wraps(fn)
-#        def _f2(*args, **kwargs):
-#
-#            filename = args2filename(*args, **kwargs)
-#
-#            if os.path.exists(filename):
-#                return file(filename).read()
-#
-#            val = fn(*args, **kwargs)
-#
-#            try:
-#                with file(filename, 'wb') as f:
-#                    f.write(val)
-#            except:
-#                try:
-#                    os.remove(filename)
-#                except OSError:
-#                    pass
-#
-#        return _f2
-#
-#    return _f1
 
 
 def download(url, usecache=True, cached=None, cachedir='cache~/', cachedonly=False, **opts):
@@ -114,12 +79,12 @@ def robust_download(url, filename, tries=3, pause=0.1, timeout=30, verbose=True)
     """
 
     if verbose:
-        print 'trying to download %s to file://%s' % (url, filename)
+        print('trying to download %s to file://%s' % (url, filename))
 
     @retry(tries=tries, pause=pause)
     @timelimit(timeout=timeout)
     def _download():
-        with file(filename, 'wb') as f:
+        with open(filename, 'wb') as f:
             [code, _, contents] = urlread(url)
             assert code == 200
             f.write(contents)
@@ -131,13 +96,13 @@ def robust_download(url, filename, tries=3, pause=0.1, timeout=30, verbose=True)
 
     # delete file on failure
     if not result:
-        if verbose: print '  failed to download'
+        if verbose: print('  failed to download')
         if os.path.exists(filename):
-            if verbose: print '  deleting file'
+            if verbose: print('  deleting file')
             os.remove(filename)
         return
     else:
-        if verbose: print '  download successful'
+        if verbose: print('  download successful')
         return filename
 
 

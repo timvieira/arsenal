@@ -163,12 +163,12 @@ def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newli
 
 if __name__ == '__main__':
     from time import sleep
-    for _ in iterview(xrange(400), every=20):
+    for _ in iterview(range(400), every=20):
         sleep(0.005)
-    for _ in iterview(xrange(10000), msg='foo', mintime=0.25):
+    for _ in iterview(range(10000), msg='foo', mintime=0.25):
         sleep(0.0001)
     # Print time elapsed if we terminate earlier than expected.
-    for i in iterview(xrange(10000), msg='foo', mintime=0.25):
+    for i in iterview(range(10000), msg='foo', mintime=0.25):
         if i == 2000:
             break
         sleep(0.001)

@@ -56,10 +56,10 @@ if __name__ == '__main__':
     def test():
 
         with assert_throws(Exception):
-            print 1/0
+            print(1/0)
 
         with assert_throws(ZeroDivisionError):
-            print 1/0
+            print(1/0)
 
         with assert_throws(None):
             pass
@@ -72,6 +72,6 @@ if __name__ == '__main__':
         else:
             raise AssertionError('test failed.')
 
-        print 'Passed basic tests.'
+        print('Passed basic tests.')
 
     test()

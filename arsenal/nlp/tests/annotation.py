@@ -7,21 +7,21 @@ def equals_mod_whitespace(a,b):
     return re.sub('\s*', '', a) == re.sub('\s*', '', b)
 
 def test_sgml_reconstruction():
-    reference_dataset = '/home/timv/projects/data/citations/tagged_references.txt'
+    reference_dataset = '/home/timv/projects/crf/data/tagged_references.txt'
 
-    with file(reference_dataset, 'r') as f:
+    with open(reference_dataset, 'r') as f:
         for sgml in line_groups(f.read(), '<NEW.*?>'):
-    
-            (labels, tokens) = zip(*sgml2bio(sgml))
-            
+
+            (labels, tokens) = list(zip(*sgml2bio(sgml)))
+
             # convert spans to sgml
             spans = bio2span(labels)
             reconstructed = ' '.join('<%s>%s</%s>' % (l, ' '.join(tokens[b:e]), l) for (l,b,e) in spans)
-    
+
             assert equals_mod_whitespace(reconstructed, sgml), \
                 'reconstructed example should only differ in whitespace.'
 
-    print 'passed sgml reconstruction test.'
+    print('passed sgml reconstruction test.')
 
 if __name__ == '__main__':
     test_sgml_reconstruction()

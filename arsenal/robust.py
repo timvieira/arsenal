@@ -73,7 +73,7 @@ def retry_apply(fn, args, kwargs=None, tries=2, pause=0.1, suppress=(Exception,)
     """
     if kwargs is None:
         kwargs = {}
-    for i in xrange(tries):
+    for i in range(tries):
         try:
             return fn(*args, **kwargs)
         except allow:          # raise these exceptions
@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
         with assert_throws(NotCalledEnough):
             f = TroublsomeFunction()
-            print retry_apply(f, (10,), tries=2)
+            print(retry_apply(f, (10,), tries=2))
 
 
         def create_trouble(tries_needs, attempts):
@@ -169,4 +169,4 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    print 'passed tests..'
+    print('passed tests..')

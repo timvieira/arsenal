@@ -33,7 +33,7 @@ def mc_paired_perm_test(xs, ys, nmc):
     n, k = len(xs), 0.0
     zs = xs - ys
     diff = np.abs(np.mean(zs))
-    for _ in xrange(nmc):
+    for _ in range(nmc):
         signs = np.random.randint(0,2,n) * 2 - 1
         k += diff <= np.abs(np.mean(signs * zs))
     return k / nmc
@@ -41,7 +41,7 @@ def mc_paired_perm_test(xs, ys, nmc):
 
 def verbose_paired_perm_test(xs, ys, nmc=1000, threshold=0.05, fmt='%.4f'):
     "Let xs be the system you want be greater."
-    from arsenal import colors
+    from arsenal.terminal import colors
 
     p = mc_paired_perm_test(xs, ys, nmc)
 
@@ -58,10 +58,10 @@ def verbose_paired_perm_test(xs, ys, nmc=1000, threshold=0.05, fmt='%.4f'):
         c = colors.yellow
         d = '~'
 
-    print '[paired perm] %s (p=%s)' % (c % 'X (%s) %s Y (%s)' % (fmt % mx,
+    print('[paired perm] %s (p=%s)' % (c % 'X (%s) %s Y (%s)' % (fmt % mx,
                                                                  d,
                                                                  fmt % my),
-                                       fmt % p)
+                                       fmt % p))
 
 
 if __name__ == '__main__':

@@ -70,32 +70,12 @@ class adam(object):
         ewma(self.m, g, b1t)
         # Update second moment estimate
         ewma(self.v, g*g, b2)
-#        # Bias correction
-#        mhat = self.m * (learning_rate / (1-(1-b1)**(i+1)))
-#        vhat = self.v / (1-(1-b2)**(i+1))
-#        # Update parameters
-#        np.sqrt(vhat, out=vhat)
-#        vhat += damping
-#        mhat /= vhat           # inplace
-#        # this is the analogue of stepsize in adam. this doen't capture the
-#        # momentum in the numerator
-#        self.D = learning_rate/vhat
-#        self.x -= mhat
-
-        mhat = self.m / (1 - (1-b1)**i)    # Bias correction.
+        # Bias correction.
+        mhat = self.m / (1 - (1-b1)**i)
         vhat = self.v / (1 - (1-b2)**i)
+        # Take step
         self.x[:] -= learning_rate*mhat/(np.sqrt(vhat) + damping)
         self.i += 1
-
-#        mhat = self.m / (1 - (1-b1)**i)    # Bias correction.
-#        vhat = self.v / (1 - (1-b2)**i)
-#        np.sqrt(vhat, out=vhat)
-#        vhat += damping
-#        mhat *= learning_rate
-#        mhat /= vhat
-#        self.x[:] -= mhat
-#        self.i += 1
-
 
 
 class sgd_momentum(object):

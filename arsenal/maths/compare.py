@@ -104,9 +104,9 @@ class compare(object):
             got = got.flatten()
 
         if data is not None:
-            assert isinstance(expect, (int, basestring)), \
+            assert isinstance(expect, (int, str)), \
                 'expected a column name got %s' % type(expect)
-            assert isinstance(got, (int, basestring)), \
+            assert isinstance(got, (int, str)), \
                 'expected a column name got %s' % type(got)
 
             if expect_label is None:

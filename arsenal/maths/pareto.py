@@ -26,7 +26,7 @@ def pareto_frontier(X, Y, maxX=True, maxY=True, indices=False):
     yy = -1 if maxY else +1
     key = lambda xy: (xy[0] * xx, xy[1] * yy)   # need to break ties
 
-    a = sorted(zip(X, Y, range(len(X))), key=key)
+    a = sorted(zip(X, Y, list(range(len(X)))), key=key)
     frontier = []
     lastx = float('inf') * xx
     lasty = float('inf') * yy
@@ -38,8 +38,8 @@ def pareto_frontier(X, Y, maxX=True, maxY=True, indices=False):
             lasty = y
             lastx = x
 
-    x,y,i = zip(*frontier)
-    return list(i) if indices else zip(x,y)
+    x,y,i = list(zip(*frontier))
+    return list(i) if indices else list(zip(x,y))
 
 
 def pareto_ix(X, Y, *a, **kw):
@@ -115,10 +115,10 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
 
     f = pareto_frontier(X, Y, maxX=maxX, maxY=maxY)
     if not f:
-        print yellow % '[warn] Empty frontier'
+        print(yellow % '[warn] Empty frontier')
         return
     if dots:
-        xs, ys = zip(*f)
+        xs, ys = list(zip(*f))
         ax.scatter(xs, ys, lw=0, alpha=0.5, c=sty['c'])
 
     XMIN = min(min(X), XMIN) if XMIN is not None else min(X)
@@ -230,7 +230,7 @@ def test():
         dd = DataFrame(data)
         pl.scatter(dd.y, dd.val, lw=0, c='r')
         pl.scatter(dd.val, dd.x, lw=0, c='g')
-        print dd
+        print(dd)
 
         #P.scatter(c='r', lw=0)
         P.show_frontier(c='r', lw=4)

@@ -1,7 +1,7 @@
 import numpy as np
 import heapq
 from operator import getitem, itemgetter
-from itertools import chain, count, cycle, imap, islice, izip, repeat, tee
+from itertools import chain, count, cycle, islice, repeat, tee
 from random import shuffle
 from collections import defaultdict
 from arsenal.iterview import iterview
@@ -82,7 +82,7 @@ def partition(data, proportion):
     >>> partition(range(10), [0.3, 0.7])
     [[0, 1, 2], [3, 4, 5, 6, 7, 8, 9]]
     """
-    assert sum(proportion) <= 1
+    assert(sum(proportion) <= 1)
     data = list(data)
     D = iter(data)
     N = len(data)
@@ -116,7 +116,7 @@ def breadth_first(tree, children=iter, depth=-1, queue=None):
 
 def compress(data, selectors):
     "compress('ABCDEF', [1,0,1,0,1,1]) --> A C E F"
-    return (d for d, s in izip(data, selectors) if s)
+    return (d for d, s in zip(data, selectors) if s)
 
 
 def cross_lower_triangle(it):
@@ -157,12 +157,27 @@ def imerge(*iterables):
     """
     heappop, siftup, _StopIteration = heapq.heappop, heapq._siftup, StopIteration
 
+    from functools import total_ordering
+    @total_ordering
+    class comparable:
+        def __init__(self, elem, next):
+            self.elem = elem
+            self.next = next
+        def __le__(self, other):
+            return self.elem < other.elem
+        def __eq__(self, other):
+            return self.elem == other.elem
+        def __iter__(self):
+            return iter((self.elem, self.next))
+
+    assert comparable(1,0) == comparable(1, None)
+
     h = []
     h_append = h.append
     for it in map(iter, iterables):
         try:
-            _next = it.next
-            h_append([_next(), _next])
+            _next = it.__next__
+            h_append(comparable(_next(), _next))
         except _StopIteration:
             pass
     heapq.heapify(h)
@@ -172,7 +187,7 @@ def imerge(*iterables):
             while 1:
                 v, _next = s = h[0]     # raises IndexError when h is empty
                 yield v
-                s[0] = _next()          # raises StopIteration when exhausted
+                s.elem = _next()          # raises StopIteration when exhausted
                 siftup(h, 0)            # restore heap condition
         except _StopIteration:
             heappop(h)                  # remove empty iterator
@@ -185,15 +200,15 @@ def floor(stream, baseline=None):
 
     The baseline, if supplied, is an upper limit for the floor.
     >>> ff = floor((1, 2, -2, 3))
-    >>> assert list(ff) == [1, 1, -2, -2]
+    >>> assert(list(ff) == [1, 1, -2, -2])
     >>> ff = floor((1, 2, -2, 3), 0)
-    >>> assert list(ff) == [0, 0, -2, -2]
+    >>> assert(list(ff) == [0, 0, -2, -2])
     """
     stream = iter(stream)
     m = baseline
     if m is None:
         try:
-            m = stream.next()
+            m = next(stream)
             yield m
         except StopIteration:
             pass
@@ -202,75 +217,64 @@ def floor(stream, baseline=None):
         yield m
 
 
-def ceil(stream):
-    """Generate the stream of maximum values from the input stream.
-
-    >>> top = ceil([0, -1, 2, -2, 3])
-    >>> assert list(top) == [0, 0, 2, 2, 3]
-    """
-    stream = iter(stream)
-    try:
-        M = stream.next()
-        yield M
-    except StopIteration:
-        pass
-    for s in stream:
-        M = max(M, s)
-        yield M
-
-
-def iter_length(it):
-    """
-    Calculate the length or an iterator
-    >>> iter_length(xrange(100))
-    100
-    >>> iter_length(None for _ in xrange(100))
-    100
-    """
-    return sum(1 for _ in it)
-
-
-def accumulate(stream):
-    """Generate partial sums from the stream.
-
-    >>> accu = accumulate([1, 2, 3, 4])
-    >>> assert list(accu) == [1, 3, 6, 10]
-    """
-    total = 0
-    for s in stream:
-        total += s
-        yield total
+#def ceil(stream):
+#    """Generate the stream of maximum values from the input stream.
+#
+#    >>> top = ceil([0, -1, 2, -2, 3])
+#    >>> assert(list(top) == [0, 0, 2, 2, 3])
+#    """
+#    stream = iter(stream)
+#    try:
+#        M = next(stream)
+#        yield M
+#    except StopIteration:
+#        pass
+#    for s in stream:
+#        M = max(M, s)
+#        yield M
+#
+#
+#def accumulate(stream):
+#    """Generate partial sums from the stream.
+#
+#    >>> accu = accumulate([1, 2, 3, 4])
+#    >>> assert(list(accu) == [1, 3, 6, 10])
+#    """
+#    total = 0
+#    for s in stream:
+#        total += s
+#        yield total
 
 
-def rolling_average_reccurence(stream):
-    """General the rolling average of a stream using
-    the recurrence:
+#def rolling_average_reccurence(stream):
+#    """General the rolling average of a stream using
+#    the recurrence:
+#
+#        a[i] = (x[i] + i*a) / (i+1)
+#
+#    >>> list(rolling_average_reccurence(range(5)))
+#    [0, 0.5, 1.0, 1.5, 2.0]
+#    """
+#    stream = iter(enumerate(stream))
+#    a = stream.next()[1]
+#    yield a
+#    for i, x in stream:
+#        a = (x + i*a) * 1.0 / (i+1)
+#        yield a
 
-        a[i] = (x[i] + i*a) / (i+1)
 
-    >>> list(rolling_average_reccurence(range(5)))
-    [0, 0.5, 1.0, 1.5, 2.0]
-    """
-    stream = enumerate(stream)
-    a = stream.next()[1]
-    yield a
-    for i, x in stream:
-        a = (x + i*a) * 1.0 / (i+1)
-        yield a
-
-
-def rolling_average(stream):
-    """General the rolling average of a stream.
-
-    >>> list(rolling_average(range(5)))
-    [0.0, 0.5, 1.0, 1.5, 2.0]
-    """
-    acc = 0
-    N = 0
-    for x in stream:
-        acc += x
-        N += 1
-        yield acc * 1.0 / N
+#def rolling_average(stream):
+#    """General the rolling average of a stream.
+#
+#    >>> list(rolling_average(range(5)))
+#    [0.0, 0.5, 1.0, 1.5, 2.0]
+#    """
+#    acc = 0
+#    N = 0
+#    for x in stream:
+#        acc += x
+#        N += 1
+#        yield acc * 1.0 / N
 
 
 # TODO: can we be lazier? require fewer passes thru X?
@@ -286,7 +290,7 @@ def k_fold_cross_validation(X, K, randomize=False):
 
 
     >>> for train, test in k_fold_cross_validation(range(3), 3):
-    ...     print 'test:', test, ' train:', list(train)
+    ...     print('test:', test, ' train:', list(train), sep=' ')
     test: [0]  train: [1, 2]
     test: [1]  train: [0, 2]
     test: [2]  train: [0, 1]
@@ -299,11 +303,11 @@ def k_fold_cross_validation(X, K, randomize=False):
     # folds = [X[i::K] for i in xrange(K)]
 
     # run thru X once and splitting into folds
-    folds = [[] for k in xrange(K)]
+    folds = [[] for k in range(K)]
     for i, item in enumerate(X):
         folds[i % K].append(item)
 
-    for k in xrange(K):
+    for k in range(K):
         training = chain(*(fold for j, fold in enumerate(folds) if j != k))
         yield training, folds[k]
 
@@ -372,7 +376,7 @@ def roundrobin(*iterables):
 
     """
     pending = len(iterables)
-    nexts = cycle(iter(it).next for it in iterables)
+    nexts = cycle(iter(it).__next__ for it in iterables)
     while pending:
         try:
             for _next in nexts:
@@ -393,12 +397,12 @@ def window(iterable, k):
     iterators = tee(iterable, k)
     for i, it in enumerate(iterators):
         # advance iterator, 'it',  by i steps
-        for _ in xrange(i):
+        for _ in range(i):
             try:
-                it.next()    # advance by one
+                next(it)    # advance by one
             except StopIteration:
                 pass
-    return izip(*iterators)
+    return zip(*iterators)
 
 sliding_window = window
 
@@ -476,45 +480,45 @@ def batch(size, iterable):
 #        yield chain([batchiter.next()], batchiter)
 
 
-def iunzip(iterable, n=None):
-    """Takes an iterator that yields n-tuples and returns n iterators
-    which index those tuples.  This function is the reverse of izip().
-    n is the length of the n-tuple and will be autodetected if not
-    specified.  If the iterable contains tuples of differing sizes,
-    the behavior is undefined.
-
-    >>> a0,b0,c0 = range(1, 10), range(21, 30), range(81, 90)
-    >>> z = zip(a0,b0,c0)
-    >>> a, b, c = iunzip(z)
-    >>> a, b, c = map(list, (a,b,c))
-    >>> assert a == a0 and b == b0 and c == c0
-    >>> recombined = zip(a, b, c)
-    >>> assert recombined == z
-
-    """
-    iterable = iter(iterable) # ensure we're dealing with an iterable
-    if n is None: # check the first element for length
-        first = iterable.next()
-        n = len(first)
-        # now put it back in to iterable is unchanged
-        iterable = chain([first], iterable)
-
-    iter_tees = tee(iterable, n)
-    selector = lambda index: lambda item: getitem(item, index)
-    return [imap(selector(i), it) for i,it in izip(count(), iter_tees)]
+#def iunzip(iterable, n=None):
+#    """Takes an iterator that yields n-tuples and returns n iterators
+#    which index those tuples.  This function is the reverse of izip().
+#    n is the length of the n-tuple and will be autodetected if not
+#    specified.  If the iterable contains tuples of differing sizes,
+#    the behavior is undefined.
+#
+#    >>> a0,b0,c0 = range(1, 10), range(21, 30), range(81, 90)
+#    >>> z = zip(a0,b0,c0)
+#    >>> a, b, c = iunzip(z)
+#    >>> a, b, c = map(list, (a,b,c))
+#    >>> assert(a == a0 and b == b0 and c == c0)
+#    >>> recombined = zip(a, b, c)
+#    >>> assert(recombined == z)
+#
+#    """
+#    iterable = iter(iterable) # ensure we're dealing with an iterable
+#    if n is None: # check the first element for length
+#        first = next(iterable)
+#        n = len(first)
+#        # now put it back in to iterable is unchanged
+#        iterable = chain([first], iterable)
+#
+#    iter_tees = tee(iterable, n)
+#    selector = lambda index: lambda item: getitem(item, index)
+#    return [map(selector(i), it) for i,it in zip(count(), iter_tees)]
 
 
 if __name__ == '__main__':
 
     def test():
-        X = [[0 for i in xrange(4)] for j in xrange(4)]
-        for (k,(i,j)) in enumerate(cross_lower_triangle(range(4))):
+        X = [[0 for i in range(4)] for j in range(4)]
+        for (k,(i,j)) in enumerate(cross_lower_triangle(list(range(4)))):
             X[i][j] = k+1
         target = [[0, 0, 0, 0],
                   [1, 0, 0, 0],
                   [2, 3, 0, 0],
                   [4, 5, 6, 0]]
-        assert X == target
+        assert(X == target)
 
     test()
 

@@ -1,19 +1,19 @@
 import re
 from sys import stdout, stderr, stdin
 from glob import glob
-from cStringIO import StringIO
+from io import StringIO
 
 def print_parse(t, out=stdout.write):
     "Print parse formatted as an s-expression."
     def pp(t):
-        if isinstance(t, basestring):                    # base case
+        if isinstance(t, str):                    # base case
             return out(t)
         if len(t) == 1:
             if t[0]:
                 pp(t[0])
             return
         label, children = t[0], t[1:]
-        assert isinstance(label, basestring)
+        assert isinstance(label, str)
         out('(%s ' % label)
         n = len(children)
         for i, child in enumerate(children):
@@ -30,14 +30,14 @@ def pprint(t, out=stdout.write):
     def pp(t, indent=0, indentme=True):
         if indentme:
             out(' '*indent)
-        if isinstance(t, basestring):                    # base case
+        if isinstance(t, str):                    # base case
             return out(t)
         if len(t) == 1:
             if t[0]:
                 pp(t[0], indent, indentme)
             return
         label, children = t[0], t[1:]
-        assert isinstance(label, basestring)
+        assert isinstance(label, str)
         out('(%s ' % label)
         n = len(children)
         for i, child in enumerate(children):
@@ -123,9 +123,9 @@ def main():
 
     for filename in glob('/home/timv/projects/ldp/data/LDC99T42/treebank_3/parsed/mrg/wsj/*/*.mrg'):
         #print >> stderr, filename
-        print >> stderr, '.',
+        print('.', end=' ', file=stderr)
 
-        with file(filename) as f:
+        with open(filename) as f:
             contents = f.read()
             chunks = contents.split('( (')
 
@@ -137,17 +137,17 @@ def main():
 
             chunk = '( (' + chunk
 
-            print chunk
+            print(chunk)
 
             try:
                 tree = sexpr(chunk)
             except BadSexpr:
-                print >> stderr
-                print >> stderr, 'failed to parse tree'
-                print >> stderr, chunk
+                print(file=stderr)
+                print('failed to parse tree', file=stderr)
+                print(chunk, file=stderr)
                 continue
 
-            print tree
+            print(tree)
 #            features(tree)
 
 

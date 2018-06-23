@@ -3,7 +3,7 @@ Pareto frontier
 """
 import pylab as pl
 import numpy as np
-from arsenal.terminal import yellow
+from arsenal.terminal import colors
 from arsenal.iterextras import window
 
 
@@ -115,7 +115,7 @@ def show_frontier(X, Y, maxX=False, maxY=True, dots=False,
 
     f = pareto_frontier(X, Y, maxX=maxX, maxY=maxY)
     if not f:
-        print(yellow % '[warn] Empty frontier')
+        print(colors.yellow % '[warn] Empty frontier')
         return
     if dots:
         xs, ys = list(zip(*f))

@@ -172,11 +172,10 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
 
     """
 
-    import numpy as np
     from numpy import zeros_like
-    from arsenal.terminal import green, red, yellow
+    from arsenal.terminal import colors
     from random import sample
-    from arsenal.math import cosine
+    from arsenal.maths import cosine
 
     fails = 0
 
@@ -227,7 +226,7 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
             fails += 1
 
             if verbose:
-                print(red % 'dim = %s rel-err = %5.3f' % (('%%-%ss' % w) % (name,), relative_error), \
+                print(colors.red % 'dim = %s rel-err = %5.3f' % (('%%-%ss' % w) % (name,), relative_error), \
                     'want: %g; got: %g' % (fd[i], grad[i]))
             else:
                 assert False, \
@@ -235,15 +234,15 @@ def check_gradient(f, grad, theta, alphabet=None, eps=1e-4, tol=0.01, skip_zero=
                     % (('%%-%ss' % w) % (name,), relative_error, fd[i], grad[i])
 
     if nzeros * 1.0 / len(keys) >= 0.75:
-        print(yellow % '[warning] checkgradient skipped a lot of approximately zero components ' \
+        print(colors.yellow % '[warning] checkgradient skipped a lot of approximately zero components ' \
             'percentage= %g (%s/%s)' % (nzeros * 1.0 / len(keys), nzeros, len(keys)))
 
     if verbose:
         print('gradient:', end=' ')
         if not fails:
-            print(green % 'OK', end=' ')
+            print(colors.green % 'OK', end=' ')
         else:
-            print(red % 'failed %s of %s' % (fails, len(keys)), end=' ')
+            print(colors.red % 'failed %s of %s' % (fails, len(keys)), end=' ')
 
         print('cosine similarity: %g' % cosine(grad[keys], fd[keys]))
 

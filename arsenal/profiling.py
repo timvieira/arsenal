@@ -4,7 +4,7 @@ import os
 import sys
 import pstats
 import cProfile
-from arsenal.terminal import yellow
+from arsenal.terminal import colors
 from contextlib import contextmanager
 
 @contextmanager
@@ -26,7 +26,7 @@ def profiler(use='cprofile', filename='out.prof'):
     finally:
         if use == 'yep':  # pragma: no cover
             yep.stop()
-            print(yellow % 'wrote: %s' % filename, '(use `google-pprof` to view)')
+            print(colors.yellow % 'wrote: %s' % filename, '(use `google-pprof` to view)')
             # google-pprof --text /bin/ls imitation.prof
             # google-pprof --evince /bin/ls imitation.prof
             # google-pprof --web /bin/ls --web imitation.prof
@@ -36,7 +36,7 @@ def profiler(use='cprofile', filename='out.prof'):
             prof.disable()
             prof.dump_stats(filename)
             #pstats.Stats(filename).strip_dirs().sort_stats('time').print_stats()
-            print(yellow % 'wrote: %s' % filename, '(use `gprof-viz` to view)')
+            print(colors.yellow % 'wrote: %s' % filename, '(use `gprof-viz` to view)')
 
 
 # TODO:

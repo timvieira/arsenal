@@ -6,7 +6,7 @@ from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
 from numpy.random import uniform, normal
 from scipy.linalg import norm as _norm
 from scipy import stats
-from arsenal.terminal import yellow, green, red
+from arsenal.terminal import colors
 from arsenal.iterview import progress
 from scipy.stats import pearsonr, spearmanr
 from contextlib import contextmanager
@@ -509,7 +509,7 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
             if not color:
                 print(msg, 'ok' if err < tol else 'fail', sep=' ')
             else:
-                print(msg, green % 'ok' if err < tol else red % 'fail', sep=' ')
+                print(msg, colors.green % 'ok' if err < tol else colors.red % 'fail', sep=' ')
 
 
 if __name__ == '__main__':

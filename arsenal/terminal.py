@@ -1,54 +1,42 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 import sys
-
-
-normal = '\x1b[0m%s\x1b[0m'
-bold = '\x1b[1m%s\x1b[0m'
-italic = "\x1b[3m%s\x1b[0m"
-underline = "\x1b[4m%s\x1b[0m"
-strike = "\x1b[9m%s\x1b[0m"
-#overline = lambda x: (u''.join(unicode(c) + u'\u0305' for c in unicode(x))).encode('utf-8')
-
-leftarrow = '←'
-rightarrow = '→'
-reset = '\x1b[0m'
 
 
 def ansi(color=None, light=None, bg=3):
     return '\x1b[%s;%s%sm' % (light, bg, color)
 
+_reset = '\x1b[0m'
 
 def colorstring(s, c):
-    return c + s + reset
+    return c + s + _reset
+
 
 class colors:
     black, red, green, yellow, blue, magenta, cyan, white = \
         [colorstring('%s', ansi(c, 0)) for c in range(8)]
 
-    light_black, light_red, light_green, light_yellow, light_blue, light_magenta, light_cyan, light_white = \
-        [colorstring('%s', ansi(c, 1)) for c in range(8)]
+    class light:
+        black, red, green, yellow, blue, magenta, cyan, white = \
+            [colorstring('%s', ansi(c, 1)) for c in range(8)]
 
-    dark_black, dark_red, dark_green, dark_yellow, dark_blue, dark_magenta, dark_cyan, dark_white = \
-        [colorstring('%s', ansi(c, 2)) for c in range(8)]
+    class dark:
+        black, red, green, yellow, blue, magenta, cyan, white = \
+            [colorstring('%s', ansi(c, 2)) for c in range(8)]
 
-    bg_black, bg_red, bg_green, bg_yellow, bg_blue, bg_magenta, bg_cyan, bg_white = \
-        [colorstring('%s', ansi(c, 0, bg=4)) for c in range(8)]
+    class bg:
+        black, red, green, yellow, blue, magenta, cyan, white = \
+            [colorstring('%s', ansi(c, 0, bg=4)) for c in range(8)]
 
+    normal = '\x1b[0m%s\x1b[0m'
+    bold = '\x1b[1m%s\x1b[0m'
+    italic = "\x1b[3m%s\x1b[0m"
+    underline = "\x1b[4m%s\x1b[0m"
+    strike = "\x1b[9m%s\x1b[0m"
+    #overline = lambda x: (u''.join(unicode(c) + u'\u0305' for c in unicode(x))).encode('utf-8')
 
-# XXX: Redundant with class above. I did it for backward compatibility
-black, red, green, yellow, blue, magenta, cyan, white = \
-    [colorstring('%s', ansi(c, 0)) for c in range(8)]
-
-light_black, light_red, light_green, light_yellow, light_blue, light_magenta, light_cyan, light_white = \
-    [colorstring('%s', ansi(c, 1)) for c in range(8)]
-
-dark_black, dark_red, dark_green, dark_yellow, dark_blue, dark_magenta, dark_cyan, dark_white = \
-    [colorstring('%s', ansi(c, 2)) for c in range(8)]
-
-bg_black, bg_red, bg_green, bg_yellow, bg_blue, bg_magenta, bg_cyan, bg_white = \
-    [colorstring('%s', ansi(c, 0, bg=4)) for c in range(8)]
-
+    leftarrow = '←'
+    rightarrow = '→'
+    reset = _reset
 
 
 #def padr(w):
@@ -64,14 +52,14 @@ bg_black, bg_red, bg_green, bg_yellow, bg_blue, bg_magenta, bg_cyan, bg_white = 
 
 
 def check(x, t='pass', f='fail'):
-    return green % t if x else red % f
+    return colors.green % t if x else colors.red % f
 
 
 def color01(x, fmt='%.10f', min_color=235, max_color=255):
     "Colorize numbers in [0,1] based on value; darker means smaller value."
     import colored
     if not (0 <= x <= 1 + 1e-10):
-        return red % fmt % x
+        return colors.red % fmt % x
     width = max_color - min_color
     color = min_color + int(round(x*width))
     return '%s%s%s' % (colored.fg(color), (fmt % x), colored.attr('reset'))
@@ -87,35 +75,66 @@ def marquee(msg=''):
     return ('{0:*^%s}' % console_width()).format(msg)
 
 
+import re
+def render(y, debug=False):
+    """
+    Render colorful string using 'reset' to mean 'pop the color stack' rather than
+    go directly 'normal' color.
+    """
+    xs = re.split('(\x1b\[[0-9;]+m)', y)  # tokenize.
+    s = [_reset]      # stack
+    b = []            # buffer
+    prefix = '\x1b['  # control code prefix
+    c = _reset        # current color
+    for x in xs:
+        if debug: print('[render] current token', repr(x))
+        if x.startswith(prefix):
+            if debug: print('[render]   ^ control code')
+            if x == _reset:
+                c = s.pop() if len(s) else _reset
+            else:
+                s.append(c)
+                c = x
+            continue
+        else:
+            if debug: print('[render]   ^ use color', repr(c))
+            b.append(c)
+            b.append(x)
+    b.append(_reset)   # always end on reset.
+    return ''.join(b)
+
 
 def tests():
     for c in 'black, red, green, yellow, blue, magenta, cyan, white'.split(', '):
-        print('%18s %24s %23s %21s' % (globals()[c] % c,
-                                       globals()['light_' + c] % ('light_' + c),
-                                       globals()['dark_' + c] % ('dark_' + c),
-                                       globals()['bg_' + c] % ('bg_' + c)))
+        print('%18s %24s %23s %21s' % (getattr(colors, c) % c,
+                                       getattr(colors.light, c) % f'light.{c}',
+                                       getattr(colors.dark, c) % f'dark.{c}',
+                                       getattr(colors.bg, c) % f'bg.{c}'))
 
-    print(underline % 'underline')
-    print(italic % 'italic')
-    print(strike % 'strike')
+    print(colors.underline % 'underline')
+    print(colors.italic % 'italic')
+    print(colors.strike % 'strike')
 
     import numpy as np
     for x in np.linspace(0, 1, 15):
-        print(color01(x, fmt='%.2f'))
-
+        print(color01(x, fmt='%.2f'), end=' ')
     print()
-    print('Composability')
-    print('=============')
-    b = ((blue % 'blue %s blue') % (green % 'green'))
-    print('normal %s normal' % ((red % 'red %s red %s red') % (b,b)))
-
-    b = ((blue % 'blue {0} blue').format(green % 'green'))
-    print('normal {middle} normal'.format(middle = ((red % 'red %s red %s red') % (b,b))))
 
     w = console_width()
     print('Console width:', w, sep=' ')
     print('='*w)
     print(marquee(' marquee '))
+
+
+    print()
+    print('Stack-based rendering')
+    print('=====================')
+    g = colors.green % 'green'
+    b = colors.blue % f'blue {g} blue'
+    r = colors.red % f'red {b} red {b} red'
+    x = colors.normal % f'normal {r} normal'
+    print(render(x))
+
 
 
 if __name__ == '__main__':

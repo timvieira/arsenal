@@ -13,7 +13,7 @@ import numpy as np
 from collections import defaultdict
 from contextlib import contextmanager
 from matplotlib.backends.backend_pdf import PdfPages
-from arsenal.terminal import yellow
+from arsenal.terminal import colors
 #from arsenal.viz.covariance_ellipse import covariance_ellipse
 from arsenal.misc import ddict
 
@@ -25,7 +25,7 @@ def save_plots(pdf):
         pl.figure(i)
         pl.savefig(pp, format='pdf')
     pp.close()
-    print(yellow % 'saved plots to "%s"' % pdf)
+    print(colors.yellow % 'saved plots to "%s"' % pdf)
 
 
 # global reference to all of the plots
@@ -73,10 +73,10 @@ contour = contour_plot
 
 # TODO: Create an alias which case-analyzes and plots 3d vs 2d accordingly?
 # TODO: also support interactive sliders and animation for when there are more parameters. use the same range notation.
-def plot3d(f, xdomain, ydomain, color=True, ax=None):
+def plot3d(f, xdomain, ydomain, ax=None):
     "3d surface plot of a function of two variables."
-    from mpl_toolkits.mplot3d import Axes3D
-    [xmin, xmax, _] = xdomain; [ymin, ymax, _] = ydomain
+    #from mpl_toolkits.mplot3d import Axes3D
+    #[xmin, xmax, _] = xdomain; [ymin, ymax, _] = ydomain
     X, Y = np.meshgrid(np.linspace(*xdomain), np.linspace(*ydomain))
     Z = np.array([f(np.array([x,y])) for (x,y) in zip(X.flat, Y.flat)]).reshape(X.shape)
     ax = pl.figure().gca(projection='3d') if ax is None else ax
@@ -128,7 +128,7 @@ class NumericalDebug(object):
         return self
 
     def compare(self, expect='expect', got='got', show_regression=1, scatter=1, **kw):
-        from arsenal.math import compare
+        from arsenal.maths import compare
         if self.ax is None:
             self.ax = pl.figure().add_subplot(111)
         if self.df.empty:

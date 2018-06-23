@@ -92,9 +92,9 @@ class compare(object):
             alphabet = alphabet.tolist()
 
         if isinstance(expect, dict) and isinstance(got, dict):
-            alphabet = expect.keys() if alphabet is None else alphabet
+            alphabet = list(expect.keys()) if alphabet is None else alphabet
             assert set(got.keys()) == set(alphabet), \
-                'Keys differ.\n  got keys  = %s\n  want keys = %s' % (got.keys(), alphabet)
+                'Keys differ.\n  got keys  = %s\n  want keys = %s' % (set(got.keys()), set(alphabet))
             expect = [expect[k] for k in alphabet]
             got = [got[k] for k in alphabet]
 

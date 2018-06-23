@@ -5,7 +5,7 @@ from sys import stderr
 from time import time
 from contextlib import contextmanager
 from arsenal.humanreadable import htime
-from arsenal.terminal import yellow
+from arsenal.terminal import colors
 from arsenal.misc import ddict
 
 
@@ -99,7 +99,7 @@ class Timer(object):
                 % (self.name,
                    getattr(other, attr) / getattr(self, attr),
                    other.name,
-                   ((yellow % '(%s: %s: %g %s: %g)' % (attr,
+                   ((colors.yellow % '(%s: %s: %g %s: %g)' % (attr,
                                                       other.name, getattr(other, attr),
                                                       self.name, getattr(self, attr)))
                     if verbose else '')

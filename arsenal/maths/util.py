@@ -1,4 +1,3 @@
-
 import numpy as np
 import pylab as pl
 from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
@@ -10,7 +9,7 @@ from arsenal.terminal import colors
 from arsenal.iterview import progress
 from scipy.stats import pearsonr, spearmanr
 from contextlib import contextmanager
-
+from scipy.special import expit as sigmoid
 
 def wide_dataframe():
     import pandas as pd

@@ -56,9 +56,10 @@ DATA = defaultdict(list)
 #
 def contour_plot(f, xdomain, ydomain, color='viridis', alpha=0.5, levels=None):
     "Contour plot of a function of two variables."
+    from arsenal import iterview
     [xmin, xmax, _] = xdomain; [ymin, ymax, _] = ydomain
     X, Y = np.meshgrid(np.linspace(*xdomain), np.linspace(*ydomain))
-    Z = np.array([f(np.array([x,y])) for (x,y) in zip(X.flat, Y.flat)]).reshape(X.shape)
+    Z = np.array([f(np.array([x,y])) for (x,y) in iterview(zip(X.flat, Y.flat), length=len(X.flat))]).reshape(X.shape)
     contours = pl.contour(X, Y, Z, 20, colors='black', levels=levels)
     pl.clabel(contours, inline=True, fontsize=8)
     if color is not None:

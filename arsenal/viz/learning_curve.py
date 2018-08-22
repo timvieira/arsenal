@@ -7,6 +7,7 @@ from arsenal.viz.util import update_ax
 from arsenal.misc import ddict
 lc = ddict(lambda name: LearningCurve(name))
 
+from time import time
 
 class LearningCurve(object):
     """
@@ -16,7 +17,6 @@ class LearningCurve(object):
     def __init__(self, name, sty=None, legend=True, averaging=True):
         self.name = name
         self.baselines = {}
-        self.baselines_reward = {}
         self.data = defaultdict(list)
         self.sty = defaultdict(dict)
         if sty is not None:
@@ -28,6 +28,8 @@ class LearningCurve(object):
         self.yscale = None
         self.xscale = None
 
+        self.last_update = time()
+
     def plot(self):
         if self.ax is None:
             self.ax = pl.figure().add_subplot(111)
@@ -37,7 +39,7 @@ class LearningCurve(object):
             for k, v in self.baselines.items():
                 ax.axhline(v, label=k, **sty[k])
             data = self.data
-            for k, v in data.iteritems():
+            for k, v in data.items():
                 xs, ys = np.array(data[k]).T
 
                 if self.averaging:
@@ -81,10 +83,12 @@ class LearningCurve(object):
     def update(self, iteration, **kwargs):
         "Update plots, if ``iteration is None`` we'll use ``iteration=len(data)``"
         data = self.data
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             i = len(data[k]) if iteration is None else iteration
             data[k].append([i, v])
-        self.plot()
+        if time() - self.last_update > 0.5:
+            self.plot()
+            self.last_update = time()
 
     def __reduce__(self):
         # Default pickle fails because of the reference to the plotting axis

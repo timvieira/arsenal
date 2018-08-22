@@ -19,8 +19,11 @@ class Benchmark(object):
         self.timers = ddict(Timer)
     def __getitem__(self, name):
         return self.timers[name]
-    def compare(self):
-        Timer.compare_many(*list(self.timers.values()))
+    def compare(self, statistic=np.median):
+        best = min(self.timers.values(), key=lambda t: statistic(t.times))
+        for name in sorted(self.timers):
+            if name != best.name:
+                best.compare(self.timers[name])
     def values(self):
         return list(self.timers.values())
     def keys(self):
@@ -81,6 +84,10 @@ class Timer(object):
         return np.mean(self.times)
 
     @property
+    def median(self):
+        return np.median(self.times)
+
+    @property
     def std(self):
         if len(self.times) <= 1:
             return 0.0
@@ -90,7 +97,7 @@ class Timer(object):
     def total(self):
         return sum(self.times)
 
-    def compare(self, other, attr='avg', verbose=True):
+    def compare(self, other, attr='median', verbose=True):
         if len(self.times) == 0 or len(other.times) == 0:
             print('%s %s %s' % (self.name, '???', other.name))
             return
@@ -107,31 +114,21 @@ class Timer(object):
         else:
             other.compare(self, attr=attr, verbose=verbose)
 
-    def compare_many(self, *others, **kw):
-        for x in sorted(others, key=lambda x: x.name):
-            if x != self:
-                self.compare(x, **kw)
+#    def compare_many(self, *others, **kw):
+#        for x in sorted(others, key=lambda x: x.name):
+#            if x != self:
+#                self.compare(x, **kw)
 
-    def plot_feature(self, feature, timecol='timer', ax=None, show='avg', **kw):
+    def plot_feature(self, feature, timecol='timer', ax=None, **kw):
         if ax is None:
             ax = pl.figure().add_subplot(111)
         df = self.dataframe(timecol)
-        a = df.groupby(feature).mean()
+        a = df.groupby(feature).median()
 
-        loglog = kw.get('loglog')
-        if 'loglog' in kw:
-            del kw['loglog']
-
-        if loglog:
-            X = np.log(a.index)
-            Y = np.log(a[timecol])
-            ax.set_xlabel('log %s' % feature)
-            ax.set_ylabel('log average time (seconds)')
-        else:
-            X = a.index
-            Y = a[timecol]
-            ax.set_xlabel(feature)
-            ax.set_ylabel('average time (seconds)')
+        X = a.index
+        Y = a[timecol]
+        ax.set_xlabel(feature)
+        ax.set_ylabel('time (seconds)')
 
         if ax is None:
             ax = pl.figure().add_subplot(111)
@@ -140,16 +137,25 @@ class Timer(object):
             # use name of the timer as default label.
             kw['label'] = self.name
 
-        [l] = ax.plot(X, Y, lw=2, alpha=0.5, **kw)
+        [line] = ax.plot(X, Y, lw=2, alpha=0.5, **kw)
         del kw['label'] # delete label so it doesn't appear twice in the legend
 
-        if 'avg' in show:
-            ax.scatter(X, Y, c=l.get_color(), lw=0, label=None, alpha=0.25, **kw)
-        elif 'scatter' in show:
-            if loglog:
-                ax.scatter(np.log(df[feature]), np.log(df[timecol]), c=l.get_color(), label=None, alpha=0.25, **kw)
-            else:
-                ax.scatter(df[feature], df[timecol], c=l.get_color(), alpha=0.25, label=None, **kw)
+        c = line.get_color()
+        ax.scatter(X, Y, c=c, lw=0, label=None, alpha=0.25, **kw)
+        #ax.scatter(df[feature], df[timecol], c=c, alpha=0.25, marker='.', label=None, **kw)
+
+        data = []
+        for f, dd in df.groupby(feature):
+            data.append([
+                f,
+                np.percentile(dd[timecol], 20),
+                np.percentile(dd[timecol], 80),
+            ])
+        data = list(sorted(data))
+        fs, ls, us = zip(*data)
+        pl.fill_between(fs, ls, us, alpha=0.25, color=c)
+
+
         #elif 'box' in show:
         #    # TODO: doen't work very well yet. need to fill out the x-axis since
         #    # feature might not be dense. Should throw an error if feature isn't an

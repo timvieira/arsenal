@@ -127,7 +127,7 @@ def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newli
             try:
                 length = len(x)
             except TypeError:
-                length = sys.maxint
+                length = sys.maxsize
         else:
             length = int(length)
 

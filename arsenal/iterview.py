@@ -127,7 +127,9 @@ def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newli
             try:
                 length = len(x)
             except TypeError:
-                length = sys.maxint
+                raise AssertionError(f'Iterable `{x!r}` does not have a known length.\n'
+                                     'Please provide in an `x` where `len(x)` is defined '
+                                     'or explicitly provide a value in the `length` argument.')
         else:
             length = int(length)
 
@@ -161,14 +163,28 @@ def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newli
                 sys.stderr.write('\r%s%s\n' % (msg, fmt(start, n+1, length, width, done=1)))
 
 
-if __name__ == '__main__':
+def tests():
+    from arsenal.assertions import assert_throws
     from time import sleep
+
+    # Check for error
+    with assert_throws(AssertionError):
+        list(iterview((None for _ in range(5))))
+
+    # won't throw an error because length is passed in
+    list(iterview((None for _ in range(5)), length=5))
+
     for _ in iterview(range(400), every=20):
         sleep(0.005)
+
     for _ in iterview(range(10000), msg='foo', mintime=0.25):
         sleep(0.0001)
+
     # Print time elapsed if we terminate earlier than expected.
     for i in iterview(range(10000), msg='foo', mintime=0.25):
-        if i == 2000:
-            break
+        if i == 2000: break
         sleep(0.001)
+
+
+if __name__ == '__main__':
+    tests()

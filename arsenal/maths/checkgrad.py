@@ -114,7 +114,13 @@ def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar
 
 
 def quick_fdcheck(func, w, g, n_checks = 20, eps = 1e-5, verbose=1, progressbar=1):
-    "Check gradient along random directions (a faster alternative to axis-aligned directions)."
+    """
+    Check gradient along random directions (a faster alternative to axis-aligned directions).
+
+    Tim Vieira (2017) "How to test gradient implementations"
+    https://timvieira.github.io/blog/post/2017/04/21/how-to-test-gradient-implementations/
+
+    """
     keys = ['rand_%s' % i for i in range(n_checks)]
     H = {}
     G = {}

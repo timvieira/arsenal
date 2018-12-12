@@ -10,6 +10,8 @@ from arsenal.iterview import progress
 from scipy.stats import pearsonr, spearmanr
 from contextlib import contextmanager
 from scipy.special import expit as sigmoid
+from scipy.linalg import svd
+
 
 def wide_dataframe():
     import pandas as pd
@@ -26,6 +28,16 @@ def set_printoptions(*args, **kw):
     np.set_printoptions(**was)
 
 
+def argmin_random_tie(x):
+    "argmin with randomized tie breaking."
+    return np.random.choice(np.flatnonzero(x == x.min()))
+
+
+def argmax_random_tie(x):
+    "argmax with randomized tie breaking."
+    return np.random.choice(np.flatnonzero(x == x.max()))
+
+
 def onehot(i, n):
     """Create a one-hot vector: a vector of length `n` with a `1` at position `i`
     and zeros elsewhere.
@@ -34,6 +46,23 @@ def onehot(i, n):
     x = np.zeros(n)
     x[i] = 1
     return x
+
+
+def null_space(A, eps=1e-15):
+    "Find V such that AVx = 0 for all x."
+    _, s, Vh = svd(A)
+    s2 = np.zeros(Vh.shape[0])
+    s2[0:len(s)] = s
+    mask = s2 < eps
+    null = Vh[mask,:]
+    return null.T
+
+
+def wls(A, b, w):
+    "weighted least-squares estimation."
+    from statsmodels.api import WLS
+    # Note: statsmodel is a bit more accurate than directly calling lstsq
+    return WLS(b, A, weights=w).fit().params
 
 
 def split_ix(N, p, randomize=1):

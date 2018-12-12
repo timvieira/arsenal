@@ -23,7 +23,7 @@ def pp_plot(a, b, pts=100, show_line=True):
 
 def check_equal(expect, got, verbose=0, **kwargs):
     c = compare(expect, got, verbose=verbose, **kwargs)
-    if c.mean_relative_error > 0.01:
+    if c.max_relative_error > 0.01:
         assert False, c.format_message()
     return c
 
@@ -183,9 +183,9 @@ class compare(object):
 
         # relative error
         r = relative_difference(expect, got)
-        r = np.mean(r[np.isfinite(r)])
-        tests.append(['mean relative error', r, r <= 0.01])
-        self.mean_relative_error = r
+        r = np.max(r[np.isfinite(r)])
+        tests.append(['max rel err', r, r <= 0.01])
+        self.max_relative_error = r
 
         # TODO: suggest that if relative error is high and rescaled error is low (or
         # something to do wtih regression residuals) that maybe there is a

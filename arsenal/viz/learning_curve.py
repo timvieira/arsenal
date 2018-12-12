@@ -14,7 +14,7 @@ class LearningCurve(object):
     Plot learning curve as data arrives.
     """
 
-    def __init__(self, name, sty=None, legend=True, averaging=True):
+    def __init__(self, name, sty=None, legend=True, smoothing=10):
         self.name = name
         self.baselines = {}
         self.data = defaultdict(list)
@@ -23,14 +23,16 @@ class LearningCurve(object):
             self.sty.update(sty)
         self.ax = None
         self.legend = legend
-        self.averaging = averaging
 
         self.yscale = None
         self.xscale = None
 
         self.last_update = time()
+        self.min_time = 0.5
 
-    def plot(self):
+        self.smoothing = smoothing
+
+    def draw(self):
         if self.ax is None:
             self.ax = pl.figure().add_subplot(111)
         ax = self.ax
@@ -42,7 +44,7 @@ class LearningCurve(object):
             for k, v in data.items():
                 xs, ys = np.array(data[k]).T
 
-                if self.averaging:
+                if self.smoothing is not None:
                     sty[k]['alpha'] = 0.5
 
                 [l] = ax.plot(xs, ys, label=k, **sty[k])
@@ -53,7 +55,7 @@ class LearningCurve(object):
                     s['c'] = l.get_color()
                     ax.scatter(xs, ys, label=k, **s)
 
-                if self.averaging:
+                if self.smoothing is not None:
                     s = pandas.Series(ys)
 
                     if 0:
@@ -64,7 +66,7 @@ class LearningCurve(object):
                         U = M + 2*s
                         L = M - 2*s
                     else:
-                        window = min(len(ys), 10)
+                        window = min(len(ys), self.smoothing)
                         r = s.rolling(window, min_periods=0)
                         M = r.median()
                         #U = r.max()
@@ -86,9 +88,13 @@ class LearningCurve(object):
         for k, v in kwargs.items():
             i = len(data[k]) if iteration is None else iteration
             data[k].append([i, v])
-        if time() - self.last_update > 0.5:
-            self.plot()
+        if self.should_update():
+            self.draw()
             self.last_update = time()
+
+    def should_update(self):
+        "Returns true if its been long enough (>= `min_time`) since the `last_update`."
+        return time() - self.last_update >= self.min_time
 
     def __reduce__(self):
         # Default pickle fails because of the reference to the plotting axis

@@ -1,3 +1,4 @@
+import random
 import numpy as np
 import pylab as pl
 from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
@@ -26,6 +27,15 @@ def set_printoptions(*args, **kw):
     np.set_printoptions(*args, **kw)
     yield
     np.set_printoptions(**was)
+
+
+@contextmanager
+def restore_random_state():
+    py_rng = random.getstate()
+    np_rng = np.random.get_state()
+    yield (py_rng, np_rng)
+    random.setstate(py_rng)
+    assert np.random.set_state(np_rng) is None
 
 
 def argmin_random_tie(x):
@@ -205,7 +215,7 @@ def cdf(a):
     Evaluate the CDF at a few points
 
      >>> g([5,9,13,15,100])
-     array([ 0.33333333,  0.33333333,  0.66666667,  1.        ,  1.        ])
+     array([0.33333333, 0.33333333, 0.66666667, 1.        , 1.        ])
 
 
     Check that ties are handled correctly
@@ -215,7 +225,7 @@ def cdf(a):
      The value p(x <= 5) = 2/3
 
      >>> g([0, 5, 15])
-     array([ 0.        ,  0.66666667,  1.        ])
+     array([0.        , 0.66666667, 1.        ])
 
     """
 
@@ -250,7 +260,7 @@ def cumavg(x):
     Cumulative average.
 
     >>> cumavg([1,2,3,4,5])
-    array([ 1. ,  1.5,  2. ,  2.5,  3. ])
+    array([1. , 1.5, 2. , 2.5, 3. ])
 
     """
     return cumsum(x) / arange(1.0, len(x)+1)
@@ -287,6 +297,40 @@ def mean_confidence_interval(a, confidence=0.95):
     return m, m-h, m+h
 
 
+def bernstein(samples, delta, R):
+    """Plug-n-chug empirical Bernstein bound, computes "error bars" which hold with
+    probability `1-delta` for the mean of independent samples from a given range
+    `R=b-a` (known a priori).
+
+    Returns epsilon such that the following bound hold,
+
+      p( mean(samples) - true_mean <= eps ) >= 1-delta
+
+    We assume that sample are independent (not necessarily identically
+    distributed).
+
+    Bound is based on sample variance `V` and a priori knowledge that RVs in are
+    in the range `[a,b]` (although we only really require a known range `b-a`)
+
+    The bound holds with probability `>=(1-delta)`.
+
+    The sample mean has symmetric deviations so we get a two-sided bound by
+    passing in 2*delta, i.e.,
+
+      p( |mean(samples) - true_mean| <= eps ) >= 1-2*delta
+
+    This is analogous to p-values, which make assumption of normally distributed
+    random variables. This means that the bounds can be 'tighter', but the
+    assumptions are usually not valid.
+
+    """
+    n = len(samples)
+    if n <= 1: return np.nan
+    V = np.var(samples, ddof=1)   # sample variance
+    assert np.ptp(samples) <= R
+    return sqrt(V*2*log(2.0/delta)/n) + R*(7.0/3.0)*log(2.0/delta)/(n-1)
+
+
 def normalize(x, p=1):
     return x / norm(x, p)
 
@@ -310,19 +354,20 @@ def logsumexp(arr, axis=None):
 
     >>> a = arange(10)
     >>> log(sum(exp(a)))
-    9.4586297444267107
+    9.45862974442671
+
     >>> logsumexp(a)
-    9.4586297444267107
+    9.45862974442671
 
     >>> x = [[0, 0, 1000.0], [1000.0, 0, 0]]
     >>> logsumexp(x, axis=1)
-    array([ 1000.,  1000.])
+    array([1000., 1000.])
 
     >>> logsumexp(x)
     1000.6931471805599
 
     >>> logsumexp(x, axis=0)
-    array([  1.00000000e+03,   6.93147181e-01,   1.00000000e+03])
+    array([1.00000000e+03, 6.93147181e-01, 1.00000000e+03])
 
     """
     arr = np.array(arr, dtype=np.double)
@@ -344,28 +389,27 @@ def softmax(x, axis=None):
     """
     >>> x = [1, -10, 100, .5]
     >>> softmax(x)
-    array([  1.01122149e-43,   1.68891188e-48,   1.00000000e+00,
-             6.13336839e-44])
+    array([1.01122149e-43, 1.68891188e-48, 1.00000000e+00, 6.13336839e-44])
+
     >>> exp(x) / exp(x).sum()
-    array([  1.01122149e-43,   1.68891188e-48,   1.00000000e+00,
-             6.13336839e-44])
+    array([1.01122149e-43, 1.68891188e-48, 1.00000000e+00, 6.13336839e-44])
 
     >>> x = [[0, 0, 1000], [1000, 0, 0]]
 
     Normalize by row:
     >>> softmax(x, axis=0)
-    array([[ 0. ,  0.5,  1. ],
-           [ 1. ,  0.5,  0. ]])
+    array([[0. , 0.5, 1. ],
+           [1. , 0.5, 0. ]])
 
     Normalize by column:
     >>> softmax(x, axis=1)
-    array([[ 0.,  0.,  1.],
-           [ 1.,  0.,  0.]])
+    array([[0., 0., 1.],
+           [1., 0., 0.]])
 
     Normalize by cell:
     >>> softmax(x, axis=None)
-    array([[ 0. ,  0. ,  0.5],
-           [ 0.5,  0. ,  0. ]])
+    array([[0. , 0. , 0.5],
+           [0.5, 0. , 0. ]])
 
     """
     a = np.array(x, dtype=np.double)
@@ -541,9 +585,21 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
 
 
 if __name__ == '__main__':
-    #import doctest; doctest.testmod()
 
     def run_tests():
+
+        # To test the random state we'll run the function below from the same
+        # random state using the restore_randome_state util.
+        def foo():
+            return [(random.randint(0, 100),
+                     np.random.randint(0, 100))
+                    for _ in range(10)]
+
+        # Note that we have to run `a` and `b` in this order.
+        with restore_random_state():
+            a = foo()
+        b = foo()
+        assert a == b
 
         # Entropy tests
         assert entropy(array((0.5, 0.5))) == 1.0
@@ -591,3 +647,5 @@ if __name__ == '__main__':
         print('passed tests.')
 
     run_tests()
+    import doctest;
+    doctest.testmod()

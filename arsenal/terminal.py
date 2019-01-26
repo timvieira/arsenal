@@ -1,5 +1,22 @@
 # -*- coding: utf-8 -*-
-import sys
+import sys, os
+from glob import glob
+
+
+def complete_filenames(text, line, begidx, endidx):
+    "Util for filename completion."
+
+    before_arg = line.rfind(" ", 0, begidx)
+    if before_arg == -1:
+        return # arg not found
+
+    fixed = line[before_arg+1:begidx]  # fixed portion of the arg
+
+    completions = []
+    for p in glob(line[before_arg+1:endidx] + '*'):
+        p = p + (os.sep if p and os.path.isdir(p) and p[-1] != os.sep else '')
+        completions.append(p.replace(fixed, "", 1))
+    return completions
 
 
 def ansi(color=None, light=None, bg=3):

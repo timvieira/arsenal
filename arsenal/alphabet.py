@@ -9,7 +9,7 @@ class Alphabet(object):
     >>> a = Alphabet()
     >>> [a[x] for x in 'abcd']
     [0, 1, 2, 3]
-    >>> map(a.lookup, range(4))
+    >>> list(map(a.lookup, range(4)))
     ['a', 'b', 'c', 'd']
 
     >>> a.stop_growth()
@@ -21,7 +21,7 @@ class Alphabet(object):
       ...
     ValueError: Alphabet is frozen. Key "z" not found.
 
-    >>> print a.plaintext()
+    >>> print(a.plaintext())
     a
     b
     c
@@ -148,11 +148,11 @@ class Alphabet(object):
     def load(cls, filename):
         if not os.path.exists(filename):
             return cls()
-        with file(filename) as f:
+        with open(filename) as f:
             return cls.from_iterable(l.strip() for l in f)
 
     def save(self, filename):
-        with file(filename, 'wb') as f:
+        with open(filename, 'w') as f:
             f.write(self.plaintext())
 
     def __eq__(self, other):

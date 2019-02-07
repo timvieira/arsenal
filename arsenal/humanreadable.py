@@ -13,7 +13,7 @@ def marquee(txt='', width=78, mark='*'):
     """
     if not txt:
         return (mark*width)[:width]
-    nmark = (width-len(txt)-2)/len(mark)/2
+    nmark = int((width-len(txt)-2)/len(mark)/2)
     if nmark < 0: nmark =0
     marks = mark*nmark
     return '%s %s %s' % (marks, txt, marks)
@@ -169,31 +169,6 @@ def print_elapsed_time():
     atexit.register(hook)
 
 
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
-    def test():
-        d = datetime(1970, 5, 1)
-
-        examples = {
-            timedelta(microseconds=1): '1 microsecond ago',
-            timedelta(microseconds=2): '2 microseconds ago',
-            -timedelta(microseconds=1): '1 microsecond from now',
-            -timedelta(microseconds=2): '2 microseconds from now',
-            timedelta(microseconds=2000): '2 milliseconds ago',
-            timedelta(seconds=2): '2 seconds ago',
-            timedelta(seconds=2*60): '2 minutes ago',
-            timedelta(seconds=2*60*60): '2 hours ago',
-            timedelta(days=2): '2 days ago',
-        }
-
-        for t, v in list(examples.items()):
-            assert datestr(d, now=d+t) == v
-
-    test()
-
-
 # borrowed from girzzled https://github.com/bmc/grizzled-python/blob/master/grizzled/text/__init__.py
 def str2bool(s):
     """
@@ -251,3 +226,28 @@ def str2bool(s):
         }[s.lower()]
     except KeyError:
         raise ValueError('Unrecognized boolean string: "%s"' % s)
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+    def test():
+        d = datetime(1970, 5, 1)
+
+        examples = {
+            timedelta(microseconds=1): '1 microsecond ago',
+            timedelta(microseconds=2): '2 microseconds ago',
+            -timedelta(microseconds=1): '1 microsecond from now',
+            -timedelta(microseconds=2): '2 microseconds from now',
+            timedelta(microseconds=2000): '2 milliseconds ago',
+            timedelta(seconds=2): '2 seconds ago',
+            timedelta(seconds=2*60): '2 minutes ago',
+            timedelta(seconds=2*60*60): '2 hours ago',
+            timedelta(days=2): '2 days ago',
+        }
+
+        for t, v in list(examples.items()):
+            assert datestr(d, now=d+t) == v
+
+    test()

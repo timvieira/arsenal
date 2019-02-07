@@ -24,7 +24,7 @@ class Alphabet(object):
     >>> a = Alphabet()
     >>> [a[x] for x in 'abcd']
     [0, 1, 2, 3]
-    >>> map(a.lookup, range(4))
+    >>> list(map(a.lookup, range(4)))
     ['a', 'b', 'c', 'd']
 
     >>> a.stop_growth()
@@ -36,7 +36,7 @@ class Alphabet(object):
       ...
     ValueError: Alphabet is frozen. Key "z" not found.
 
-    >>> print a.plaintext()
+    >>> print(a.plaintext())
     a
     b
     c

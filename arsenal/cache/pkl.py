@@ -2,7 +2,7 @@
 
 """
 import pickle
-from path import path
+from path import Path as path
 from arsenal.fsutils import filesize
 from arsenal.timer import timeit
 
@@ -14,10 +14,10 @@ def load(filename, default=None, saveit=False, verbose=False):
         if verbose:
             print('[load] %s, size = %s' % (f, filesize(f)))
             with timeit('[load] %s' % filename):
-                with file(f) as pkl:
+                with open(f) as pkl:
                     return pickle.load(pkl)
         else:
-            with file(f) as pkl:
+            with open(f) as pkl:
                 return pickle.load(pkl)
     else:
         if default is None:
@@ -33,10 +33,10 @@ def save(filename, val, verbose=False):
     "Save `val` so we can load it via `load`."
     if verbose:
         with timeit('[save] %s' % filename):
-            with file(filename, 'wb') as pkl:
+            with open(filename, 'w') as pkl:
                 pickle.dump(val, pkl)
             print('[save] %s, size = %s' % (filename, filesize(filename)))
     else:
-        with file(filename, 'wb') as pkl:
+        with open(filename, 'w') as pkl:
             pickle.dump(val, pkl)
     return val

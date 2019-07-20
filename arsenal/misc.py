@@ -5,6 +5,9 @@ from io import StringIO
 from contextlib import contextmanager
 from arsenal.terminal import colors
 
+# TODO: stdio/stderr redirection is available in contextlib; so is exception
+# suppression and even the context decorator.
+
 
 def open_diff(a, b, cmd='meld'):
     "View diff of string representations in dedicated diff program."
@@ -217,27 +220,28 @@ def ctx_redirect_io(f=None):
         # Restore stdio
         sys.stdout = original_stdout
 
+redirect_io = ctx_redirect_io
 
-def redirect_io(f):
-    """
-    redirect all of the output to standard out to a StringIO instance,
-    which can be accessed as an attribute of the function, f.io_target
-
-    Usage Example:
-        >>> @redirect_io
-        ... def foo(x):
-        ...    print(x)
-        >>> foo('hello?')
-        >>> print(foo.io_target.getvalue())    # doctest:+NORMALIZE_WHITESPACE
-        hello?
-        >>>
-    """
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        with ctx_redirect_io() as io_target:
-            wrap.io_target = io_target
-            return f(*args, **kwargs)
-    return wrap
+#def redirect_io(f):
+#    """
+#    redirect all of the output to standard out to a StringIO instance,
+#    which can be accessed as an attribute of the function, f.io_target
+#
+#    Usage Example:
+#        >>> @redirect_io
+#        ... def foo(x):
+#        ...    print(x)
+#        >>> foo('hello?')
+#        >>> print(foo.io_target.getvalue())    # doctest:+NORMALIZE_WHITESPACE
+#        hello?
+#        >>>
+#    """
+#    @wraps(f)
+#    def wrap(*args, **kwargs):
+#        with ctx_redirect_io() as io_target:
+#            wrap.io_target = io_target
+#            return f(*args, **kwargs)
+#    return wrap
 
 
 if __name__ == '__main__':
@@ -247,12 +251,10 @@ if __name__ == '__main__':
     def run_tests():
 
         def test_redirect_io():
-            @redirect_io
-            def foo(x):
-                print(x)
             msg = 'hello there?'
-            foo(msg)
-            assert str(foo.io_target.getvalue().strip()) == msg
+            with redirect_io() as f:
+                print(msg)
+            assert str(f.getvalue().strip()) == msg
 
         test_redirect_io()
 

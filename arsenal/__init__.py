@@ -9,3 +9,4 @@ from arsenal.timer import Timer, timers, timeit
 #from arsenal.debug import ip
 #from arsenal.humanreadable import htime
 from arsenal.misc import ddict
+from arsenal.robust import timelimit

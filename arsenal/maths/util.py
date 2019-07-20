@@ -548,7 +548,7 @@ def inf_norm(a, b):
     return abs(a - b).max()
 
 
-def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
+def assert_equal(a, b, name='', verbose=False, throw=True, tol=0.001, color=1):
     """isfinite: asserts that *both* `a` and `b` must be finite.
 
     >>> assert_equal(0, 1, throw=0, color=0)
@@ -568,7 +568,7 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=1e-10, color=1):
         else:
             print(msg)
 
-    err = inf_norm(a,b)
+    err = abs(a - b) / abs(a)
     if np.array(a == b).all():   # handles the non-finite cases.
         err = 0
     if name:

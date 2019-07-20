@@ -2,32 +2,81 @@ import sys
 import time
 from threading import Thread
 from functools import wraps
+from contextlib import contextmanager
 
-# TODO: add verbose argument to timelimit and retry
+# Warning: signal is apparently unavailable on windows.
+import signal
 
-class dispatch(Thread):
-    def __init__(self, f, *args, **kwargs):
-        Thread.__init__(self)
-        self.f = f
-        self.args = args
-        self.kwargs = kwargs
-        self.result = None
-        self.error = None
-        self.setDaemon(True)
-        self.start()
-    def run(self):
-        try:
-            self.result = self.f(*self.args, **self.kwargs)
-        except:
-            # store exception information in the thread.
-            self.error = sys.exc_info()
+class Timeout(Exception): pass
 
-class TimeoutError(Exception):
-    pass
+
+@contextmanager
+def time_limit(seconds):
+    def signal_handler(signum, frame):
+        raise Timeout(f'Call took longer than {seconds} seconds.')
+    signal.signal(signal.SIGALRM, signal_handler)
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)   # disables alarm
+
+
+#class dispatch(Thread):
+#    def __init__(self, f, *args, **kwargs):
+#        Thread.__init__(self)
+#        self.f = f
+#        self.args = args
+#        self.kwargs = kwargs
+#        self.result = None
+#        self.error = None
+#        self.setDaemon(True)
+#        self.start()
+#    def run(self):
+#        try:
+#            self.result = self.f(*self.args, **self.kwargs)
+#        except:
+#            # store exception information in the thread.
+#            self.error = sys.exc_info()
+#
+#def timelimit(timeout):
+#    """
+#    A decorator to limit a function to `timeout` seconds, raising Timeout
+#    if it takes longer.
+#
+#        >>> def meaningoflife():
+#        ...     time.sleep(.2)
+#        ...     return 42
+#        >>>
+#        >>> timelimit(.1)(meaningoflife)()
+#        Traceback (most recent call last):
+#            ...
+#        Timeout: Call took longer than .1 seconds.
+#        >>> timelimit(1)(meaningoflife)()
+#        42
+#
+#    _Caveat:_ The function isn't stopped after `timeout` seconds but continues
+#    executing in a separate thread. (There seems to be no way to kill a thread)
+#    inspired by
+#        <http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/473878>
+#    """
+#    def _1(f):
+#        @wraps(f)
+#        def _2(*args, **kwargs):
+#            c = dispatch(f, *args, **kwargs)
+#            c.join(timeout)
+#            if c.isAlive():
+#                raise Timeout(f'Call took longer than {seconds} seconds.')
+#            if c.error:
+#                raise c.error[1]
+#            return c.result
+#        return _2
+#    return _1
+
 
 def timelimit(timeout):
     """
-    A decorator to limit a function to `timeout` seconds, raising TimeoutError
+    A decorator to limit a function to `timeout` seconds, raising `Timeout`.
     if it takes longer.
 
         >>> def meaningoflife():
@@ -37,7 +86,7 @@ def timelimit(timeout):
         >>> timelimit(.1)(meaningoflife)()
         Traceback (most recent call last):
             ...
-        robust.TimeoutError: took too long
+        Timeout: Call took longer than 0.1 seconds.
         >>> timelimit(1)(meaningoflife)()
         42
 
@@ -49,20 +98,16 @@ def timelimit(timeout):
     def _1(f):
         @wraps(f)
         def _2(*args, **kwargs):
-            c = dispatch(f, *args, **kwargs)
-            c.join(timeout)
-            if c.isAlive():
-                raise TimeoutError('took too long')
-            if c.error:
-                raise c.error[1]
-            return c.result
+            with time_limit(timeout):
+                return f(*args, **kwargs)
         return _2
     return _1
+
 
 #_______________________________________________________________________________
 #
 
-def retry_apply(fn, args, kwargs=None, tries=2, pause=0.1, suppress=(Exception,),
+def retry_apply(fn, args, kwargs=None, tries=2, pause=None, suppress=(Exception,),
                 allow=(NameError, NotImplementedError)):
     """
     Attempt to call `fn` up to `tries` times with the `args` as arguments
@@ -81,10 +126,10 @@ def retry_apply(fn, args, kwargs=None, tries=2, pause=0.1, suppress=(Exception,)
         except suppress:
             if i == tries - 1:  # the last iteration
                 raise
-        time.sleep(pause)
+        if pause is not None: time.sleep(pause)
 
 
-def retry(tries=2, pause=0.1, suppress=(Exception,), allow=(NameError, NotImplementedError)):
+def retry(tries=2, pause=None, suppress=(Exception,), allow=(NameError, NotImplementedError)):
     def retry1(f):
         @wraps(f)
         def retry2(*args, **kw):
@@ -153,10 +198,10 @@ if __name__ == '__main__':
         @timelimit(1.0)
         def sleepy_function(x): time.sleep(x)
 
-        with assert_throws(TimeoutError):
+        with assert_throws(Timeout):  # should timeout
             sleepy_function(3.0)
 
-        sleepy_function(0.2)
+        sleepy_function(0.2)   # should succeed
 
         @timelimit(1)
         def raises_errors(): return 1/0

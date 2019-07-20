@@ -45,6 +45,7 @@ class Benchmark(object):
         if self.title is not None:
             ax.set_title(self.title)
         ax.legend(loc=2)
+        return ax
 
 
 class Timer(object):
@@ -163,7 +164,7 @@ class Timer(object):
         #    ddd = [np.asarray(dd[timecol]) for f, dd in sorted(df.groupby(feature))]
         #    ax.boxplot(ddd)
 
-        return a
+        return ax
 
     def dataframe(self, timecol='timer'):
         df = pd.DataFrame(list(self.features))

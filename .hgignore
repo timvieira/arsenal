@@ -15,6 +15,8 @@ tmp/*
 semantic.cache
 sandbox/*
 _build
+coverage-report
+.coverage/
 
 build/*
 dist/*

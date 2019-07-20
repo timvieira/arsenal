@@ -99,7 +99,7 @@ class compare(object):
             got = [got[k] for k in alphabet]
 
         if isinstance(expect, np.ndarray) and isinstance(got, np.ndarray):
-            assert expect.shape == got.shape
+            assert expect.shape == got.shape, [expect.shape, got.shape]
             expect = expect.flatten()
             got = got.flatten()
 
@@ -128,7 +128,7 @@ class compare(object):
 
             data = pd.DataFrame({expect_label: expect, got_label: got})
 
-        assert expect.shape == got.shape
+        assert expect.shape == got.shape, [expect.shape, got.shape]
         [n] = expect.shape
 
         self.expect = expect

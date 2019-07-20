@@ -134,7 +134,7 @@ def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newli
             length = int(length)
 
         if length == 0:
-            raise StopIteration
+            return
 
         n = 0
         if msg:

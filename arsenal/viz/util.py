@@ -13,10 +13,10 @@ import numpy as np
 from collections import defaultdict
 from contextlib import contextmanager
 from matplotlib.backends.backend_pdf import PdfPages
+from mpl_toolkits.mplot3d import Axes3D
 from arsenal.terminal import colors
 #from arsenal.viz.covariance_ellipse import covariance_ellipse
 from arsenal.misc import ddict
-
 
 def save_plots(pdf):
     "save all plots to pdf"
@@ -54,19 +54,20 @@ DATA = defaultdict(list)
 # - For rendering constraints, we might want to use hatching instead of
 #   something opaque.
 #
-def contour_plot(f, xdomain, ydomain, color='viridis', alpha=0.5, levels=None):
+def contour_plot(f, xdomain, ydomain, color='viridis', alpha=0.5, levels=None, ax=None):
     "Contour plot of a function of two variables."
     from arsenal import iterview
+    if ax is None: ax = pl.gca()
     [xmin, xmax, _] = xdomain; [ymin, ymax, _] = ydomain
     X, Y = np.meshgrid(np.linspace(*xdomain), np.linspace(*ydomain))
     Z = np.array([f(np.array([x,y])) for (x,y) in iterview(zip(X.flat, Y.flat), length=len(X.flat))]).reshape(X.shape)
-    contours = pl.contour(X, Y, Z, 20, colors='black', levels=levels)
-    pl.clabel(contours, inline=True, fontsize=8)
+    contours = ax.contour(X, Y, Z, 20, colors='black', levels=levels)
+    ax.clabel(contours, inline=True, fontsize=8)
     if color is not None:
-        pl.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin='lower', cmap=color, alpha=alpha)
-        pl.axis(aspect='scalar')
-    pl.gcf().tight_layout()
-    pl.xlim(xmin,xmax); pl.ylim(ymin,ymax)
+        ax.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin='lower', cmap=color, alpha=alpha)
+        ax.axis(aspect='scalar')
+    ax.figure.tight_layout()
+    ax.set_xlim(xmin,xmax); ax.set_ylim(ymin,ymax)
 
 # TODO: No need to say "plot" we're already in a module called "viz". The whole
 # point is reduce clutter when plotting.
@@ -76,7 +77,6 @@ contour = contour_plot
 # TODO: also support interactive sliders and animation for when there are more parameters. use the same range notation.
 def plot3d(f, xdomain, ydomain, ax=None):
     "3d surface plot of a function of two variables."
-    #from mpl_toolkits.mplot3d import Axes3D
     #[xmin, xmax, _] = xdomain; [ymin, ymax, _] = ydomain
     X, Y = np.meshgrid(np.linspace(*xdomain), np.linspace(*ydomain))
     Z = np.array([f(np.array([x,y])) for (x,y) in zip(X.flat, Y.flat)]).reshape(X.shape)

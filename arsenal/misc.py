@@ -8,8 +8,8 @@ from arsenal.terminal import colors
 
 def open_diff(a, b, cmd='meld'):
     "View diff of string representations in dedicated diff program."
-    print(a, file=open('/tmp/a','wb'))
-    print(b, file=open('/tmp/b','wb'))
+    print(a, file=open('/tmp/a', 'w'))
+    print(b, file=open('/tmp/b', 'w'))
     os.system('%s /tmp/a /tmp/b' % cmd)
 
 

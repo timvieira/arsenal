@@ -57,10 +57,10 @@ class Alphabet(object):
         return inst
 
     def keys(self):
-        return self._mapping.iterkeys()
+        return self._mapping.keys()
 
     def items(self):
-        return self._mapping.iteritems()
+        return self._mapping.items()
 
     def imap(self, seq, emit_none=False):
         """

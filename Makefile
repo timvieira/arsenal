@@ -17,3 +17,12 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+
+clean:
+	rm -rf coverage-report
+
+test-coverage:
+	find arsenal -name '*.py' -exec coverage run --rcfile .coveragerc -a {} \;
+	coverage html --rcfile .coveragerc --include './*' -d coverage-report
+	xdg-open coverage-report/index.html

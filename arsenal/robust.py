@@ -16,33 +16,28 @@ def timelimit(seconds):
     A decorator to limit a function to `timeout` seconds, raising `Timeout`.
     if it takes longer.
 
-        >>> def meaningoflife():
-        ...     sleep(.2)
-        ...     return 42
-        >>>
-        >>> timelimit(.1)(meaningoflife)()
-        Traceback (most recent call last):
-            ...
-        Timeout: Call took longer than 0.1 seconds.
-        >>> timelimit(1)(meaningoflife)()
-        42
+    >>> def meaningoflife():
+    ...     sleep(.2)
+    ...     return 42
+    >>>
+    >>> timelimit(.1)(meaningoflife)()
+    Traceback (most recent call last):
+        ...
+    Timeout: Call took longer than 0.1 seconds.
+    >>> timelimit(1)(meaningoflife)()
+    42
 
-        >>> with timelimit(.2):
-        ...     sleep(1)
-        Traceback (most recent call last):
-            ...
-        Timeout: Call took longer than 0.2 seconds.
+    >>> with timelimit(.2):
+    ...     sleep(1)
+    Traceback (most recent call last):
+        ...
+    Timeout: Call took longer than 0.2 seconds.
 
-        >>> with timelimit(.2):
-        ...     sleep(.1)
-        ...     print('finished')
-        finished
+    >>> with timelimit(.2):
+    ...     sleep(.1)
+    ...     print('finished')
+    finished
 
-
-    _Caveat:_ The function isn't stopped after `timeout` seconds but continues
-    executing in a separate thread. (There seems to be no way to kill a thread)
-    inspired by
-        <http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/473878>
     """
 
     def signal_handler(signum, frame):

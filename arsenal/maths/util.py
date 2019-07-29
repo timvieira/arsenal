@@ -14,6 +14,14 @@ from scipy.special import expit as sigmoid
 from scipy.linalg import svd
 
 
+def random_dist(*size):
+    """
+    Generate a random conditional distribution which sums to one over the last
+    dimension of the input dimensions.
+    """
+    return np.random.dirichlet(np.ones(size[-1]), size=size[:-1])
+
+
 def wide_dataframe():
     import pandas as pd
     from arsenal.terminal import console_width
@@ -30,9 +38,12 @@ def set_printoptions(*args, **kw):
 
 
 @contextmanager
-def restore_random_state():
+def restore_random_state(seed=None):
     py_rng = random.getstate()
     np_rng = np.random.get_state()
+    if seed is not None:
+        random.seed(seed)
+        np.random.seed(seed)
     yield (py_rng, np_rng)
     random.setstate(py_rng)
     assert np.random.set_state(np_rng) is None

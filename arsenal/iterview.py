@@ -98,6 +98,12 @@ def fmt(start, n, length, width, done=False):
     return string
 
 
+#def iterview(x, msg=None, every=None, mintime=0.25, length=None,
+#             width=None, newline=False, show=True):
+#    #from tqdm import tqdm
+#    return tqdm(x, desc=msg, total=length, ncols=width, miniters=every)
+
+
 def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newline=False, show=True):
     """Show aprogress bar as we move through the iterable `x`.
 
@@ -168,8 +174,8 @@ def tests():
     from time import sleep
 
     # Check for error
-    with assert_throws(AssertionError):
-        list(iterview((None for _ in range(5))))
+#    with assert_throws(AssertionError):
+#        list(iterview((None for _ in range(5))))
 
     # won't throw an error because length is passed in
     list(iterview((None for _ in range(5)), length=5))

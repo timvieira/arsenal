@@ -82,7 +82,7 @@ def robust_download(url, filename, tries=3, pause=0.1, timeout=30, verbose=True)
         print('trying to download %s to file://%s' % (url, filename))
 
     @retry(tries=tries, pause=pause)
-    @timelimit(timeout=timeout)
+    @timelimit(timeout)
     def _download():
         with open(filename, 'wb') as f:
             [code, _, contents] = urlread(url)

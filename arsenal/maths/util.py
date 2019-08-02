@@ -216,7 +216,13 @@ def spherical(size):
     return x
 
 
-def cdf(a):
+# TODO: Should we create a class to represent this data with this the fit
+# method?  This should really be the MLE of some sort of distrbution.  What
+# distribution is it?  I suppose it is nonparametric in the same sense that
+# Kaplan-Meier is nonparametric (In fact, KM generalizes this estimator to
+# support censored response).
+# TODO: That same class would probably have the defacto mean/std estimators.
+class cdf:
     """
     Empirical CDF of data `a`, returns function which makes values to their
     cumulative probabilities.
@@ -240,13 +246,13 @@ def cdf(a):
 
     """
 
-    x = array(a, copy=True)
-    x.sort()
+    def __init__(self, a):
+        self.n = len(a)
+        self.x = array(a, copy=True)
+        self.x.sort()
 
-    def f(z):
-        return searchsorted(x, z, 'right') * 1.0 / len(x)
-
-    return f
+    def __call__(self, z):
+        return searchsorted(self.x, z, 'right') / self.n
 
 
 def sample(w, n=None):
@@ -559,6 +565,7 @@ def inf_norm(a, b):
     return abs(a - b).max()
 
 
+# TODO: generalize to arrays? (or just use `compare`?)
 def assert_equal(a, b, name='', verbose=False, throw=True, tol=0.001, color=1):
     """isfinite: asserts that *both* `a` and `b` must be finite.
 
@@ -579,12 +586,13 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=0.001, color=1):
         else:
             print(msg)
 
+    a = np.asarray(a); b = np.asarray(b)
     err = abs(a - b) / abs(a)
     if np.array(a == b).all():   # handles the non-finite cases.
         err = 0
     if name:
         name = '%s: ' % name
-    if verbose or err > tol:
+    if verbose or np.any(err > tol):
         msg = '%s%g %g err=%g' % (name, a, b, err)
         if throw and err > tol:
             raise AssertionError(msg + ' >= tolerance (%s)' % tol)

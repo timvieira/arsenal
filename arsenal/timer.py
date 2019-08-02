@@ -47,6 +47,24 @@ class Benchmark(object):
         ax.legend(loc=2)
         return ax
 
+    def plot_survival(self):
+        "Show the probability each algorithm is still running."
+        for _, t in sorted(self.items()):
+            t.plot_survival()
+
+    def run(self, methods, reps):
+        from arsenal import iterview, restore_random_state
+        jobs = [
+            (name, seed)
+            for seed in range(reps)   # TODO: use a better strategy for picking random seeds.
+            for name in methods
+        ]
+        np.random.shuffle(jobs)       # shuffle jobs to avoid weird ordering correlations
+        for name, seed in iterview(jobs):
+            with restore_random_state(seed):
+                with self[name]:
+                    methods[name]()
+
 
 class Timer(object):
     """
@@ -61,7 +79,7 @@ class Timer(object):
     A is 2.0018x faster
 
     """
-    def __init__(self, name):
+    def __init__(self, name=None):
         self.name = name
         self.times = []
         self.features = []
@@ -188,6 +206,13 @@ class Timer(object):
     def trim_slow(self, feature_to_bucket, threshold):
         f = lambda k, d: d.timer <= d.timer.quantile(threshold)
         return self.bucket_filter(feature_to_bucket, f)
+
+    def plot_survival(self):
+        from arsenal.maths import cdf
+        ts = np.array(self.times)
+        xs = np.linspace(0, ts.max(), 1000)
+        pl.plot(xs, 1-cdf(ts)(xs), label=self.name)
+        pl.legend(loc='best'); pl.xscale('log'); pl.yscale('log')
 
 
 @contextmanager

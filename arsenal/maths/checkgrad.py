@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import numpy as np
 from arsenal.maths import compare, spherical
 from arsenal.iterview import iterview

@@ -1,13 +1,11 @@
 import random
 import numpy as np
-import pylab as pl
 from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
     asarray, ones, mean, searchsorted, sqrt, isfinite
 from numpy.random import uniform, normal
 from scipy.linalg import norm as _norm
 from scipy import stats
 from arsenal.terminal import colors
-from arsenal.iterview import progress
 from scipy.stats import pearsonr, spearmanr
 from contextlib import contextmanager
 from scipy.special import expit as sigmoid
@@ -110,9 +108,26 @@ def norm(x, p=2):
 def zero_retrieval(expect, got):
     "How good are we at retrieving zero values? Measured with F1 score."
     assert expect.shape == got.shape
-    # F1 on zeros
-    A = (expect == 0)
-    B = (got == 0)
+    return f1(expect == 0, got == 0)
+
+
+def f1(A, B):
+    """
+    Compute the F1 measure on two bit vectors.
+
+    >>> f1([1], [1])
+    1.0
+
+    >>> f1([1], [0])
+    0.0
+
+    >>> f1([1,0,1], [0,1,1])
+    0.5
+
+    """
+
+    A = np.array(A, dtype=bool); B = np.array(B, dtype=bool)
+
     C = (A & B).sum()
     A = A.sum()
     B = B.sum()
@@ -644,7 +659,7 @@ if __name__ == '__main__':
                      mutual_information(Pjoint.T))
 
         def mi_independent_is_zero(px, py):
-            assert_equal(mutual_information(multiply.outer(px, py)), 0.0)
+            assert mutual_information(multiply.outer(px, py)) <= 1e-10
 
         mi_independent_is_zero(p, q)
         mi_independent_is_zero(array([0.1, 0.1, 0.2, 0.6]),   # non-square joint

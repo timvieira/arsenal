@@ -54,6 +54,9 @@ class Benchmark(object):
 
     def run(self, methods, reps):
         from arsenal import iterview, restore_random_state
+        if isinstance(methods, (tuple, list)):
+            methods = {m.__name__: m for m in methods}
+
         jobs = [
             (name, seed)
             for seed in range(reps)   # TODO: use a better strategy for picking random seeds.

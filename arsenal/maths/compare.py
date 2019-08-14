@@ -186,6 +186,7 @@ class compare(object):
         r = np.max(r[np.isfinite(r)])
         tests.append(['max rel err', r, r <= 0.01])
         self.max_relative_error = r
+        self.max_rel_err = r
 
         # TODO: suggest that if relative error is high and rescaled error is low (or
         # something to do wtih regression residuals) that maybe there is a

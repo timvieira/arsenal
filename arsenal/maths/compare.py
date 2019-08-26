@@ -7,6 +7,7 @@ from scipy.linalg import lstsq, norm
 from arsenal import colors
 from arsenal.iterview import progress
 from arsenal.maths.util import cdf, cosine, linf, relative_difference, zero_retrieval
+from arsenal import Alphabet
 
 
 def pp_plot(a, b, pts=100, show_line=True):
@@ -87,7 +88,8 @@ class compare(object):
 
         """
 
-        from arsenal import Alphabet
+        self.name = name
+
         if isinstance(alphabet, Alphabet):
             alphabet = alphabet.tolist()
 
@@ -135,7 +137,6 @@ class compare(object):
         self.got = got
         self.alphabet = alphabet
         self.ax = ax
-        self.name = name
         self.got_label = got_label
         self.expect_label = expect_label
         self.n = n
@@ -252,9 +253,12 @@ class compare(object):
             lines.append('  %s: %s' % (k, c % (v,)))
         return '\n'.join(lines)
 
-    def plot(self, regression=True, seaborn=False, ax=None, title=None, **scatter_kw):
+    def plot(self, regression=True, seaborn=False, ax=None, title=None, name=None, **scatter_kw):
         if ax is not None:
             self.ax = ax
+
+        title = name or self.name or title
+
         if seaborn:
             import seaborn as sns
             sns.set_context(rc={"figure.figsize": (7, 5)})
@@ -264,27 +268,37 @@ class compare(object):
         else:
             if self.ax is None:
                 self.ax = pl.figure().add_subplot(111)
+
             self.ax.scatter(self.got, self.expect, lw=0, alpha=0.5, **scatter_kw)
-            if self.name is not None:
-                self.ax.set_title(self.name)
+
             self.ax.set_xlabel(self.got_label)
             self.ax.set_ylabel(self.expect_label)
+
             # Keeps the plot region tight against the data (allow 5% of the
             # data-range for padding so that points in the scatter plot aren't
             # partially clipped.)
             xeps = 0.05 * self.got.ptp()
             self.ax.set_xlim(self.got.min() - xeps, self.got.max() + xeps)
+
             yeps = 0.05 * self.expect.ptp()
             self.ax.set_ylim(self.expect.min() - yeps, self.expect.max() + yeps)
-        if title is not None:
-            self.ax.set_title(title)
-        if regression:
-            self.regression_line()
+
+        if title is not None: self.ax.set_title(title)
+        if regression: self.regression_line()
         return self
 
     def show(self, *args, **kw):
         self.plot(*args, **kw)
         pl.show()
+        return self
+
+    def live_plot(self, *args, **kw):
+        from arsenal.viz import axman
+        name = self.name if self.name is not None else kw.get('name')
+        assert name is not None, '`name` required for `live_plot` in order to make the figure.'
+        with axman(name) as ax:
+            kw['ax'] = ax
+            self.plot(*args, **kw)
         return self
 
     def regression_line(self):
@@ -314,7 +328,7 @@ class compare(object):
         A = np.ones((self.n, 2))
         A[:,0] = self.got
 
-        self.coeff, _, _, _ = lstsq(A, self.expect)
+        [self.coeff, _, _, _] = lstsq(A, self.expect)
 
         # Label with warn or ok.
         ok = 1 if abs(self.coeff - [1, 0]).max() <= 1e-5 else 2

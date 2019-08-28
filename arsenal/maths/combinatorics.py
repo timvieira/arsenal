@@ -1,68 +1,71 @@
 from itertools import product
+from scipy.special import binom, factorial
 
-def k_subsets_i(n, k):
-    "Subset of size k from the set of integers 0..n-1"
-    # check base cases
-    if k == 0 or n < k:
-        yield []
-    elif n == k:
-        yield list(range(n))
-    else:
-        # Use recursive formula based on binomial coeffecients:
-        # choose(n, k) = choose(n-1, k-1) + choose(n-1, k)
-        for s in k_subsets_i(n - 1, k - 1):
-            s.append(n - 1)
-            yield s
-        for s in k_subsets_i(n - 1, k):
-            yield s
+# TODO: I'm not crazy about this design because the return type should be a
+# FiniteSet too.  However, for practical purposes, I want the results to be lazy
+# -- since I often use these combinatorial routines to do model checking.
+class FiniteSet:
 
+    def __init__(self, Σ):
+        self.Σ = tuple(Σ)
 
-def k_subsets(s, k):
-    "Subsets of size k from s."
-    s = list(s)
-    n = len(s)
-    for k_set in k_subsets_i(n, k):
-        yield [s[i] for i in k_set]
+    def __iter__(self):
+        return iter(self.Σ)
 
+    def __len__(self):
+        return len(self.Σ)
 
-def powerset(S):
-    n = len(S)
-    # choose all subsets of size k from variables
-    for k in range(n+1):
-        for s in k_subsets(S, k):
-            yield list(s)
+    def __getitem__(self, x):
+        return FiniteSet(self.Σ.__getitem__(x))
 
+    def __add__(self, x):
+        return FiniteSet(self.Σ + x.Σ)
 
-def combinations(items, n):
-    "Ordered combinations"
-    if n==0: yield []
-    else:
-        for i in range(len(items)):
-            for cc in combinations(items[:i]+items[i+1:],n-1):
-                yield [items[i]]+cc
+    def __pow__(self, k):
+        "Strings of (exactly) length k."
+        yield from self.sample(k, ordered=True, replace=True)
 
+    def sample(self, k, ordered, replace):
+        if k == 0:
+            yield ()
+        else:
+            for i, σ in enumerate(self):
 
-def unordered_combinations(items, n):
-    "Unordered combinations"
-    if n==0: yield []
-    else:
-        for i in range(len(items)):
-            for cc in unordered_combinations(items[i+1:],n-1):
-                yield [items[i]]+cc
+                if ordered     and not replace: X = self[:i] + self[i+1:]  # select
+                if not ordered and not replace: X = self[i+1:]             # choose
+                if ordered     and     replace: X = self                   # self**k
+                if not ordered and     replace: X = self[i:]               # ????
 
+                for c in X.sample(k-1, ordered, replace):
+                    yield c + (σ,)
 
-def selections(items, n):
-    "Combinations with replacement"
-    if n==0: yield []
-    else:
-        for i in range(len(items)):
-            for ss in selections(items, n-1):
-                yield [items[i]]+ss
+    def kleene(self, n=None):
+        """
+        Kleene closure of Σ: The set of strings over the alphabet Σ with the option
+        to specify a maximum length `n` or leave as `None`.
+        """
+        if n is not None and n < 0: return
+        yield ()
+        for s in self.kleene(n if n is None else n-1):
+            for σ in self:
+                yield s + (σ,)
 
+    def select(self, k):
+        "Ordered subsets of size k"
+        yield from self.sample(k, ordered=True, replace=False)
 
-def permutations(items):
-    "Permutations"
-    return combinations(items, len(items))
+    def choose(self, k):
+        "Unordered subsets of size k"
+        yield from self.sample(k, ordered=False, replace=False)
+
+    def permutations(self):
+        "Permutations"
+        return self.select(len(self))
+
+    def powerset(self):
+        # choose all subsets of size k from variables
+        for k in range(len(self)+1):
+            yield from self.choose(k)
 
 
 def enumerate_digraphs(n):
@@ -81,23 +84,59 @@ def enumerate_digraphs(n):
 #                yield G
 
 
+def permutations(s):
+    return FiniteSet(s).permutations()
+
+def choose(s, k):
+    return FiniteSet(s).choose(k)
+
+def select(s, k):
+    return FiniteSet(s).select(k)
+
+def powerset(s):
+    return FiniteSet(s).powerset()
+
+
+
+def tests():
+
+    def check(N,K):
+        S = FiniteSet(range(N))
+
+        A00 = list(S.sample(K, ordered=0, replace=0))
+        assert binom(N,K) == len(A00)
+
+        #A01 = S.sample(K, ordered=0, replace=1)   # ???
+
+        A10 = list(S.sample(K, ordered=1, replace=0))
+        assert binom(N,K) * factorial(K) == len(A10)
+
+        A11 = list(S.sample(K, ordered=1, replace=1))
+        assert N**K == len(A11)
+
+    check(5,3)
+
+    # Check corner cases
+    check(5,5)
+    check(5,0)
+
+
+    from arsenal.iterextras import take
+
+    assert (list(take(10, map(''.join, FiniteSet('01').kleene())))
+            == ['', '0', '1', '00', '01', '10', '11', '000', '001', '010'])
+
+    assert (list(map(''.join, FiniteSet('01').kleene(n=3)))
+            == ['', '0', '1', '00', '01', '10', '11', '000', '001', '010', '011', '100', '101', '110', '111'])
+
+    assert (list(map(''.join, FiniteSet('a').kleene(n=4)))
+            == ['', 'a', 'aa', 'aaa', 'aaaa'])
+
+    assert (list(map(''.join, FiniteSet('').kleene(n=4)))
+            == [''])
+
+
 if __name__ == '__main__':
-
-    def test():
-        from scipy.special import factorial, binom
-        A = list(permutations(['l','o','v','e']))
-        assert(len(A) == factorial(4))
-
-        A = list(combinations(['l','o','v','e'], 2))
-        assert(len(A) == 2*binom(4, 2))
-
-        A = list(unordered_combinations(['l','o','v','e'], 2))
-        assert(len(A) == binom(4, 2))
-
-        A = list(selections(['l','o','v','e'], 2))
-        assert(len(A) == 4*4)
-
-        A = list(powerset(['l','o','v','e']))
-        assert(len(A) == 2**4)
-
-    test()
+    import doctest
+    doctest.testmod(verbose=True)
+    tests()

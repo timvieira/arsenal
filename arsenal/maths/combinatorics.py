@@ -6,7 +6,7 @@ from scipy.special import binom, factorial
 
 # TODO: implement "fair" versions of all methods (when they exist)
 
-# TODO: implement set-partition enumeration and sequence-parition
+# TODO: implement set-partition enumeration
 
 # TODO: figure out the fair enumerate extension and get all the special cases
 # for free.  We know that a fair enumerator exists because the `string` is a
@@ -114,6 +114,7 @@ def enumerate_digraphs(n):
 
 
 def test_sample():
+    print('[sample]')
 
     def check(N,K):
         S = range(N)
@@ -130,6 +131,7 @@ def test_sample():
 
 
 def test_kleene():
+    print('[kleene]')
     from arsenal.iterextras import take
 
     assert (list(take(10, map(''.join, kleene('01'))))

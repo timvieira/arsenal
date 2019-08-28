@@ -163,6 +163,34 @@ def flatten(S):
             yield from flatten(x)
 
 
+#def xCross(sets, *more):
+#    """
+#    Take the cartesian product of two or more iterables.
+#    The input can be either one argument, a collection of iterables xCross([it1,it2,...]),
+#    or several arguments, each one an iterable xCross(it1, itb, ...).
+#
+#    >>> [(x,y,z) for x,y,z in xCross([1,2], 'AB', [5])]
+#    [(1, 'A', 5), (1, 'B', 5), (2, 'A', 5), (2, 'B', 5)]
+#
+#    """
+#    if more:
+#        sets = chain((sets,), more)
+#    sets = list(sets)
+#    wheels = map(iter, sets) # wheels like in an odometer
+#    digits = [it.next() for it in wheels]
+#    while True:
+#        yield digits[:]
+#        for i in range(len(digits)-1, -1, -1):
+#            try:
+#                digits[i] = wheels[i].next()
+#                break
+#            except StopIteration:
+#                wheels[i] = iter(sets[i])
+#                digits[i] = wheels[i].next()
+#        else:
+#            break
+
+
 def test_trees():
 
     _catalan = [1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786,

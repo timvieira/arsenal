@@ -1,71 +1,99 @@
 from itertools import product
 from scipy.special import binom, factorial
 
-# TODO: I'm not crazy about this design because the return type should be a
-# FiniteSet too.  However, for practical purposes, I want the results to be lazy
-# -- since I often use these combinatorial routines to do model checking.
-class FiniteSet:
+# TODO: see itertools.{combinations combinations_with_replacement, permutations,
+# product} those implementations are fair because they are based on "pools"
 
-    def __init__(self, Σ):
-        self.Σ = tuple(Σ)
+# TODO: implement "fair" versions of all methods (when they exist)
 
-    def __iter__(self):
-        return iter(self.Σ)
+# TODO: implement set-partition enumeration and sequence-parition
 
-    def __len__(self):
-        return len(self.Σ)
+# TODO: figure out the fair enumerate extension and get all the special cases
+# for free.  We know that a fair enumerator exists because the `string` is a
+# superset of all other sets.
+def sample(S, k, ordered, replace):
+    S = tuple(S)
 
-    def __getitem__(self, x):
-        return FiniteSet(self.Σ.__getitem__(x))
+    if k == 0:
+        yield ()
+    else:
+        for i, s in enumerate(S):
 
-    def __add__(self, x):
-        return FiniteSet(self.Σ + x.Σ)
+            if     ordered and not replace: X = S[:i] + S[i+1:]  # select
+            if not ordered and not replace: X =         S[i+1:]  # choose
+            if     ordered and     replace: X = S[:i] + S[i:]    # string
+            if not ordered and     replace: X =         S[i:]    # ????
 
-    def __pow__(self, k):
-        "Strings of (exactly) length k."
-        yield from self.sample(k, ordered=True, replace=True)
+            for x in sample(X, k-1, ordered, replace):
+                yield x + (s,)
 
-    def sample(self, k, ordered, replace):
-        if k == 0:
-            yield ()
+
+def select(S, k):
+    "Ordered subsets of size k"
+    return sample(S, k, ordered=True, replace=False)
+
+
+def choose(S, k):
+    "Unordered subsets of size k"
+    return sample(S, k, ordered=False, replace=False)
+
+
+def permute(S):
+    "Permutations"
+    return select(S, len(S))
+
+
+# Note: There is no way to fairly enumerate powerset when S is infinite
+def powerset(S):
+    "Powerset"
+    # choose all subsets of size k from variables
+    for k in range(len(S)+1):
+        yield from choose(S, k)
+
+
+# TODO: If use a dovetailed Cartesian products, then we can support fair
+# enumerate over infinite sequences S
+def string(S, k):
+    "Strings of length k"
+    return sample(S, k, ordered=True, replace=True)
+
+
+# TODO: if we 'parse" left-to-right (instead of top-down) then we can support
+# fair enumeration over infinite sequences S.
+def trees(S):
+    "Generate all balanced trees over sequence S."
+    S = tuple(S)
+
+    def _trees(i, k):
+        if k-i == 1:
+            yield S[i]
         else:
-            for i, σ in enumerate(self):
+            for j in range(i, k):
+                for y in _trees(i, j):
+                    for z in _trees(j, k):
+                        yield (y, z)
 
-                if ordered     and not replace: X = self[:i] + self[i+1:]  # select
-                if not ordered and not replace: X = self[i+1:]             # choose
-                if ordered     and     replace: X = self                   # self**k
-                if not ordered and     replace: X = self[i:]               # ????
+    return _trees(0, len(S))
 
-                for c in X.sample(k-1, ordered, replace):
-                    yield c + (σ,)
 
-    def kleene(self, n=None):
-        """
-        Kleene closure of Σ: The set of strings over the alphabet Σ with the option
-        to specify a maximum length `n` or leave as `None`.
-        """
+def kleene(S, n=None):
+    """
+    Kleene closure of S: The set of strings over the alphabet `S` with the option
+    to specify a maximum length `n` or leave as `None`.
+    """
+
+    def _kleene(n):
         if n is not None and n < 0: return
         yield ()
-        for s in self.kleene(n if n is None else n-1):
-            for σ in self:
-                yield s + (σ,)
+        for x in _kleene(n if n is None else n-1):
+            for s in S:
+                yield x + (s,)
 
-    def select(self, k):
-        "Ordered subsets of size k"
-        yield from self.sample(k, ordered=True, replace=False)
+    return _kleene(n)
 
-    def choose(self, k):
-        "Unordered subsets of size k"
-        yield from self.sample(k, ordered=False, replace=False)
 
-    def permutations(self):
-        "Permutations"
-        return self.select(len(self))
-
-    def powerset(self):
-        # choose all subsets of size k from variables
-        for k in range(len(self)+1):
-            yield from self.choose(k)
+def catalan(n):
+    return int(binom(2*n, n)) // (n+1)
 
 
 def enumerate_digraphs(n):
@@ -84,35 +112,15 @@ def enumerate_digraphs(n):
 #                yield G
 
 
-def permutations(s):
-    return FiniteSet(s).permutations()
 
-def choose(s, k):
-    return FiniteSet(s).choose(k)
-
-def select(s, k):
-    return FiniteSet(s).select(k)
-
-def powerset(s):
-    return FiniteSet(s).powerset()
-
-
-
-def tests():
+def test_sample():
 
     def check(N,K):
-        S = FiniteSet(range(N))
-
-        A00 = list(S.sample(K, ordered=0, replace=0))
-        assert binom(N,K) == len(A00)
-
-        #A01 = S.sample(K, ordered=0, replace=1)   # ???
-
-        A10 = list(S.sample(K, ordered=1, replace=0))
-        assert binom(N,K) * factorial(K) == len(A10)
-
-        A11 = list(S.sample(K, ordered=1, replace=1))
-        assert N**K == len(A11)
+        S = range(N)
+        assert binom(N,K) == length(sample(S, K, ordered=0, replace=0))
+        #A01 = sample(S, K, ordered=0, replace=1)   # ???
+        assert binom(N,K) * factorial(K) == length(sample(S, K, ordered=1, replace=0))
+        assert N**K == length(sample(S, K, ordered=1, replace=1))
 
     check(5,3)
 
@@ -121,22 +129,85 @@ def tests():
     check(5,0)
 
 
+def test_kleene():
     from arsenal.iterextras import take
 
-    assert (list(take(10, map(''.join, FiniteSet('01').kleene())))
+    assert (list(take(10, map(''.join, kleene('01'))))
             == ['', '0', '1', '00', '01', '10', '11', '000', '001', '010'])
 
-    assert (list(map(''.join, FiniteSet('01').kleene(n=3)))
-            == ['', '0', '1', '00', '01', '10', '11', '000', '001', '010', '011', '100', '101', '110', '111'])
+    assert (list(map(''.join, kleene('01', n=3)))
+            == ['', '0', '1', '00', '01', '10', '11', '000', '001', '010',
+                '011', '100', '101', '110', '111'])
 
-    assert (list(map(''.join, FiniteSet('a').kleene(n=4)))
+    assert (list(map(''.join, kleene('a', n=4)))
             == ['', 'a', 'aa', 'aaa', 'aaaa'])
 
-    assert (list(map(''.join, FiniteSet('').kleene(n=4)))
+    assert (list(map(''.join, kleene('', n=4)))
             == [''])
+
+    assert length(powerset(range(5))) == 2**5
+    assert length(permute(range(5))) == factorial(5)
+
+
+def length(x):
+    return len(list(x))
+
+
+def test_trees():
+
+    _catalan = [1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786,
+                208012, 742900, 2674440]
+
+    for n in range(1, len(_catalan)):
+        assert _catalan[n] == catalan(n), [n, _catalan[n], catalan(n)]
+
+    verbose = False
+
+    def test(S):
+        A = list(trees(S))
+        if verbose:
+            if n <= 5:
+                for x in A:
+                    print('  ', x)
+                print()
+        assert length(A) == catalan(n-1)
+
+    for n in range(1, 10):
+        print(f'[trees] n={n}' )
+        test(range(n))
+
+
+def segmentations(S):
+    "Enumerate all segmentations of S"
+    N = len(S)
+    p = [[] for _ in range(N+1)]
+    p[0] = [()]
+    for t in range(1, N+1):
+        for s in range(t):
+            p[t] += [prefix + (tuple(S[s:t]),) for prefix in p[s]]
+    return p[N]
+
+
+def test_segementations():
+
+    verbose = False
+
+    def test(S):
+        A = list(segmentations(S))
+        if verbose: print(f'\nsegementations of {S}')
+        for i, p in enumerate(sorted(A)):
+            if verbose: print(f'  {i}: {p}')
+            assert ''.join(''.join(s) for s in p) == ''.join(S), S
+        assert len(A) == 2 ** (len(S) - 1)
+        assert len(A) == len(set(A))
+
+    for n in range(2, 10):
+        print(f'[segmentations] n={n}')
+        test(tuple(map(str,range(n))))
 
 
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod(verbose=True)
-    tests()
+    test_kleene()
+    test_sample()
+    test_trees()
+    test_segementations()

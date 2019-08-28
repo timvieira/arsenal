@@ -155,6 +155,14 @@ def length(x):
     return len(list(x))
 
 
+def flatten(S):
+    if not isinstance(S, (list, tuple)):
+        yield S
+    else:
+        for x in S:
+            yield from flatten(x)
+
+
 def test_trees():
 
     _catalan = [1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786,
@@ -167,14 +175,14 @@ def test_trees():
 
     def test(S):
         A = list(trees(S))
-        if verbose:
-            if n <= 5:
-                for x in A:
-                    print('  ', x)
-                print()
+        if verbose: print(f'\ntrees of {S}')
+        for x in A:
+            if verbose: print('  ', x)
+            # Check that flattening tree gives the seqence `S`.
+            assert tuple(flatten(x)) == tuple(S)
         assert length(A) == catalan(n-1)
 
-    for n in range(1, 10):
+    for n in range(2, 10):
         print(f'[trees] n={n}' )
         test(range(n))
 

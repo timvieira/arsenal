@@ -199,8 +199,11 @@ def test_segementations():
         if verbose: print(f'\nsegementations of {S}')
         for i, p in enumerate(sorted(A)):
             if verbose: print(f'  {i}: {p}')
+            # Check that `p` is actually a segmentation of S.
             assert ''.join(''.join(s) for s in p) == ''.join(S), S
+        # Check that we have the correct number
         assert len(A) == 2 ** (len(S) - 1)
+        # Check for duplicates
         assert len(A) == len(set(A))
 
     for n in range(2, 10):

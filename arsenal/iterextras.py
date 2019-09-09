@@ -57,6 +57,11 @@ def merge_roundrobin(*iterables):
 
     Recipe credited to George Sakkis
 
+    >>> list(take(10, merge_roundrobin('ABC', count(), 'E')))
+    ['A', 0, 'E', 'B', 1, 'C', 2, 3, 4, 5]
+
+    Recipe credited to George Sakkis
+
     """
     pending = len(iterables)
     nexts = cycle(iter(it).__next__ for it in iterables)

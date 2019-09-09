@@ -58,7 +58,7 @@ def string(S, k):
     return sample(S, k, ordered=True, replace=True)
 
 
-# TODO: if we 'parse" left-to-right (instead of top-down) then we can support
+# TODO: if we "parse" left-to-right (instead of top-down) then we can support
 # fair enumeration over infinite sequences S.
 def trees(S):
     "Generate all balanced trees over sequence S."

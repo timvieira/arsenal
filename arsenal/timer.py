@@ -180,7 +180,7 @@ class Timer(object):
 
         #elif 'box' in show:
         #    # TODO: doen't work very well yet. need to fill out the x-axis since
-        #    # feature might not be dense. Should throw an error if feature isn't an
+        #    # feature might not be dense. Should throw an error if feature isn't
         #    # integral.
         #    ddd = [np.asarray(dd[timecol]) for f, dd in sorted(df.groupby(feature))]
         #    ax.boxplot(ddd)
@@ -207,8 +207,10 @@ class Timer(object):
         return pd.DataFrame(data)
 
     def trim_slow(self, feature_to_bucket, threshold):
-        f = lambda k, d: d.timer <= d.timer.quantile(threshold)
-        return self.bucket_filter(feature_to_bucket, f)
+        return self.bucket_filter(
+            feature_to_bucket,
+            lambda k, d: d.timer <= d.timer.quantile(threshold)
+        )
 
     def plot_survival(self):
         from arsenal.maths import cdf

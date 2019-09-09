@@ -1,12 +1,11 @@
 import numpy as np
-import pylab as pl
+from matplotlib import pyplot as pl
 import pandas
 from collections import defaultdict
 from time import time
 
 from arsenal.viz.util import update_ax
 from arsenal.misc import ddict
-
 
 class LearningCurve(object):
     """
@@ -21,19 +20,23 @@ class LearningCurve(object):
         if sty is not None:
             self.sty.update(sty)
 
-        self.ax = pl.figure().add_subplot(111) if ax is None else ax
+        self.ax = pl.figure(figsize=(10,6)).add_subplot(111) if ax is None else ax
         self.legend = legend
         self.yscale = None
         self.xscale = None
+
+        self.widget = None
 
         self.last_update = time()
         self.min_time = 0.5
 
         # TODO: add knobs that control the smoothing params/options
         self.smoothing = None
-        self.bands = None
+        self._bands = None
 
     def smooth(self, type, aggregate, **kwargs):
+        # TODO: look at notes:interpolated-signal for additional ideas for
+        # smoothing the learning curve.
         if type == 'rolling':
             assert 'window' in kwargs
         elif type == 'ewm':
@@ -42,6 +45,10 @@ class LearningCurve(object):
             raise ValueError(self.smoothing.get('type'))
         self.smoothing = dict(type=type, aggregate=aggregate, **kwargs)
         return self
+
+    def bands(self, type):
+        assert self.smoothing is not None
+        self._bands = dict(type=type)
 
     def loglog(self):
         self.xscale = 'log'
@@ -87,9 +94,32 @@ class LearningCurve(object):
             if self.name:   ax.set_title(self.name)
             if self.legend: ax.legend(loc='best')
 
+            ax = self.ax
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            #ax.spines['bottom'].set_visible(False)
+            #ax.spines['left'].set_visible(False)
+
             self.draw_extra(ax)
+            self.add_widget()
+            #self.ax.figure.tight_layout()
 
         return self
+
+    def add_widget(self):
+        if self.widget is not None: return
+
+        from matplotlib.widgets import TextBox
+
+        # [left, bottom, width, height]
+        ax_widget = self.ax.figure.add_axes([0.1, .93, 0.06, 0.037])
+
+        def submit(text):
+            if not text: return
+            self.smoothing['half_life'] = float(text)
+
+        self.widget = TextBox(ax_widget, 'Smoothing ', initial='')
+        self.widget.on_submit(submit)
 
     def draw_extra(self, ax):
         return
@@ -105,6 +135,8 @@ class LearningCurve(object):
             return s.rolling(window, min_periods=0)
 
     def draw_smoothing(self, xs, ys, c):
+        # Note: the smoothing happens on the original signal, not in log space.
+        # We should probably add an option to smooth in log/log-log space.
         if self.smoothing is None: return
         r = self.smoothed_signal(xs, ys)
         if self.smoothing['aggregate'] == 'mean':
@@ -114,17 +146,17 @@ class LearningCurve(object):
         self.ax.plot(xs, zs, lw=2, c=c)
 
     def draw_bands(self, xs, ys, c):
-        if self.bands is None: return
+        if self._bands is None: return
 
         r = self.smoothed_signal(xs, ys)
 
-        if self.bands['type'] == 'std':
+        if self._bands['type'] == 'std':
             M = r.mean()
             s = r.std()
             U = M + 2*s
             L = M - 2*s
 
-        if self.bands['type'] == 'quantile':
+        if self._bands['type'] == 'quantile':
             U = r.quantile(.9)
             L = r.quantile(.1)
 
@@ -153,3 +185,22 @@ class LearningCurve(object):
 
 
 lc = ddict(LearningCurve)
+
+
+
+def test():
+
+    lc = LearningCurve('test')
+    lc.smooth('ewm', 'mean', half_life = 0.01).bands('std')
+    for t in range(1, 100000):
+
+        lc.update(t, signal = np.exp(np.log(t) * -0.5 + np.random.randn()))
+
+        lc.loglog().draw()
+
+
+    pl.ioff(); pl.show()
+
+
+if __name__ == '__main__':
+    test()

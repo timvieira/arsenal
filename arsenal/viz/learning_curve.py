@@ -25,14 +25,12 @@ class LearningCurve(object):
         self.yscale = None
         self.xscale = None
 
-        self.widget = None
-
         self.last_update = time()
         self.min_time = 0.5
 
-        # TODO: add knobs that control the smoothing params/options
         self.smoothing = None
         self._bands = None
+        self.widget = None
 
     def smooth(self, type, aggregate, **kwargs):
         # TODO: look at notes:interpolated-signal for additional ideas for
@@ -121,7 +119,9 @@ class LearningCurve(object):
             except (ValueError, AssertionError):
                 print('bad value for smooting parameter')
 
-        self.widget = TextBox(ax_widget, 'Smoothing ', initial='')
+        self.widget = TextBox(ax_widget, 'Smoothing ',
+                              initial = str(self.smoothing['half_life']))
+
         self.widget.on_submit(submit)
 
     def draw_extra(self, ax):

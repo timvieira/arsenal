@@ -44,11 +44,13 @@ class LearningCurve(object):
         else:
             raise ValueError(self.smoothing.get('type'))
         self.smoothing = dict(type=type, aggregate=aggregate, **kwargs)
+        self.add_widget()
         return self
 
     def bands(self, type):
         assert self.smoothing is not None
         self._bands = dict(type=type)
+        return self
 
     def loglog(self):
         self.xscale = 'log'
@@ -101,7 +103,6 @@ class LearningCurve(object):
             #ax.spines['left'].set_visible(False)
 
             self.draw_extra(ax)
-            self.add_widget()
             #self.ax.figure.tight_layout()
 
         return self
@@ -201,7 +202,7 @@ def test():
         if t % 10 == 0:
             lc.update(t, signal2 = np.exp(np.log(t) * -0.25 + np.random.randn()))
 
-        
+
         lc.loglog().draw()
 
 

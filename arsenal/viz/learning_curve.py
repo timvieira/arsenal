@@ -108,15 +108,17 @@ class LearningCurve(object):
 
     def add_widget(self):
         if self.widget is not None: return
-
         from matplotlib.widgets import TextBox
-
-        # [left, bottom, width, height]
-        ax_widget = self.ax.figure.add_axes([0.1, .93, 0.06, 0.037])
+        ax_widget = self.ax.figure.add_axes([0.1, .93, 0.06, 0.037])  # [left, bottom, width, height]
 
         def submit(text):
             if not text: return
-            self.smoothing['half_life'] = float(text)
+            try:
+                x = float(text)
+                self.smoothing['half_life'] = x
+                assert x > 0
+            except (ValueError, AssertionError):
+                print('bad value for smooting parameter')
 
         self.widget = TextBox(ax_widget, 'Smoothing ', initial='')
         self.widget.on_submit(submit)
@@ -196,6 +198,10 @@ def test():
 
         lc.update(t, signal = np.exp(np.log(t) * -0.5 + np.random.randn()))
 
+        if t % 10 == 0:
+            lc.update(t, signal2 = np.exp(np.log(t) * -0.25 + np.random.randn()))
+
+        
         lc.loglog().draw()
 
 

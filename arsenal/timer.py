@@ -35,15 +35,13 @@ class Benchmark(object):
     def __iter__(self):
         return iter(sorted(self.keys()))
     def plot_feature(self, feature, timecol='timer', ax=None, **kw):
-        if ax is None:
-            ax = pl.figure().add_subplot(111)
+        if ax is None: ax = pl.figure().add_subplot(111)
         for t in list(self.timers.values()):
             t.plot_feature(feature=feature,
                            timecol=timecol,
                            ax=ax,
                            **kw)
-        if self.title is not None:
-            ax.set_title(self.title)
+        if self.title is not None: ax.set_title(self.title)
         ax.legend(loc=2)
         return ax
 
@@ -142,8 +140,7 @@ class Timer(object):
 #                self.compare(x, **kw)
 
     def plot_feature(self, feature, timecol='timer', ax=None, **kw):
-        if ax is None:
-            ax = pl.figure().add_subplot(111)
+        if ax is None: ax = pl.figure().add_subplot(111)
         df = self.dataframe(timecol)
         a = df.groupby(feature).median()
 
@@ -152,12 +149,9 @@ class Timer(object):
         ax.set_xlabel(feature)
         ax.set_ylabel('time (seconds)')
 
-        if ax is None:
-            ax = pl.figure().add_subplot(111)
-
         if 'label' not in kw:
             # use name of the timer as default label.
-            kw['label'] = self.name
+            kw['label'] = f'{self.name}'
 
         [line] = ax.plot(X, Y, lw=2, alpha=0.5, **kw)
         del kw['label'] # delete label so it doesn't appear twice in the legend
@@ -175,8 +169,7 @@ class Timer(object):
             ])
         data = list(sorted(data))
         fs, ls, us = zip(*data)
-        pl.fill_between(fs, ls, us, alpha=0.25, color=c)
-
+        ax.fill_between(fs, ls, us, alpha=0.25, color=c)
 
         #elif 'box' in show:
         #    # TODO: doen't work very well yet. need to fill out the x-axis since
@@ -212,12 +205,13 @@ class Timer(object):
             lambda k, d: d.timer <= d.timer.quantile(threshold)
         )
 
-    def plot_survival(self):
+    def plot_survival(self, ax=None):
+        if ax is None: ax = pl.figure().add_subplot(111)
         from arsenal.maths import cdf
         ts = np.array(self.times)
         xs = np.linspace(0, ts.max(), 1000)
-        pl.plot(xs, 1-cdf(ts)(xs), label=self.name)
-        pl.legend(loc='best'); pl.xscale('log'); pl.yscale('log')
+        ax.plot(xs, 1-cdf(ts)(xs), label=self.name)
+        ax.legend(loc='best'); ax.set_xscale('log'); ax.set_yscale('log')
 
 
 @contextmanager

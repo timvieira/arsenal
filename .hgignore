@@ -17,6 +17,8 @@ sandbox/*
 _build
 coverage-report
 .coverage/
+*.so
+*.c
 
 build/*
 dist/*

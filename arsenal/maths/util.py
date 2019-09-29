@@ -20,6 +20,12 @@ def random_dist(*size):
     return np.random.dirichlet(np.ones(size[-1]), size=size[:-1])
 
 
+def gen_truncated(d, a=-np.inf, b=np.inf, size=None):
+    "Generate a truncated random variable, `a <= X <= b`."
+    u = uniform(0, 1, size=size)
+    return d.ppf(d.cdf(a) + u * (d.cdf(b) - d.cdf(a)))
+
+
 def wide_dataframe():
     import pandas as pd
     from arsenal.terminal import console_width
@@ -58,9 +64,9 @@ def argmax_random_tie(x):
 
 
 def onehot(i, n):
-    """Create a one-hot vector: a vector of length `n` with a `1` at position `i`
+    """
+    Create a one-hot vector: a vector of length `n` with a `1` at position `i`
     and zeros elsewhere.
-
     """
     x = np.zeros(n)
     x[i] = 1
@@ -100,8 +106,7 @@ def split_ix(N, p, randomize=1):
 
 
 def norm(x, p=2):
-    if not isfinite(x).all():
-        return np.nan
+    if not isfinite(x).all(): return np.nan
     return _norm(x, p)
 
 
@@ -212,11 +217,11 @@ class Mixture(object):
             'w is not a prob. distribution.'
         self.pdfs = pdfs
         self.w = w
-        self.cdf = cumsum(w)
+        self.w_cdf = cumsum(w)
 
     def rvs(self, size=1):
         # sample component
-        i = self.cdf.searchsorted(uniform(size=size))
+        i = sample(self.w_cdf, size=size)
         # sample from component
         return array([self.pdfs[j].rvs() for j in i])
 
@@ -261,22 +266,33 @@ class cdf:
 
     """
 
-    def __init__(self, a):
-        self.n = len(a)
-        self.x = array(a, copy=True)
+    def __init__(self, x):
+        [self.n] = x.shape
+        self.x = array(x, copy=True)
         self.x.sort()
 
     def __call__(self, z):
         return searchsorted(self.x, z, 'right') / self.n
 
+    cdf = __call__
 
-def sample(w, n=None):
+    def conditional_mean(self, a, b):
+        "E[T | a <= T < b]"
+        m = 0.0; n = 0.0
+        for i in range(self.x.searchsorted(a, 'right'),
+                       self.x.searchsorted(b, 'left')):
+            m += self.x[i]
+            n += 1
+        return m / n if n > 0 else np.inf
+
+
+def sample(w, size=None):
     """
     Uses the inverse CDF method to return samples drawn from an (unnormalized)
     discrete distribution.
     """
     c = cumsum(w)
-    r = uniform() if n is None else uniform(size=n)
+    r = uniform(size=size)
     return c.searchsorted(r * c[-1])
 
 
@@ -455,12 +471,6 @@ def softmax(x, axis=None):
     return a
 
 
-from arsenal.misc import deprecated
-@deprecated('softmax')
-def exp_normalize(arr, axis=None):
-    return softmax(arr, axis=axis)
-
-
 # TODO: add support for the axis argument.
 def d_softmax(out, x, adj):
     """
@@ -503,7 +513,7 @@ def entropy(p):
     "Entropy of a discrete random variable with distribution `p`"
     assert len(p.shape) == 1
     p = p[p.nonzero()]
-    return -dot(p, log(p)) / log_of_2
+    return -p @ log(p) / log_of_2
 
 
 def kl_divergence(p, q):
@@ -562,7 +572,7 @@ def cross_entropy(p, q):
     """
     assert len(p) == len(q)
     p = p[p > 0]
-    return -dot(p, log(q)) / log_of_2
+    return -p @ log(q) / log_of_2
 
 
 def assert_isdistr(p):

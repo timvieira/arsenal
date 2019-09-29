@@ -85,6 +85,32 @@ def plot3d(f, xdomain, ydomain, ax=None):
     return ax
 
 
+class plot_xsection:
+    def __init__(self, f, a, b, n, ax=None, opts=None):
+        """
+        Plot a cross section of `f` by interpolating from `x0 to `x1` by `n`
+        evenly space points.
+        """
+        if opts is None: opts = {}
+        if ax is None: ax = pl.gca()
+        self.n = n
+        self.a = a
+        self.b = b
+        self.ts = np.linspace(0,1,n)
+        self.fs = [f(xt) for xt in self.curve()]
+        ax.plot(self.ts, self.fs, **opts)
+        ax.set_xlabel('interpolation coefficient')
+        self.ax = ax
+
+    def __call__(self, f, opts=None):
+        return plot_xsection(f=f, a=self.a, b=self.b, n=self.n, ax=self.ax, opts=opts)
+
+    def curve(self):
+        "Sweep a curve in parameter spaces which is convex combination of `a` and `b`."
+        for t in self.ts:
+            yield self.a*(1-t) + self.b*t
+
+
 class NumericalDebug(object):
     """Incrementally builds a DataFrame, includes plotting and comparison method.
 

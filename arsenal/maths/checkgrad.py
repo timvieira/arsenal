@@ -10,6 +10,30 @@ from scipy.sparse.linalg import cg as implicit_cg
 from scipy.sparse.linalg import LinearOperator
 
 
+from scipy.optimize import minimize
+from scipy.linalg import norm
+from arsenal.maths import compare
+from arsenal import iterview
+
+
+def prox_numerical(f, x, s, jac=None):
+    "Numerically estimate the proximal operator `Prox_{s*f}(x)`."
+
+    def fg(z):
+        d = (z-x)
+        p = 0.5/s * (d @ d)
+        if jac:
+            fz, gz = f(z)
+            return (fz + p, gz + 1/s * d)
+        else:
+            return f(z) + p
+
+    sol = minimize(fg, x, jac=jac)
+    for _ in range(4):
+        sol = minimize(fg, sol.x, jac=jac)
+    return sol
+
+
 def fd_Jv(f, x, shape=None):
     """Finite-difference approximation to a Jacobian-vector product, J[f](x) v,
     where f: Rⁿ ↦ Rᵐ.

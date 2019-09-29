@@ -45,10 +45,10 @@ class Benchmark(object):
         ax.legend(loc=2)
         return ax
 
-    def plot_survival(self):
+    def plot_survival(self,*args,**kwargs):
         "Show the probability each algorithm is still running."
         for _, t in sorted(self.items()):
-            t.plot_survival()
+            t.plot_survival(*args,**kwargs)
 
     def run(self, methods, reps):
         from arsenal import iterview, restore_random_state

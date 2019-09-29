@@ -8,13 +8,14 @@ cdef extern from "limits.h":
     int INT_MAX
 
 cdef double MAX = float(INT_MAX)
-cdef inline double uniform():
+cdef inline double uniform() nogil:
     return rand() / MAX
 
 
 cdef class SumHeap:
-    cdef double[:] S
-    cdef int n, d
+    cdef readonly:
+        double[:] S
+        int n, d
 
     def __init__(self, double[:] w):
         self.n = w.shape[0]

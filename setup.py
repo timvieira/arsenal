@@ -5,7 +5,7 @@ from Cython.Build import cythonize
 
 
 setup(name = 'arsenal',
-      version = '3.1',
+      version = '3.2',
       description = 'Arsenal of python utilities.',
       author = 'Tim Vieira',
       url = 'https://github.com/timvieira/arsenal/',

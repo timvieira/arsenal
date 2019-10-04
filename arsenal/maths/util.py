@@ -264,11 +264,17 @@ class cdf:
      >>> g([0, 5, 15])
      array([0.        , 0.66666667, 1.        ])
 
+    The auantile function should be the inverse of the cdf.
+
+      >>> g = cdf([-1, 5, 5, 15])
+      >>> g.quantile(np.linspace(0, 1, 10))
+      array([-1, -1, -1,  5,  5,  5,  5,  5,  5, 15])
+
     """
 
     def __init__(self, x):
+        self.x = x = np.array(x, copy=True)
         [self.n] = x.shape
-        self.x = array(x, copy=True)
         self.x.sort()
 
     def __call__(self, z):
@@ -284,6 +290,13 @@ class cdf:
             m += self.x[i]
             n += 1
         return m / n if n > 0 else np.inf
+
+    def quantile(self, q):
+        # TODO: this could be made fastet given that x is already sorted.
+        assert np.all((0 <= q) & (q <= 1))
+        return np.quantile(self.x, q, interpolation='lower')
+
+    ppf = quantile
 
 
 def sample(w, size=None):
@@ -612,7 +625,7 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=0.001, color=1):
             print(msg)
 
     a = np.asarray(a); b = np.asarray(b)
-    err = abs(a - b) / abs(a)
+    err = abs(a - b) / abs(a) if a != 0 else 1.0
     if np.array(a == b).all():   # handles the non-finite cases.
         err = 0
     if name:

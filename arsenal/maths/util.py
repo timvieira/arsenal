@@ -625,9 +625,7 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=0.001, color=1):
             print(msg)
 
     a = np.asarray(a); b = np.asarray(b)
-    err = abs(a - b) / abs(a) if a != 0 else 1.0
-    if np.array(a == b).all():   # handles the non-finite cases.
-        err = 0
+    err = relative_difference(a, b)
     if name:
         name = '%s: ' % name
     if verbose or np.any(err > tol):
@@ -704,5 +702,6 @@ if __name__ == '__main__':
         print('passed tests.')
 
     run_tests()
-    import doctest;
+
+    import doctest
     doctest.testmod()

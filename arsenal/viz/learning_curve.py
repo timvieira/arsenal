@@ -191,23 +191,19 @@ lc = ddict(LearningCurve)
 
 
 
-def test():
-
-    lc = LearningCurve('test')
-    lc.smooth('ewm', 'mean', half_life = 0.01).bands('std')
-    for t in range(1, 100000):
-
-        lc.update(t, signal = np.exp(np.log(t) * -0.5 + np.random.randn()))
-
-        if t % 10 == 0:
-            lc.update(t, signal2 = np.exp(np.log(t) * -0.25 + np.random.randn()))
-
-
-        lc.loglog().draw()
-
-
-    pl.ioff(); pl.show()
-
-
-if __name__ == '__main__':
-    test()
+#def run():
+#
+#    lc = LearningCurve('test')
+#    lc.smooth('ewm', 'mean', half_life = 0.01).bands('std')
+#    for t in range(1, 1000):
+#        lc.update(t, signal = np.exp(np.log(t) * -0.5 + np.random.randn()))
+#        if t % 10 == 0:
+#            lc.update(t, signal2 = np.exp(np.log(t) * -0.25 + np.random.randn()))
+#        lc.loglog().draw()
+#
+#    pl.ioff(); pl.show()
+#
+#
+#if __name__ == '__main__':
+#    run()
+#

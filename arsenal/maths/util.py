@@ -217,11 +217,10 @@ class Mixture(object):
             'w is not a prob. distribution.'
         self.pdfs = pdfs
         self.w = w
-        self.w_cdf = cumsum(w)
 
     def rvs(self, size=1):
         # sample component
-        i = sample(self.w_cdf, size=size)
+        i = sample(self.w, size=size)
         # sample from component
         return array([self.pdfs[j].rvs() for j in i])
 
@@ -242,7 +241,7 @@ def spherical(size):
 # Kaplan-Meier is nonparametric (In fact, KM generalizes this estimator to
 # support censored response).
 # TODO: That same class would probably have the defacto mean/std estimators.
-class cdf:
+class Empirical:
     """
     Empirical CDF of data `a`, returns function which makes values to their
     cumulative probabilities.
@@ -282,6 +281,9 @@ class cdf:
 
     cdf = __call__
 
+    def sf(self, z):
+        return 1-self.cdf(z)
+
     def conditional_mean(self, a, b):
         "E[T | a <= T < b]"
         m = 0.0; n = 0.0
@@ -297,6 +299,8 @@ class cdf:
         return np.quantile(self.x, q, interpolation='lower')
 
     ppf = quantile
+
+cdf = Empirical
 
 
 def sample(w, size=None):

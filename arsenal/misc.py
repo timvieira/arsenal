@@ -16,7 +16,7 @@ def open_diff(a, b, cmd='meld'):
     os.system('%s /tmp/a /tmp/b' % cmd)
 
 
-def deprecated(use_instead=None):
+def deprecated(use_instead=None, msg=None):
     """
     This is a decorator which can be used to mark functions as deprecated.
     It will result in a warning being emitted when the function is used.
@@ -24,10 +24,12 @@ def deprecated(use_instead=None):
     def wrapped(func):
         @wraps(func)
         def new_func(*args, **kwargs):
-            message = "Call to deprecated function %s." % func.__name__
+            m = f'Call to deprecated function `{func.__name__}`.'
+            if msg:
+                m += f'\n{msg}'
             if use_instead:
-                message += " Use %s instead." % use_instead
-            warnings.warn(message, stacklevel=2)
+                m += f"\nUse `{use_instead}` instead."
+            warnings.warn(m, stacklevel=2)
             return func(*args, **kwargs)
         return new_func
 

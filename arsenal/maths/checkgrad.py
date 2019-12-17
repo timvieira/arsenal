@@ -1,5 +1,6 @@
 import numpy as np
-from arsenal.maths import compare, spherical
+from arsenal.maths.compare import compare
+from arsenal.maths.rvs import spherical
 from arsenal.iterview import iterview
 
 
@@ -12,7 +13,6 @@ from scipy.sparse.linalg import LinearOperator
 
 from scipy.optimize import minimize
 from scipy.linalg import norm
-from arsenal.maths import compare
 from arsenal import iterview
 
 

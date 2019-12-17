@@ -9,5 +9,6 @@ from arsenal.timer import Timer, timers, timeit
 #from arsenal.debug import ip
 #from arsenal.humanreadable import htime
 from arsenal.misc import ddict
+from arsenal.assertions import assert_throws
 from arsenal.robust import timelimit, Timeout
 from arsenal.maths import restore_random_state

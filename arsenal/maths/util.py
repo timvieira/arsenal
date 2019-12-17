@@ -12,20 +12,6 @@ from scipy.special import expit as sigmoid
 from scipy.linalg import svd
 
 
-def random_dist(*size):
-    """
-    Generate a random conditional distribution which sums to one over the last
-    dimension of the input dimensions.
-    """
-    return np.random.dirichlet(np.ones(size[-1]), size=size[:-1])
-
-
-def gen_truncated(d, a=-np.inf, b=np.inf, size=None):
-    "Generate a truncated random variable, `a <= X <= b`."
-    u = uniform(0, 1, size=size)
-    return d.ppf(d.cdf(a) + u * (d.cdf(b) - d.cdf(a)))
-
-
 def wide_dataframe():
     import pandas as pd
     from arsenal.terminal import console_width
@@ -200,124 +186,6 @@ def cosine(a, b):
         return a.dot(b) / (A*B)
     else:
         return np.nan
-
-
-def is_distribution(p):
-    p = asarray(p)
-    return (p >= 0).all() and abs(1 - p.sum()) < 1e-10
-
-
-class Mixture(object):
-    """
-    Mixture of several densities
-    """
-    def __init__(self, w, pdfs):
-        w = array(w)
-        assert is_distribution(w), \
-            'w is not a prob. distribution.'
-        self.pdfs = pdfs
-        self.w = w
-
-    def rvs(self, size=1):
-        # sample component
-        i = sample(self.w, size=size)
-        # sample from component
-        return array([self.pdfs[j].rvs() for j in i])
-
-    def pdf(self, x):
-        return sum([p.pdf(x) * w for w, p in zip(self.w, self.pdfs)])
-
-
-def spherical(size):
-    "Generate random vector from spherical Gaussian."
-    x = normal(0, 1, size=size)
-    x /= norm(x, 2)
-    return x
-
-
-# TODO: Should we create a class to represent this data with this the fit
-# method?  This should really be the MLE of some sort of distrbution.  What
-# distribution is it?  I suppose it is nonparametric in the same sense that
-# Kaplan-Meier is nonparametric (In fact, KM generalizes this estimator to
-# support censored response).
-# TODO: That same class would probably have the defacto mean/std estimators.
-class Empirical:
-    """
-    Empirical CDF of data `a`, returns function which makes values to their
-    cumulative probabilities.
-
-     >>> g = cdf([5, 10, 15])
-
-    Evaluate the CDF at a few points
-
-     >>> g([5,9,13,15,100])
-     array([0.33333333, 0.33333333, 0.66666667, 1.        , 1.        ])
-
-
-    Check that ties are handled correctly
-
-     >>> g = cdf([5, 5, 15])
-
-     The value p(x <= 5) = 2/3
-
-     >>> g([0, 5, 15])
-     array([0.        , 0.66666667, 1.        ])
-
-    The auantile function should be the inverse of the cdf.
-
-      >>> g = cdf([-1, 5, 5, 15])
-      >>> g.quantile(np.linspace(0, 1, 10))
-      array([-1, -1, -1,  5,  5,  5,  5,  5,  5, 15])
-
-    """
-
-    def __init__(self, x):
-        self.x = x = np.array(x, copy=True)
-        [self.n] = x.shape
-        self.x.sort()
-
-    def __call__(self, z):
-        return searchsorted(self.x, z, 'right') / self.n
-
-    cdf = __call__
-
-    def sf(self, z):
-        return 1-self.cdf(z)
-
-    def conditional_mean(self, a, b):
-        "E[T | a <= T < b]"
-        m = 0.0; n = 0.0
-        for i in range(self.x.searchsorted(a, 'right'),
-                       self.x.searchsorted(b, 'left')):
-            m += self.x[i]
-            n += 1
-        return m / n if n > 0 else np.inf
-
-    def quantile(self, q):
-        # TODO: this could be made fastet given that x is already sorted.
-        assert np.all((0 <= q) & (q <= 1))
-        return np.quantile(self.x, q, interpolation='lower')
-
-    ppf = quantile
-
-cdf = Empirical
-
-
-def sample(w, size=None):
-    """
-    Uses the inverse CDF method to return samples drawn from an (unnormalized)
-    discrete distribution.
-    """
-    c = cumsum(w)
-    r = uniform(size=size)
-    return c.searchsorted(r * c[-1])
-
-
-def log_sample(w):
-    "Sample from unnormalized log-distribution."
-    a = w - w.max()
-    exp(a, out=a)
-    return sample(a)
 
 
 def cumavg(x):
@@ -526,12 +394,15 @@ def project_onto_simplex(a, radius=1.0):
 
 log_of_2 = log(2)
 
+
+# TODO: Create discrete distribution with an entropy method an make this a
+# shortcut to the method on that instance.  Similarly for `kl_divergence` and
+# `mutual information`, and `cross_entropy`.
 def entropy(p):
     "Entropy of a discrete random variable with distribution `p`"
     assert len(p.shape) == 1
     p = p[p.nonzero()]
     return -p @ log(p) / log_of_2
-
 
 def kl_divergence(p, q):
     """ Compute KL divergence of two vectors, K(p || q).
@@ -598,9 +469,9 @@ def assert_isdistr(p):
     assert abs(p.sum() - 1.0) < 0.000001
 
 
-def equal(a, b, tol=1e-10):
-    "L_{\inf}(a - b) < tol"
-    return inf_norm(a,b) < tol
+#def equal(a, b, tol=1e-10):
+#    "L_{\inf}(a - b) < tol"
+#    return inf_norm(a,b) < tol
 
 
 def inf_norm(a, b):

@@ -99,9 +99,12 @@ class Timer(object):
         self.features.append(features)
         return self
 
+    def mean(self):
+        return np.mean(self.times)
+
     @property
     def avg(self):
-        return np.mean(self.times)
+        return self.mean
 
     @property
     def median(self):

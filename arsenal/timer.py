@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from arsenal.humanreadable import htime
 from arsenal.terminal import colors
 from arsenal.misc import ddict
+from scipy.stats import mannwhitneyu
 
 
 def timers(title=None):
@@ -93,18 +94,15 @@ class Timer(object):
         self.times.append(time() - self.b4)
 
     def __str__(self):
-        return 'Timer(name=%s, avg=%g, std=%g)' % (self.name, self.avg, self.std)
+        return 'Timer(name=%s, avg=%g, std=%g)' % (self.name, self.mean, self.std)
 
     def __call__(self, **features):
         self.features.append(features)
         return self
 
+    @property
     def mean(self):
         return np.mean(self.times)
-
-    @property
-    def avg(self):
-        return self.mean
 
     @property
     def median(self):
@@ -120,20 +118,33 @@ class Timer(object):
     def total(self):
         return sum(self.times)
 
-    def compare(self, other, attr='median', verbose=True):
+    def compare(self, other, attr='mean', verbose=True):
         if len(self.times) == 0 or len(other.times) == 0:
             print('%s %s %s' % (self.name, '???', other.name))
             return
-        if getattr(self, attr) <= getattr(other, attr):
-            print('%s is %6.4fx faster than %s %s' \
-                % (self.name,
-                   getattr(other, attr) / getattr(self, attr),
-                   other.name,
-                   ((colors.yellow % '(%s: %s: %g %s: %g)' % (attr,
-                                                      other.name, getattr(other, attr),
-                                                      self.name, getattr(self, attr)))
-                    if verbose else '')
-                ))
+
+        self_attr = getattr(self, attr)
+        other_attr = getattr(other, attr)
+        if self_attr <= other_attr:
+
+            # use_continuity=True, alternative=None
+            # alternative = {None, ‘two-sided’, ‘less’, ‘greater’}
+
+            #print(np.array(self.times) - np.array(other.times))
+            U = mannwhitneyu(self.times, other.times)
+
+            extra = ''
+            if verbose:
+                pval = f'p={U.pvalue:.5f}'
+                if U.pvalue < 0.05:
+                    pval = colors.green % pval
+                else:
+                    pval = colors.yellow % pval
+                extra = f'({pval}, {attr}: {other.name}: {other_attr:g}, {self.name}: {self_attr:g})'
+
+            print(f'{self.name} is %6.4fx faster than {other.name} %s' \
+                % (other_attr / self_attr, extra))
+
         else:
             other.compare(self, attr=attr, verbose=verbose)
 
@@ -236,6 +247,17 @@ def main():
     from arsenal.iterview import iterview
     from time import sleep
     from numpy.random import uniform
+
+    T = Benchmark('A vs B')
+    for _ in iterview(range(1000), T.title):
+        with T['A']:
+            sleep(np.random.exponential(.001))
+        with T['B']:
+            sleep(np.random.exponential(.001))
+
+    T.compare()
+
+
     t = Timer('test')
 
     for i in iterview(range(1, 20)):
@@ -245,8 +267,7 @@ def main():
                 z = max(i**2 * 0.0001 + uniform(-c, c), 0.0)
                 sleep(z)
 
-    a = t.plot_feature('i')
-    print(a)
+    t.plot_feature('i')
     pl.show()
 
 

@@ -18,6 +18,25 @@ from arsenal.terminal import colors
 #from arsenal.viz.covariance_ellipse import covariance_ellipse
 from arsenal.misc import ddict
 
+
+from palettable.colorbrewer import qualitative
+
+
+simple_palette = ['r','g','b','y','c','m','k']
+default_palette = qualitative.Set1_6.mpl_colors
+
+def name2color(palette = default_palette):
+    "Create a mapping from names to matplotlib colors."
+    palette = list(palette)
+    i = -1
+    n = len(palette)
+    def next_color():
+        nonlocal i
+        i += 1
+        return palette[i % n]
+    return defaultdict(next_color)
+
+
 def save_plots(pdf):
     "save all plots to pdf"
     pp = PdfPages(pdf)

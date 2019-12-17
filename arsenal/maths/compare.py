@@ -6,7 +6,8 @@ from scipy.stats import pearsonr, spearmanr
 from scipy.linalg import lstsq, norm
 from arsenal import colors
 from arsenal.iterview import progress
-from arsenal.maths.util import cdf, cosine, linf, relative_difference, zero_retrieval
+from arsenal.maths import cosine, linf, relative_difference, zero_retrieval
+from arsenal.maths.rvs import cdf
 from arsenal import Alphabet
 
 

@@ -167,6 +167,11 @@ class LearningCurve(object):
 
     def update(self, iteration, **kwargs):
         "Update plots, if ``iteration is None`` we'll use ``iteration=len(data)``"
+        return self._update(iteration, kwargs)
+
+    def _update(self, iteration, kwargs):
+        "Update plots, if ``iteration is None`` we'll use ``iteration=len(data)``"
+        assert isinstance(kwargs, dict)
         data = self.data
         for k, v in kwargs.items():
             i = len(data[k]) if iteration is None else iteration

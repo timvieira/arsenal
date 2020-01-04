@@ -18,10 +18,10 @@ class memoize(object):
         except AttributeError:
             pass
 
-    # define __get__ in case this function is a method.
     def __get__(self, obj, objtype=None):
-        if obj is None:
-            return self.func
+        "define `__get__` in case this function is a method."
+        #print('  method get', obj, objtype)
+        if obj is None: return self.func
         return partial(self, obj)
 
     def __call__(self, *args):
@@ -73,7 +73,8 @@ def persistent_cache(key=lambda x: x, None_is_bad=False):
 
 
 
-## TODO: automatically make a back-up of the pickle
+## TODO: automatically make a back-up of any previous pickles just in case the
+##   save fails.  (Saving at-exit can be pretty flaky.)
 class memoize_persistent(object):
     """
     cache a function's return value to avoid recalulation and save the
@@ -93,7 +94,8 @@ class memoize_persistent(object):
 
     def save(self):
         if self.cache and self.dirty:
-            pickle.dump((self.cache, self.key), file(self.filename,'wb'))
+            with open(self.filename, 'w') as f:
+                pickle.dump((self.cache, self.key), f)
             print('[ATEXIT] saved persistent cache for {self.func.__name__} to file "{self.filename}"'.format(self=self))
         else:
             print("[ATEXIT] found nothing to save in {self.func.__name__}'s cache.".format(self=self))
@@ -102,7 +104,8 @@ class memoize_persistent(object):
         self.loaded = True
         loaded_key = None
         try:
-            (cache, loaded_key) = pickle.load(file(self.filename,'r'))
+            with open(self.filename, 'r') as f:
+                (cache, loaded_key) = pickle.load(f)
         except IOError:
             pass
         finally:
@@ -142,3 +145,50 @@ class memoize_persistent(object):
             return self.cache[args]
         else:
             return None
+
+
+def test_memoize():
+
+    @memoize
+    def g(x):
+        return x**2
+
+    class foo:
+        def __init__(self, a):
+            self.a = a
+        @memoize
+        def goo(self, x):
+            return self.a * x
+        def __repr__(self):
+            return f'foo({self.a})'
+
+    a = foo(2)
+    b = foo(3)
+
+    print('created')
+    a_goo = a.goo
+    print(a.goo)
+    print('calling')
+    assert a_goo(5) == 2*5
+    assert b.goo(5) == 3*5
+    print('ok')
+
+    assert a_goo(5) == 2*5
+
+    print('xxx')
+    print(foo.goo)   # triggers method.get
+    assert foo.goo(a, 4) == 2*4
+    print('----')
+
+    print(a.__class__.__dict__['goo'])        # gives the memoize instance
+    print(a.__class__.__dict__['goo'].cache)  # it's hashing (obj, args)
+
+    print('----')
+    assert g(4) == 4**2    # no __get__ call here.
+    print(g)
+    print(g.cache)
+    print('ok')
+
+
+if __name__ == '__main__':
+    test_memoize()

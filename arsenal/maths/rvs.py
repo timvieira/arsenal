@@ -2,7 +2,7 @@ import numpy as np
 from numpy.random import uniform, normal
 from numpy import array, exp, cumsum, asarray
 from numpy.linalg import norm
-
+from scipy.integrate import quad
 
 def is_distribution(p):
     p = asarray(p)
@@ -13,6 +13,8 @@ class TruncatedDistribution:
     def __init__(self, d, a, b):
         assert np.all(a <= b), [a, b]
         self.d = d; self.a = a; self.b = b
+    def sf(self, x):
+        return 1-self.cdf(x)
     def pdf(self, x):
         d = self.d; a = self.a; b = self.b
         return (a <= x) * (x <= b) * d.pdf(x) / (d.cdf(b) - d.cdf(a))
@@ -24,11 +26,18 @@ class TruncatedDistribution:
         cdf_a = d.cdf(self.a)
         return d.ppf(cdf_a + u * (d.cdf(self.b) - cdf_a))
     def cdf(self, x):
-#        assert np.all((x >= self.a) & (x <= self.b))
         d = self.d; a = self.a; b = self.b
         cdf_a = d.cdf(a)
         w = d.cdf(b) - cdf_a
         return np.minimum(1, (d.cdf(x) - cdf_a) * (a <= x) / w)
+    def mean(self):
+        # The truncated mean is unfortunately not analytical
+        return quad(lambda x: x * self.pdf(x), self.a, self.b)[0]
+
+        # XXX: The Darth Vader only applies to positive random variables
+        # http://thirdorderscientist.org/homoclinic-orbit/2013/6/25/the-darth-vader-rule-mdash-or-computing-expectations-using-survival-functions
+        # https://content.sciendo.com/view/journals/tmmp/52/1/article-p53.xml
+#        return quad(self.sf, self.a, self.b)[0] + self.a
 
 
 def test_truncated_distribution():
@@ -37,7 +46,9 @@ def test_truncated_distribution():
     import scipy.stats as st
     d = st.lognorm(1.25)
 
-    t = TruncatedDistribution(d, 1, 4)
+    t = TruncatedDistribution(d, 2, 4)
+
+    print(t.mean(), t.rvs(100_000).mean())
 
     if 1:
         us = np.linspace(0.01, 0.99, 1000)
@@ -58,13 +69,15 @@ def test_truncated_distribution():
         us = np.linspace(0.01, 0.99, 100)
         for u in us:
             v = t.cdf(t.ppf(u))
-            assert abs(u - v)/abs(u) < 1e-8
+            assert abs(u - v)/abs(u) < 1e-3
 
     if 1:
-        xs = np.linspace(1, 4, 1000)
+        xs = np.linspace(1, 5, 1000)
         for x in xs:
             y = t.ppf(t.cdf(x))
-            assert abs(x - y)/abs(x) < 1e-8, [x, y]
+            if t.pdf(x) > 0:
+                err = abs(x - y)/abs(x)
+                assert err < 1e-3, [err, x, y]
 
 
 def random_dist(*size):

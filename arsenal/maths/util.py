@@ -3,13 +3,12 @@ import numpy as np
 from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
     asarray, ones, mean, searchsorted, sqrt, isfinite
 from numpy.random import uniform, normal
-from scipy.linalg import norm as _norm
+import scipy.linalg as la
 from scipy import stats
 from arsenal.terminal import colors
 from scipy.stats import pearsonr, spearmanr
 from contextlib import contextmanager
 from scipy.special import expit as sigmoid
-from scipy.linalg import svd
 
 
 def wide_dataframe():
@@ -59,21 +58,48 @@ def onehot(i, n):
     return x
 
 
-def null_space(A, eps=1e-15):
-    "Find V such that AVx = 0 for all x."
-    _, s, Vh = svd(A)
-    s2 = np.zeros(Vh.shape[0])
-    s2[0:len(s)] = s
-    mask = s2 < eps
-    null = Vh[mask,:]
-    return null.T
-
-
 def wls(A, b, w):
     "weighted least-squares estimation."
     from statsmodels.api import WLS
     # Note: statsmodel is a bit more accurate than directly calling lstsq
     return WLS(b, A, weights=w).fit().params
+
+
+class subspace:
+    """
+    Linear subspace
+    """
+    def __init__(self, A):
+        # A is a collection of column vectors
+        [self.dim, _] = A.shape
+        self.A = A
+        self.P = la.pinv(A) @ A
+#        self.P = A @ la.inv(A.T @ A) @ A.T
+        self.N = la.null_space(A.T)
+
+    def project(self, q):
+        return self.P @ q
+
+    def basic_checks(self):
+        # basic checks: P is a projection matrix
+        P = self.P
+        assert P.shape == (self.dim, self.dim)
+        assert np.allclose(P, P.T)
+        assert np.allclose(P @ P, P)
+
+    def visualize(self, ax, num=100):
+        if self.dim == 2:
+            X = np.linspace(*ax.get_xlim(), num=num)
+            a,b = self.N   # Show the linear subspace spanned by the basis vectors in F.
+            ax.plot(X, -a*X/b, color='k', alpha=0.25)
+        if self.dim == 3:
+            X = np.linspace(*ax.get_xlim(), num=num)
+            Y = np.linspace(*ax.get_ylim(), num=num)
+            X,Y = np.meshgrid(X, Y)
+            a,b,c = self.N   # Show the linear subspace spanned by the basis vectors in F.
+            ax.plot_surface(X, Y, np.array([-(a*x+b*y)/c for x,y in zip(X.flat,Y.flat)]).reshape(X.shape),
+                            color='k', alpha=0.25)
+        return ax
 
 
 def split_ix(N, p, randomize=1):
@@ -93,7 +119,7 @@ def split_ix(N, p, randomize=1):
 
 def norm(x, p=2):
     if not isfinite(x).all(): return np.nan
-    return _norm(x, p)
+    return la.norm(x, p)
 
 
 def zero_retrieval(expect, got):
@@ -504,7 +530,7 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=0.001, color=1):
     if name:
         name = '%s: ' % name
     if verbose or np.any(err > tol):
-        msg = '%s%g %g err=%g' % (name, a, b, err)
+        msg = f'{name}{a} {b} err={err}'
         if throw and err > tol:
             raise AssertionError(msg + ' >= tolerance (%s)' % tol)
         else:

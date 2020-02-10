@@ -92,7 +92,7 @@ class compare(object):
         self.name = name
 
         if isinstance(alphabet, Alphabet):
-            alphabet = alphabet.tolist()
+            alphabet = list(alphabet)
 
         if isinstance(expect, dict) and isinstance(got, dict):
             alphabet = list(expect.keys()) if alphabet is None else alphabet
@@ -184,11 +184,11 @@ class compare(object):
         tests.append(['same-sign', '%s%% (%s/%s)' % (p, s.sum(), len(s)), p == 100.0])
 
         # relative error
-        r = relative_difference(expect, got)
-        r = np.max(r[np.isfinite(r)])
-        tests.append(['max rel err', r, r <= 0.01])
-        self.max_relative_error = r
-        self.max_rel_err = r
+        #r = relative_difference(expect, got)
+        #r = np.max(r[np.isfinite(r)])
+        #tests.append(['max rel err', r, r <= 0.01])
+        #self.max_relative_error = r
+        #self.max_rel_err = r
 
         # TODO: suggest that if relative error is high and rescaled error is low (or
         # something to do wtih regression residuals) that maybe there is a

@@ -43,6 +43,37 @@ def permute(S):
     return select(S, len(S))
 
 
+def perm_sign(p):
+    if len(p) == 1: return True
+    t = _inversions(p)
+    return -1 if t % 2 else +1
+
+
+from blist import sortedlist
+def _fast_inversions(p):
+    n = len(p)
+    total = 0
+    S = sortedlist()
+    for k in reversed(range(n)):
+        pos = S.bisect_left(p[k])
+        S.add(p[k])
+        total += pos
+    return total
+
+def _slow_inversions(p):
+    n = len(p)
+    t = 0
+    for i in range(n):
+        for j in range(i+1, n):
+            if p[i] > p[j]:
+                t += 1
+    return t
+
+def _inversions(p):
+    #assert _slow_inversions(p) == _fast_inversions(p)
+    return _fast_inversions(p)
+
+
 # Note: There is no way to fairly enumerate powerset when S is infinite
 def powerset(S):
     "Powerset"

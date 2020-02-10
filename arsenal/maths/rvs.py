@@ -9,6 +9,16 @@ def is_distribution(p):
     return (p >= 0).all() and abs(1 - p.sum()) < 1e-10
 
 
+def anneal(p, *, invT=None, T=None):
+    "p ** (1/T)"
+    if T is not None:
+        assert invT is None
+        invT = 1./T
+    p = p ** invT
+    p /= p.sum()
+    return p
+
+
 class TruncatedDistribution:
     def __init__(self, d, a, b):
         assert np.all(a <= b), [a, b]

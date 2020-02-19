@@ -1,8 +1,10 @@
 import numpy as np
+import scipy.stats as st
 from numpy.random import uniform, normal
 from numpy import array, exp, cumsum, asarray
 from numpy.linalg import norm
 from scipy.integrate import quad
+
 
 def is_distribution(p):
     p = asarray(p)
@@ -23,23 +25,20 @@ class TruncatedDistribution:
     def __init__(self, d, a, b):
         assert np.all(a <= b), [a, b]
         self.d = d; self.a = a; self.b = b
+        self.cdf_b = d.cdf(b)
+        self.cdf_a = d.cdf(a)
+        self.cdf_w = self.cdf_b - self.cdf_a
     def sf(self, x):
         return 1-self.cdf(x)
     def pdf(self, x):
-        d = self.d; a = self.a; b = self.b
-        return (a <= x) * (x <= b) * d.pdf(x) / (d.cdf(b) - d.cdf(a))
+        return (self.a <= x) * (x <= self.b) * self.d.pdf(x) / self.cdf_w
     def rvs(self, size=None):
         u = uniform(0, 1, size=size)
         return self.ppf(u)
     def ppf(self, u):
-        d = self.d
-        cdf_a = d.cdf(self.a)
-        return d.ppf(cdf_a + u * (d.cdf(self.b) - cdf_a))
+        return self.d.ppf(self.cdf_a + u * self.cdf_w)
     def cdf(self, x):
-        d = self.d; a = self.a; b = self.b
-        cdf_a = d.cdf(a)
-        w = d.cdf(b) - cdf_a
-        return np.minimum(1, (d.cdf(x) - cdf_a) * (a <= x) / w)
+        return np.minimum(1, (self.d.cdf(x) - self.cdf_a) * (self.a <= x) / self.cdf_w)
     def mean(self):
         # The truncated mean is unfortunately not analytical
         return quad(lambda x: x * self.pdf(x), self.a, self.b)[0]
@@ -96,6 +95,10 @@ def random_dist(*size):
     dimension of the input dimensions.
     """
     return np.random.dirichlet(np.ones(size[-1]), size=size[:-1])
+
+
+def random_psd(n):
+    return st.wishart.rvs(df=n, scale=np.eye(n)) / n
 
 
 class Mixture(object):

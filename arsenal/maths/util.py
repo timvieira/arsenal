@@ -65,6 +65,47 @@ def wls(A, b, w):
     return WLS(b, A, weights=w).fit().params
 
 
+def blocks(M, k):
+    """Partition the matrix M into blocks
+
+      M = [[A, B],
+           [C, D]]
+
+    Output: `A: k x k`, `D: (n-k) x (n-k)` if `M: n x n`.
+
+    TODO: support arbitrary partitions when `k` is a list
+
+    """
+
+#    if isinstance(k, list) or (isinstance(k, np.ndarray) and k.dtype == int):
+#        N,M = M.shape
+#        M = M[k,k]    # Shuffle the rows so that k comes first
+#        nodes = set(k)
+#        I = list(sorted(nodes))
+#        O = list(sorted(set(range(N)) - nodes))
+#        A,B,C,D = [{} for _ in range(4)]
+#        for i in range(N):
+#            for j in range(M):
+#                v = M[i,j]
+#                if i in nodes:
+#                    if j in nodes:
+#                        A[i,j] = v
+#                    else:
+#                        B[i,j] = v
+#                else:
+#                    if j in nodes:
+#                        C[i,j] = v
+#                    else:
+#                        D[i,j] = v
+#        k = len(k)
+
+    assert isinstance(k, int)
+    return [
+        [M[:k,:k], M[:k,k:]],
+        [M[k:,:k], M[k:,k:]],
+    ]
+
+
 class subspace:
     """
     Linear subspace
@@ -392,7 +433,8 @@ def d_softmax(out, x, adj):
     return g
 
 
-# TODO: implement projection onto l1 ball -- see code in notes.
+# TODO: move elsewhere (test cases for this method live with my proximal
+# operators).  This method should probably move there.
 def project_onto_simplex(a, radius=1.0):
     """
     Project point a to the probability simplex.
@@ -509,17 +551,17 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=0.001, color=1):
     """isfinite: asserts that *both* `a` and `b` must be finite.
 
     >>> assert_equal(0, 1, throw=0, color=0)
-    0 1 err=1 fail
+    0 1 err=[1.] fail
 
     >>> assert_equal(0, 0, verbose=1, color=0)
-    0 0 err=0 ok
+    0 0 err=[0] ok
 
     """
     try:
         assert not np.isnan(a).any() and not np.isnan(b).any()
     except (TypeError, AssertionError):
-        msg = '%sexpected %s, got %s' % ('%s: ' % name if name else '',
-                                         a, b)
+        pre = {"%s: " % name if name else ""}
+        msg = f'{pre}expected {a}, got {b}'
         if throw:
             raise AssertionError(msg)
         else:

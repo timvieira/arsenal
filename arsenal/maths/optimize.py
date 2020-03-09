@@ -35,6 +35,36 @@ class NProx:
         return (x - self.op(x, **kw)) / self.s
 
 
+class NProj:
+
+    def __init__(self, C, type):
+        self.C = C
+        self.type = type
+        self.constraints = [{
+            'fun': self.C,
+            'type': {'>=': 'ineq', '==': 'eq'}[self.type],
+        }]
+
+    def solve(self, x, y0=None):
+        sol = minimize(
+            lambda y: 0.5 * (y - x) @ (y - x),
+            y0 if y0 is not None else x,
+            constraints = self.constraints,
+        )
+        if not sol.success: print(sol.message)
+        return sol
+
+    def op(self, x, **kw):
+        return self.solve(x, **kw).x
+
+    def func(self, x, **kw):
+        return self.solve(x, **kw).fun
+
+    def grad_like(self, x, **kw):
+        "Gradient of `prox_func` wrt `x`."
+        return (x - self.op(x, **kw))
+
+
 def is_subgradient(f, g, x):
     "Numerically check whether or not `g` is a subgradient of `f` at `x`."
     # Check the condition:

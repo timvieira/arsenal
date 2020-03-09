@@ -1,5 +1,5 @@
 """
-Rank-one updates to the Cholesky decomposition of a positive-definite matrix.
+Utilities for working with the Cholesky factorization of a positive-definite matrix.
 """
 import numpy as np
 import scipy.linalg as la
@@ -9,7 +9,8 @@ from arsenal.maths import blocks, random_psd
 
 class Cholesky:
     """Interface to Cholesky factorization of a matrix, which supports updates
-    (growing and rank-one updates)
+    (growing and rank-one updates) as well as efficient utility methods (e.g.,
+    solve, det).
 
     Remarks:
 
@@ -41,6 +42,30 @@ class Cholesky:
             L[k, k]    = r
             L[k+1:, k] = (L[k+1:n, k] + s * x[k+1:n]) / c
             x[k+1:]    = c * x[k+1:n] - s * L[k+1:n, k]
+
+    def downdate_rank_one(self, z):
+        """
+        Rank-one down-date: compute Chol(M - x xᵀ) given L = Chol(M).
+        """
+        # based on https://github.com/scipy/scipy/issues/8188
+        L = self.L
+        n = L.shape[0]
+        eps = n * np.spacing(1.)  # For complex this needs modification
+        alpha, beta = np.empty_like(z), np.empty_like(z)
+        alpha[-1], beta[-1] = 1., 1.
+
+        for r in range(n):
+            a = z[r] / L[r, r]
+            alpha[r] = alpha[r-1] - a ** 2
+            # Numerically zero or negative
+            if alpha[r] < eps:
+                # Made up err msg.
+                raise la.LinAlgError('The Cholesky factor becomes nonpositive'
+                                     'with this downdate at the step {}'.format(r))
+            beta[r] = np.sqrt(alpha[r])
+            z[r+1:] -= a * L[r, r+1:]
+            L[r, r:] *= beta[r] / beta[r-1]
+            L[r, r+1:] -= a/(beta[r] * beta[r-1]) * z[r+1:]
 
     def update_grow(self, B, D):
         """
@@ -94,8 +119,10 @@ def test_rank_one():
 
     L = Cholesky(A)
     L.update_rank_one(x)
-
     assert np.allclose(L.L, la.cholesky(A + np.outer(x, x)))
+
+    L.downdate_rank_one(x)
+    assert np.allclose(L.L, la.cholesky(A))
 
     print('[test rank-one] pass!')
 

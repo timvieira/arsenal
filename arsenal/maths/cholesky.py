@@ -4,7 +4,7 @@ Rank-one updates to the Cholesky decomposition of a positive-definite matrix.
 import numpy as np
 import scipy.linalg as la
 #import numpy.linalg as la
-from algebra.kleene import blocks
+from arsenal.maths import blocks, random_psd
 
 
 class Cholesky:
@@ -22,7 +22,7 @@ class Cholesky:
     def __init__(self, M):
         self.L = la.cholesky(M)
 
-    def update_rank_one(self, x):
+    def update_rank_one(self, x, x_copy=True):
         """
         Rank-one update: compute Chol(M + x xᵀ) given L = Chol(M).
 
@@ -30,6 +30,7 @@ class Cholesky:
          - Update is performed in-place (so `self.L` is mutated).
          - We don't need to know `M` to peform the update.
         """
+        if x_copy: x = x.copy()
         L = self.L.T
         [n] = x.shape
         assert L.shape == (n,n)
@@ -62,24 +63,8 @@ class Cholesky:
     def solve(self, b):
         return la.cho_solve((self.L, False), b)
 
-
-def test_rank_one():
-    n = 10
-
-    A = np.random.randn(n, n)
-    A = A @ A.T    # random PSD matrix
-    L = Cholesky(A)
-
-    x = np.random.randn(n)
-    A1 = A + np.outer(x, x)
-    L.update_rank_one(x)
-
-    assert np.allclose(L.L, la.cholesky(A1))
-
-    # using the cholesky factorization to quickly solve linear systems
-    b = np.random.randn(n)
-    assert np.allclose(L.solve(b), la.solve(A1, b))
-    print('[test rank-one] pass!')
+    def det(self):
+        return np.prod(np.diag(self.L))**2
 
 
 def test_grow():
@@ -87,8 +72,7 @@ def test_grow():
     n = 9
     m = 4
 
-    X = np.random.rand(n, n)
-    X = np.dot(X.T, X)
+    X = random_psd(n)
 
     [A,B], [C,D] = blocks(X, n-m)
     assert np.allclose(A, A.T)
@@ -102,6 +86,35 @@ def test_grow():
     print('[test grow] pass!')
 
 
+def test_rank_one():
+    n = 10
+
+    A = random_psd(n)
+    x = np.random.randn(n)
+
+    L = Cholesky(A)
+    L.update_rank_one(x)
+
+    assert np.allclose(L.L, la.cholesky(A + np.outer(x, x)))
+
+    print('[test rank-one] pass!')
+
+
+def test_util():
+    n = 10
+    X = random_psd(n)
+
+    L = Cholesky(X)
+    assert np.allclose(L.det(), np.linalg.det(X))
+
+    # use Cholesky factorization to solve a linear system in O(n^2)
+    b = np.random.randn(n)
+    assert np.allclose(L.solve(b), la.solve(X, b))
+
+    print('[test util] pass!')
+
+
 if __name__ == '__main__':
     test_rank_one()
     test_grow()
+    test_util()

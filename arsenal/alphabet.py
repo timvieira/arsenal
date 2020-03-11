@@ -83,6 +83,7 @@ class Alphabet(object):
             self._list.append(k)
             return x
 
+    __call__ = __getitem__
     add = __getitem__
 
     def __iter__(self):

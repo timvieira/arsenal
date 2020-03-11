@@ -135,15 +135,6 @@ def enumerate_digraphs(n):
         yield nx.from_numpy_matrix(e, create_using = nx.DiGraph)
 
 
-#def slow_enumerate_dtrees(n):
-#    for G in enumerate_digraphs(n):
-#        if nx.is_tree(G):
-#            [s,*_] = nx.topological_sort(G)  # get root.
-#            if s == 0:
-#                yield G
-
-
-
 def test_sample():
     print('[sample]')
 

@@ -6,8 +6,6 @@ from collections import defaultdict
 from arsenal.iterview import iterview
 
 
-from heapq import heapify, heappop, _siftup
-
 class head_iter:
     def __init__(self, iterator):
         self.done = False
@@ -26,145 +24,32 @@ class head_iter:
         return h
 
 
-def _fair_product(iterable1, iterable2):
-    """
-    Cartesian product of two possibly infinite iterables
-    Based closely on https://github.com/sympy/sympy/issues/17157
-    """
+class buf_iter:
+    "Lazy, random access wrapper around an iterator."
+    def __init__(self, x):
+        self.buf = []
+        self.x = iter(x)
+        self.j = 0     # num things emitted
 
-    it1 = iter(iterable1)
-    it2 = iter(iterable2)
+    def __iter__(self):
+        return self
 
-    elems1 = []
-    elems2 = []
+    def __next__(self):
+        y = self[self.j]
+        self.j += 1
+        return y
 
-    sentinel = object()
-    def append(it, elems):
-        e = next(it, sentinel)
-        if e is not sentinel:
-            elems.append(e)
-
-    n = 0
-    append(it1, elems1)
-    append(it2, elems2)
-
-    while n <= len(elems1) + len(elems2):
-        for m in range(n-len(elems1)+1, len(elems2)):
-            yield (elems1[n-m], elems2[m])
-        n += 1
-        append(it1, elems1)
-        append(it2, elems2)
-
-
-def fair_product(*iterables):
-    """
-    Returns Cartesian product of iterables. Yields every element
-    eventually.
-
-    Based closely on https://github.com/sympy/sympy/issues/17157
-    """
-    if len(iterables) == 0:
-        yield ()
-        return
-    elif len(iterables) == 1:
-        for e in iterables[0]:
-            yield (e,)
-    elif len(iterables) == 2:
-        for e12 in _fair_product(*iterables):
-            yield e12
-    else:
-        first, others = iterables[0], iterables[1:]
-        for ef, eo in fair_product(first, fair_product(*others)):
-            yield (ef,) + eo
-
-
-
-def test_fair_product():
-
-    def show_cross_product(xys, steps, N):
-        grid = [['  .' for j in range(N)] for i in range(N)]
-        for i, (x, y) in enumerate(xys):
-            if i >= steps: break
+    def __getitem__(self, i):
+        k = i - len(self.buf)
+        while k >= 0:
             try:
-                grid[x][y] = f'{i:3d}'
-            except IndexError:
-                pass
-        print('[%s]' % ( ']\n['.join(' '.join(map(str,row)) for row in grid)))
+                self.buf.append(self.x.__next__())
+            except StopIteration:
+                raise IndexError(i)
+            k -= 1
+        return self.buf[i]
 
-
-    N = 10
-    steps = N*(N+1)//2
-
-    from arsenal import colors
-    print()
-    print(colors.light.yellow % 'fair_product: inf-inf')
-    show_cross_product(fair_product(count(), count()),
-                       steps = steps, N = N)
-
-    print()
-    print(colors.light.yellow % 'fair_product: inf-fin')
-    show_cross_product(fair_product(count(), range(4)),
-                       steps = steps, N = N)
-
-    print()
-    print(colors.light.yellow % 'fair_product: fin-inf')
-    show_cross_product(fair_product(range(4), count()),
-                       steps = steps, N = N)
-
-    print()
-    print(colors.light.yellow % 'fair_product: fin-fin')
-    show_cross_product(fair_product(range(3), range(5)),
-                       steps = steps, N = N)
-
-
-def merge_sorted(*iterators):
-    """
-    Merge multiple sorted inputs into a single sorted output.
-
-    Equivalent to:  sorted(itertools.chain(*iterables))
-
-    >>> list(merge_sorted([1,3,5,7], [0,2,4,8], [5,10,15,20], [], [25]))
-    [0, 1, 2, 3, 4, 5, 5, 7, 8, 10, 15, 20, 25]
-    """
-
-    h = [head_iter(s) for s in iterators]
-    h = [s for s in h if not s.done]
-    heapify(h)
-    while h:
-        s = h[0]
-        yield s.__next__()       # advance the top iterator
-        if s.done:
-            heappop(h)           # remove empty iterator
-        else:
-            _siftup(h, 0)        # restore heap condition
-
-
-def merge_roundrobin(*iterables):
-    """
-    Merge iterators with a round-robin scheduler.
-
-    >>> list(merge_roundrobin('ABC', 'D', 'EF'))
-    ['A', 'D', 'E', 'B', 'F', 'C']
-
-    Recipe credited to George Sakkis
-
-    >>> list(take(10, merge_roundrobin('ABC', count(), 'E')))
-    ['A', 0, 'E', 'B', 1, 'C', 2, 3, 4, 5]
-
-    Recipe credited to George Sakkis
-
-    """
-    pending = len(iterables)
-    nexts = cycle(iter(it).__next__ for it in iterables)
-    while pending:
-        try:
-            for _next in nexts:
-                yield _next()
-        except StopIteration:
-            pending -= 1
-            nexts = cycle(islice(nexts, pending))
-
-
+    
 def argmax(f, seq):
     """
     >>> argmax(lambda x: -x**2 + 1, range(-10,10))
@@ -280,7 +165,6 @@ def compress(data, selectors):
     return (d for d, s in zip(data, selectors) if s)
 
 
-# TODO: can we be lazier? require fewer passes thru X?
 def k_fold_cross_validation(X, K, randomize=False):
     """
     Generates K (training, validation) pairs from the items in X.
@@ -398,5 +282,3 @@ def batch(size, iterable):
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-
-    test_fair_product()

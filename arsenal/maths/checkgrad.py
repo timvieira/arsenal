@@ -76,7 +76,7 @@ def finite_difference(f, eps=1e-5):
     return grad
 
 
-def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar=1):
+def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar=1, throw=True):
     """
     Finite-difference check.
 
@@ -115,12 +115,19 @@ def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar
         w[k] = was
         d[k] = (b-a) / (2*eps)
 
+    if throw and not np.allclose([d[k] for k in keys],
+                                 [g[k] for k in keys]):
+        compare(H, G, verbose=verbose)
+        raise AssertionError('^^^^ see compare above')
+
+
     return compare([d[k] for k in keys],
                    [g[k] for k in keys],
                    verbose=verbose)
 
 
-def quick_fdcheck(func, w, g, n_checks = 20, eps = 1e-5, quiet=False, verbose=1, progressbar=0):
+def quick_fdcheck(func, w, g, n_checks = 20, eps = 1e-5,
+                  quiet=True, verbose=False, progressbar=False, throw=True):
     """
     Check gradient along random directions (a faster alternative to axis-aligned directions).
 
@@ -153,5 +160,9 @@ def quick_fdcheck(func, w, g, n_checks = 20, eps = 1e-5, quiet=False, verbose=1,
         a = func()
         w[:] = was
         H[k] = (b-a) / (2*eps)
+
+    if throw and not np.allclose(list(H.values()), list(G.values())):
+        compare(H, G, verbose=verbose)
+        raise AssertionError('^^^^ see compare above')
 
     return compare(H, G, verbose=verbose)

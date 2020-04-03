@@ -278,10 +278,10 @@ class compare(object):
             # Keeps the plot region tight against the data (allow 5% of the
             # data-range for padding so that points in the scatter plot aren't
             # partially clipped.)
-            xeps = 0.05 * self.got.ptp()
+            xeps = 0.05 * np.ptp(self.got)
             self.ax.set_xlim(self.got.min() - xeps, self.got.max() + xeps)
 
-            yeps = 0.05 * self.expect.ptp()
+            yeps = 0.05 * np.ptp(self.expect)
             self.ax.set_ylim(self.expect.min() - yeps, self.expect.max() + yeps)
 
         if title is not None: self.ax.set_title(title)

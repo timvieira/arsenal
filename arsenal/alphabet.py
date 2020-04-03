@@ -20,12 +20,29 @@ class Alphabet(object):
     b
     c
     d
+
+    >>> print(a)
+    Alphabet(size=4,frozen=True)
+
+    >>> list(a)
+    ['a', 'b', 'c', 'd']
+
+    >>> a == Alphabet(['a', 'b', 'c', 'd'])
+    True
+
+    >>> a == Alphabet(['b', 'a', 'c', 'd'])
+    False
+
+    >>> a.map('aabc')
+    [0, 0, 1, 2]
+
     """
 
-    def __init__(self):
+    def __init__(self, data=()):
         self._map = {}       # str -> int
         self._list = []      # int -> str
         self._frozen = False
+        self.add_many(data)
 
     def __repr__(self):
         return 'Alphabet(size=%s,frozen=%s)' % (len(self), self._frozen)
@@ -33,16 +50,8 @@ class Alphabet(object):
     def freeze(self):
         self._frozen = True
 
-    @classmethod
-    def from_iterable(cls, xs):
-        inst = cls()
-        inst.add_many(xs)
-        return inst
-
-    from_iter = from_iterable
-
-    def keys(self):
-        return self._map.keys()
+#    def keys(self):
+#        return self._map.keys()
 
     def items(self):
         return self._map.items()
@@ -100,7 +109,7 @@ class Alphabet(object):
     def load(cls, filename):
         #if not os.path.exists(filename): return cls()
         with open(filename) as f:
-            return cls.from_iterable(l.strip() for l in f)
+            return cls(l.strip() for l in f)
 
     def save(self, filename):
         with open(filename, 'w') as f:

@@ -117,7 +117,7 @@ def fdcheck(func, w, g, keys = None, eps = 1e-5, quiet=0, verbose=1, progressbar
 
     if throw and not np.allclose([d[k] for k in keys],
                                  [g[k] for k in keys]):
-        compare(H, G, verbose=verbose)
+        compare(d, g, verbose=True)
         raise AssertionError('^^^^ see compare above')
 
 
@@ -161,8 +161,11 @@ def quick_fdcheck(func, w, g, n_checks = 20, eps = 1e-5,
         w[:] = was
         H[k] = (b-a) / (2*eps)
 
-    if throw and not np.allclose(list(H.values()), list(G.values())):
-        compare(H, G, verbose=verbose)
+    different = not np.allclose(list(H.values()), list(G.values()))
+    if verbose or different:
+        compare(H, G, verbose=True)
+
+    if different and throw:
         raise AssertionError('^^^^ see compare above')
 
-    return compare(H, G, verbose=verbose)
+    return compare(H, G, verbose=False)

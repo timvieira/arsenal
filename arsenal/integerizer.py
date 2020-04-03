@@ -46,10 +46,11 @@ class Integerizer(AbstractIntegerizer):
 
     """
 
-    def __init__(self):
+    def __init__(self, data=None):
         self._map = {}       # str -> int
         self._list = []      # int -> str
         self._frozen = False
+        if data: self.add(data)
 
     def _add(self, k):
         try:
@@ -80,12 +81,7 @@ class Integerizer(AbstractIntegerizer):
 
     def freeze(self):
         self._frozen = True
-
-    @classmethod
-    def from_iter(cls, xs):
-        inst = cls()
-        inst.add_many(xs)
-        return inst
+        return self
 
     def keys(self):
         return self._list

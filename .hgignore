@@ -17,6 +17,7 @@ sandbox/*
 _build
 coverage-report
 .coverage/
+.pytest_cache/
 *.so
 *.c
 

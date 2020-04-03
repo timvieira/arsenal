@@ -35,9 +35,16 @@ class buf_iter:
         return self
 
     def __next__(self):
-        y = self[self.j]
-        self.j += 1
-        return y
+        try:
+            y = self[self.j]
+            self.j += 1
+            return y
+        except IndexError:
+            raise StopIteration()
+
+    def __len__(self):
+        for _ in self: pass
+        return len(self.buf)
 
     def __getitem__(self, i):
         k = i - len(self.buf)
@@ -49,7 +56,7 @@ class buf_iter:
             k -= 1
         return self.buf[i]
 
-    
+
 def argmax(f, seq):
     """
     >>> argmax(lambda x: -x**2 + 1, range(-10,10))

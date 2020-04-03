@@ -194,8 +194,8 @@ def test_bounded():
             A = S.items
             B = L.map()
 
-            print('want:', A)
-            if A != B: print('got: ', B)
+            #print('want:', A)
+            #if A != B: print('got: ', B)
             assert A == B
 
             if L or S:
@@ -205,7 +205,7 @@ def test_bounded():
 
         L.check()
 
-    print('[min-max random workload] pass.')
+    print('[bounded random workload] pass.')
 
 
 if __name__ == '__main__':

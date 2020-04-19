@@ -7,6 +7,9 @@ class MinMaxHeap:
         self.max = LocatorMaxHeap(**kw)
         self.min = LocatorMaxHeap(**kw)   # will pass negative values here
 
+    def __contains__(self, k):
+        return k in self.max
+        
     def __setitem__(self, k, v):
         self.max[k] = v
         self.min[k] = -v

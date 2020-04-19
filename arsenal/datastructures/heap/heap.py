@@ -6,8 +6,7 @@ Heap data structures with optional
 """
 import numpy as np
 
-Dt = object
-Vt = float
+Vt = object
 
 
 class Vector:

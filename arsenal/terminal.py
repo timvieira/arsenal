@@ -121,6 +121,10 @@ def render(y, debug=False):
     return ''.join(b)
 
 
+ok   = colors.green     % 'ok'
+fail = colors.light.red % 'fail'
+
+
 def tests():
     for c in 'black, red, green, yellow, blue, magenta, cyan, white'.split(', '):
         print('%18s %24s %23s %21s' % (getattr(colors, c) % c,

@@ -1,4 +1,4 @@
-from arsenal.datastructures.prioritydict import prioritydict
+from arsenal.datastructures.heap import MaxHeap
 from arsenal.iterextras import buf_iter, head_iter
 from heapq import heapify, heappop, _siftup
 
@@ -26,6 +26,20 @@ def sorted_union(*iterators):
 
 merge_sorted = sorted_union
 
+
+class Item:
+    def __init__(self, score, index, elems):
+        self.score = score
+        self.index = index
+        self.elems = elems
+    def __lt__(self, other):
+        # Note: reversed
+        return self.score > other.score
+    def __le__(self, other):
+        # Note: reversed
+        return self.score > other.score or self.score == other.score
+
+
 def sorted_product(p, *iters):
     """
     Sorted product of `iters`, where the output is sorted by a monotonic product
@@ -42,18 +56,22 @@ def sorted_product(p, *iters):
     def vals(z):
         return tuple(it[j] for it, j in zip(iters, z))
 
-    # min heap
-    q = prioritydict()
+    # elements in the heap are wrapped `Item` to make it a min heap.
+    q = MaxHeap()
     y = (0,)*n
-    q[0,y] = p(vals(y))
+    q.push(Item(p(vals(y)), 0, y))
 
 #    from collections import Counter
 #    pushes = Counter()
 
+
     while q:  # this line is slightly wrong due to a bug in prioritydict
 
-        j,x = q.pop_smallest()
-        yield p(vals(x))
+        item = q.pop()
+        x = item.elems
+        j = item.index
+
+        yield item.score
 
         # next best item must differ by one, enqueue all such items
         # We reduce the number of pushes by the dotted rule trick.
@@ -76,7 +94,7 @@ def sorted_product(p, *iters):
             # of the emitted `p(vals(x))` in only position `i`.
             #
             # Are there other tricks to reduce the number of pushes?
-            q[i,y] = p(vals(y))
+            q.push(Item(p(vals(y)), i, y))
 
 #            pushes[y] += 1
 

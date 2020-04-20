@@ -25,7 +25,7 @@ class Vector:
 
     def pop(self):
         "pop from the end"
-        assert self.end > 0
+        assert 0 < self.end
         self.end -= 1
         v = self.val[self.end]
         self.val[self.end] = np.nan
@@ -40,7 +40,7 @@ class Vector:
 
     def ensure_size(self, i):
         "grow in needed"
-        if i + 1 > self.val.shape[0]: self.grow()
+        if self.val.shape[0] < i + 1: self.grow()
         return i
 
     def __getitem__(self, i):
@@ -85,9 +85,9 @@ class MaxHeap:
         self.val[i], self.val[j] = self.val[j], self.val[i]
 
     def up(self, i):
-        while i > 1:
+        while 1 < i:
             p = i // 2
-            if self.val[p] >= self.val[i]:
+            if self.val[i] <= self.val[p]:
                 break
             self.swap(i, p)
             i = p
@@ -99,9 +99,9 @@ class MaxHeap:
             a = 2 * i
             b = 2 * i + 1
             c = i
-            if self.val[a] > self.val[c]:
+            if self.val[c] < self.val[a]:
                 c = a
-            if b < n and self.val[b] > self.val[c]:
+            if b < n and self.val[c] < self.val[b]:
                 c = b
             if c == i:
                 break
@@ -130,4 +130,4 @@ class MaxHeap:
     def check(self):
         # heap property
         for i in range(2, self.val.end):
-            assert self.val[i // 2] >= self.val[i], (self.val[i // 2], self.val[i])   # parent >= child
+            assert self.val[i] <= self.val[i // 2], (self.val[i // 2], self.val[i])   # child <= parent

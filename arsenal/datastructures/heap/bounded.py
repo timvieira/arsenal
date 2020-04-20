@@ -9,7 +9,7 @@ class MinMaxHeap:
 
     def __contains__(self, k):
         return k in self.max
-        
+
     def __setitem__(self, k, v):
         self.max[k] = v
         self.min[k] = -v

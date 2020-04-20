@@ -1,6 +1,8 @@
 from heapq import heapify, heappush, heappop
 
 
+from arsenal.misc import deprecated
+
 class prioritydict(dict):
     """Dictionary that can be used as a priority queue.
 
@@ -25,6 +27,7 @@ class prioritydict(dict):
 
     """
 
+    @deprecated('use arsenal.datastructures.heap.locator')
     def __init__(self, *args, **kwargs):
         super(prioritydict, self).__init__(*args, **kwargs)
         self._heap = None

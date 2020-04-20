@@ -7,9 +7,9 @@ from arsenal.timer import timers
 
 # XXX: warning some of these implementations may not be shipped with the
 # package.  Also be sure to compile with Cython.
-from arsenal.maths.sumheap  import SumHeap as SumHeap1
-from arsenal.maths.sumheap2 import SumHeap as SumHeap2
-from arsenal.maths.sumheap3 import SumHeap as SumHeap3
+from arsenal.datastructures.heap.sumheap  import SumHeap as SumHeap1
+from arsenal.datastructures.heap.sumheap2 import SumHeap as SumHeap2
+from arsenal.datastructures.heap.sumheap3 import SumHeap as SumHeap3
 
 
 def p_perm(w, z):

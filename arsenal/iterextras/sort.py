@@ -33,11 +33,7 @@ class Item:
         self.index = index
         self.elems = elems
     def __lt__(self, other):
-        # Note: reversed
-        return self.score > other.score
-    def __le__(self, other):
-        # Note: reversed
-        return self.score > other.score or self.score == other.score
+        return self.score > other.score  # Note: reversed to get min heap.
 
 
 def sorted_product(p, *iters):

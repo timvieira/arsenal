@@ -87,10 +87,11 @@ class MaxHeap:
     def up(self, i):
         while 1 < i:
             p = i // 2
-            if self.val[i] <= self.val[p]:
+            if self.val[p] < self.val[i]:
+                self.swap(i, p)
+                i = p
+            else:
                 break
-            self.swap(i, p)
-            i = p
         return i
 
     def down(self, i):

@@ -1,5 +1,20 @@
+# TODO: This module should move into iterextras since it is focused on
+# iterators, which are not specific to mathematics.
+
+
 from itertools import product
 from scipy.special import binom, factorial
+
+
+def n_selections_with_replacement(n, k):
+    """
+    Number of positive integers solutions to x1 + x2 + … + xn = n+k
+    (Linear diophantine equation)
+
+    https://www.johndcook.com/blog/select_with_replacement/
+    """
+    return binom(n+k-1, k)
+
 
 # TODO: see itertools.{combinations combinations_with_replacement, permutations,
 # product} those implementations are fair because they are based on "pools"

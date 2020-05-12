@@ -168,7 +168,8 @@ class Timer(object):
             kw['label'] = f'{self.name}'
 
         [line] = ax.plot(X, Y, lw=2, alpha=0.5, **kw)
-        del kw['label'] # delete label so it doesn't appear twice in the legend
+        kw.pop('label', None) # delete label so it doesn't appear twice in the legend
+        kw.pop('c', None)
 
         c = line.get_color()
         ax.scatter(X, Y, c=c, lw=0, label=None, alpha=0.25, **kw)

@@ -102,6 +102,9 @@ class compare(object):
             got = [got[k] for k in alphabet]
 
         if isinstance(expect, np.ndarray) and isinstance(got, np.ndarray):
+            assert alphabet is None
+            alphabet = Alphabet(dict(np.ndenumerate(expect)).keys())
+
             assert expect.shape == got.shape, [expect.shape, got.shape]
             expect = expect.flatten()
             got = got.flatten()
@@ -367,7 +370,7 @@ class compare(object):
             if e <= 0.001:
                 continue
 
-            df.append([e, self.alphabet[i], x, y, sx, sy])
+            df.append([e, self.alphabet.lookup(i), x, y, sx, sy])
 
             #df.append({'name':   alphabet[i],
             #           'error':  e,

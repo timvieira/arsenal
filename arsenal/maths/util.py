@@ -38,6 +38,20 @@ def restore_random_state(seed=None):
     assert np.random.set_state(np_rng) is None
 
 
+def fit_curve(xs, ys):
+    import pylab as pl
+    xs = np.array(xs); ys = np.array(ys)
+    assert np.all(xs > 0) and np.all(ys > 0)
+    a,b = np.polyfit(np.log(xs), np.log(ys), deg=1)
+    label = '${%.2f} x^{%.2f}$' % (np.exp(b), a)
+    print('[fit] estimate', label)
+    pl.plot(xs, ys, c='r', alpha=0.5, label='data')
+    pl.plot(xs, np.exp(b)*xs**a, c='b', alpha=0.5,
+            label=label)
+    pl.legend(loc='best')
+    pl.show()
+
+
 def argmin_random_tie(x):
     "argmin with randomized tie breaking."
     return np.random.choice(np.flatnonzero(x == x.min()))

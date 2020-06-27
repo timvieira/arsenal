@@ -43,7 +43,7 @@ def fit_curve(xs, ys):
     xs = np.array(xs); ys = np.array(ys)
     assert np.all(xs > 0) and np.all(ys > 0)
     a,b = np.polyfit(np.log(xs), np.log(ys), deg=1)
-    label = '${%.2f} x^{%.2f}$' % (np.exp(b), a)
+    label = '${%.2f} \cdot x^{%.2f}$' % (np.exp(b), a)
     print('[fit] estimate', label)
     pl.plot(xs, ys, c='r', alpha=0.5, label='data')
     pl.plot(xs, np.exp(b)*xs**a, c='b', alpha=0.5,
@@ -356,6 +356,38 @@ def lidstone(p, delta):
     return normalize(p + delta)
 
 
+def logsubexp(x, y):
+    """
+    Numerically stable computation of subtraction in log-space
+    z = log(exp(x) - exp(y))
+    """
+    if x == y:
+        return -np.inf
+    elif x < y:
+        return np.nan
+    else:
+        return x + log1mexp(y-x)
+
+
+def log1mexp(x):
+    """
+    Numerically stable implementation of log(1-exp(x))
+
+    Note: function is finite for x < 0.
+
+    Source:
+    http://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf
+    """
+    if x >= 0:
+        return np.nan
+    else:
+        a = abs(x)
+        if 0 < a <= 0.693:
+            return np.log(-np.expm1(-a))
+        else:
+            return np.log1p(-np.exp(-a))
+
+
 # based on implementation from scikits-learn
 def logsumexp(arr, axis=None):
     """Computes the sum of arr assuming arr is in the log domain.
@@ -472,6 +504,19 @@ def project_onto_simplex(a, radius=1.0):
     x[ind_sort] = y
     return x, tau, .5*np.dot(x-a, x-a)
 
+
+def project_pmin_simplex(p, pmin):
+    q = pmin * np.ones_like(p)    # assumes all actions fire.
+    c = 1
+    while True:
+        A0 = (pmin >= c * p)
+        l = p[~A0].sum()
+        if l == 0: break
+        Δ = q[A0].sum()
+        cc = (1 - Δ) / l
+        if c == cc or not np.isfinite(cc): break
+        c = cc
+    return np.maximum(q, c * p)
 
 
 log_of_2 = log(2)

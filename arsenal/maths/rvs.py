@@ -21,6 +21,33 @@ def anneal(p, *, invT=None, T=None):
     return p
 
 
+class _BruteForce:
+    """
+    Base class for tabular representation of a distribution
+
+      p(x) ∝ score(x).
+
+    where score(x) > 0 for all x ∈ domain.
+
+    """
+
+    def __init__(self):
+        self.Z = np.sum([self.score(x) for x in self.domain()])
+        self.P = {x: self.score(x) / self.Z for x in self.domain()}
+
+    def domain(self):
+        raise NotImplementedError
+
+    def score(self, x):
+        raise NotImplementedError()
+
+    def entropy(self):
+        return -np.sum([p * np.log(p) for p in self.P.values() if p != 0])
+
+    def logp(self, x):
+        return np.log(self.P[x])
+
+
 class TruncatedDistribution:
     def __init__(self, d, a, b):
         assert np.all(a <= b), [a, b]
@@ -198,14 +225,16 @@ class Empirical:
 cdf = Empirical
 
 
-def sample(w, size=None):
+def sample(w, size=None, u=None):
     """
     Uses the inverse CDF method to return samples drawn from an (unnormalized)
     discrete distribution.
     """
     c = cumsum(w)
-    r = uniform(size=size)
-    return c.searchsorted(r * c[-1])
+    if u is None:
+        assert size is None
+        u = uniform(0,1,size=size)
+    return c.searchsorted(u * c[-1])
 
 
 def log_sample(w):

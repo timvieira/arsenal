@@ -22,10 +22,24 @@ class UnionFind(object):
       in X, it is added to X as one of the members of the merged set.
     """
 
-    def __init__(self):
+    def __init__(self, elements=None):
         """Create a new empty union-find structure."""
         self.weights = {}
         self.parents = {}
+        if elements is not None:
+            for x in elements:
+                self.add(x)
+
+    @property
+    def elems(self):
+        return self.parents
+
+    def add(self, x):
+        "Add element x as a singleton"
+        self.union(x, x)
+
+    def connected(self, x, y):
+        return self[x] == self[y]
 
     def __getitem__(self, obj):
         """Find and return the name of the set containing the object."""
@@ -47,7 +61,7 @@ class UnionFind(object):
         for ancestor in path:
             self.parents[ancestor] = root
         return root
-        
+
     def __iter__(self):
         """Iterate through all items ever found or unioned by this structure."""
         return iter(self.parents)
@@ -55,10 +69,8 @@ class UnionFind(object):
     def union(self, *objects):
         """Find the sets containing the objects and merge them all."""
         roots = [self[x] for x in objects]
-        heaviest = max([(self.weights[r],r) for r in roots])[1]
+        heaviest = max(roots, key = self.weights.__getitem__)
         for r in roots:
             if r != heaviest:
                 self.weights[heaviest] += self.weights[r]
                 self.parents[r] = heaviest
-
-

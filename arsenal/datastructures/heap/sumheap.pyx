@@ -23,6 +23,12 @@ cdef class SumHeap:
         self.S = np.zeros(2*self.d)           # intermediates + leaves
         self.heapify(w)
 
+    def __getitem__(self, int k):
+        return self.S[self.d + k]
+
+    def __setitem__(self, int k, double v):
+        self.update(k, v)
+
     cpdef void heapify(self, double[:] w):
         "Create sumheap from weights `w` in O(n) time."
         d = self.d; n = self.n

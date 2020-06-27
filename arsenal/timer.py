@@ -21,6 +21,12 @@ class Benchmark(object):
     def __getitem__(self, name):
         return self.timers[name]
     def compare(self, statistic=np.median):
+        if len(self.timers) == 0:
+            return
+        if len(self.timers) == 1:
+            [x] = self.timers.values()
+            print(x)
+            return
         best = min(self.timers.values(), key=lambda t: statistic(t.times))
         for name in sorted(self.timers):
             if name != best.name:
@@ -153,10 +159,11 @@ class Timer(object):
 #            if x != self:
 #                self.compare(x, **kw)
 
-    def plot_feature(self, feature, timecol='timer', ax=None, **kw):
+    def plot_feature(self, feature, timecol='timer', ax=None, scatter=False, **kw):
         if ax is None: ax = pl.figure().add_subplot(111)
         df = self.dataframe(timecol)
-        a = df.groupby(feature).median()
+#        a = df.groupby(feature).median()
+        a = df.groupby(feature).mean()
 
         X = a.index
         Y = a[timecol]
@@ -182,9 +189,13 @@ class Timer(object):
                 np.percentile(dd[timecol], 20),
                 np.percentile(dd[timecol], 80),
             ])
+
+            if scatter:
+                ax.scatter([f]*len(dd), dd[timecol], c=c, alpha=0.25)
+
         data = list(sorted(data))
         fs, ls, us = zip(*data)
-        ax.fill_between(fs, ls, us, alpha=0.25, color=c)
+        ax.fill_between(fs, ls, us, alpha=0.2, color=c)
 
         #elif 'box' in show:
         #    # TODO: doen't work very well yet. need to fill out the x-axis since

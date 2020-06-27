@@ -25,6 +25,7 @@ from palettable.colorbrewer import qualitative
 simple_palette = ['r','g','b','y','c','m','k']
 default_palette = np.array(qualitative.Set1_6.mpl_colors)
 
+
 def name2color(palette = default_palette):
     "Create a mapping from names to matplotlib colors."
     palette = list(palette)

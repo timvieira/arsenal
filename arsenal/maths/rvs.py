@@ -1,4 +1,5 @@
 import numpy as np
+import pylab as pl
 import scipy.stats as st
 from numpy.random import uniform, normal
 from numpy import array, exp, cumsum, asarray
@@ -65,7 +66,7 @@ class TruncatedDistribution:
     def ppf(self, u):
         return self.d.ppf(self.cdf_a + u * self.cdf_w)
     def cdf(self, x):
-        return np.minimum(1, (self.d.cdf(x) - self.cdf_a) * (self.a <= x) / self.cdf_w)
+        return np.minimum(1, (self.a <= x) * (self.d.cdf(x) - self.cdf_a) / self.cdf_w)
     def mean(self):
         # The truncated mean is unfortunately not analytical
         return quad(lambda x: x * self.pdf(x), self.a, self.b)[0]
@@ -74,6 +75,86 @@ class TruncatedDistribution:
         # http://thirdorderscientist.org/homoclinic-orbit/2013/6/25/the-darth-vader-rule-mdash-or-computing-expectations-using-survival-functions
         # https://content.sciendo.com/view/journals/tmmp/52/1/article-p53.xml
 #        return quad(self.sf, self.a, self.b)[0] + self.a
+
+
+def show_distr(D, a, b, resolution=1000):
+    xs = np.linspace(a, b, resolution)
+    us = np.linspace(0, 1, resolution)
+    fig, ax = pl.subplots(figsize=(12,4), ncols=3)
+
+    ax[0].plot(xs, D.pdf(xs))
+    ax[0].set_ylabel('f(x)')
+    ax[0].set_xlabel('x')
+    ax[0].set_title('probability density function')
+    ax[0].set_xlim(a, b)
+
+
+    ax[1].plot(xs, D.cdf(xs))
+    ax[1].set_ylabel('F(x)')
+    ax[1].set_xlabel('x')
+    ax[1].set_title('cumulative distribution function')
+    ax[1].set_xlim(a, b)
+
+
+    ax[2].plot(us, D.ppf(us))
+    ax[2].set_ylabel('$F^{-1}(u)$')
+    ax[2].set_xlabel('u')
+    ax[2].set_xlim(0, 1)
+    ax[2].set_title('quantile function')
+
+    fig.tight_layout()
+
+    for a in ax:
+        # Move left and bottom spines outward by 10 points
+        a.spines['left'].set_position(('outward', 10))
+        a.spines['bottom'].set_position(('outward', 10))
+        # Hide the right and top spines
+        a.spines['right'].set_visible(False)
+        a.spines['top'].set_visible(False)
+        # Only show ticks on the left and bottom spines
+        a.yaxis.set_ticks_position('left')
+        a.xaxis.set_ticks_position('bottom')
+
+    return ax
+
+
+def compare_samples_to_distr(D, samples, a, b, bins):
+
+    fig, ax = pl.subplots(figsize=(12,4), ncols=3)
+
+    ax[0].hist(samples, bins=bins, color='b', alpha=0.5, density=True,
+               label='histogram')
+
+    xs = np.linspace(a, b, 1000)
+    ax[0].plot(xs, D.pdf(xs), c='k')
+    ax[2].set_title('pdf/histogram')
+
+    E = Empirical(samples)
+
+    ax[1].plot(xs, E.cdf(xs), alpha=0.5, linestyle=':')
+    ax[1].plot(xs, D.cdf(xs), alpha=0.5)
+    ax[1].set_title('cdf')
+
+    us = np.linspace(0, 1, 1000)
+    ax[2].plot(us, E.ppf(us), alpha=0.5, linestyle=':')
+    ax[2].plot(us, D.ppf(us), alpha=0.5)
+    ax[2].set_title('ppf')
+
+
+    fig.tight_layout()
+
+    for a in ax:
+        # Move left and bottom spines outward by 10 points
+        a.spines['left'].set_position(('outward', 10))
+        a.spines['bottom'].set_position(('outward', 10))
+        # Hide the right and top spines
+        a.spines['right'].set_visible(False)
+        a.spines['top'].set_visible(False)
+        # Only show ticks on the left and bottom spines
+        a.yaxis.set_ticks_position('left')
+        a.xaxis.set_ticks_position('bottom')
+
+    return ax
 
 
 def test_truncated_distribution():

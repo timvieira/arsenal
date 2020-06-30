@@ -44,11 +44,12 @@ cdef class SumHeap:
             i //= 2
             self.S[i] = self.S[2*i] + self.S[2*i + 1]
 
-    cpdef int sample(self):
+    cpdef int sample(self, u=None):
         "Sample from sumheap, O(log n) per sample."
         cdef double left, p
+        if u is None: u = uniform()
         d = self.S.shape[0]//2     # number of internal nodes.
-        p = uniform() * self.S[1]  # random probe, p ~ Uniform(0, z)
+        p = u * self.S[1]  # random probe, p ~ Uniform(0, z)
         # Use binary search to find the index of the largest CDF (represented as a
         # heap) value that is less than a random probe.
         i = 1

@@ -127,7 +127,7 @@ def compare_samples_to_distr(D, samples, a, b, bins):
 
     xs = np.linspace(a, b, 1000)
     ax[0].plot(xs, D.pdf(xs), c='k')
-    ax[2].set_title('pdf/histogram')
+    ax[0].set_title('pdf')
 
     E = Empirical(samples)
 
@@ -137,11 +137,8 @@ def compare_samples_to_distr(D, samples, a, b, bins):
 
     us = np.linspace(0, 1, 1000)
     ax[2].plot(us, E.ppf(us), alpha=0.5, linestyle=':')
-    ax[2].plot(us, D.ppf(us), alpha=0.5)
+    ax[2].plot(us, [D.ppf(u) for u in us], alpha=0.5)
     ax[2].set_title('ppf')
-
-
-    fig.tight_layout()
 
     for a in ax:
         # Move left and bottom spines outward by 10 points
@@ -153,6 +150,8 @@ def compare_samples_to_distr(D, samples, a, b, bins):
         # Only show ticks on the left and bottom spines
         a.yaxis.set_ticks_position('left')
         a.xaxis.set_ticks_position('bottom')
+
+    fig.tight_layout()
 
     return ax
 
@@ -213,21 +212,32 @@ class Mixture(object):
     """
     Mixture of several densities
     """
-    def __init__(self, w, pdfs):
+    def __init__(self, w, ds):
         w = array(w)
         assert is_distribution(w), \
             'w is not a prob. distribution.'
-        self.pdfs = pdfs
+        self.ds = ds
         self.w = w
 
     def rvs(self, size=1):
         # sample component
         i = sample(self.w, size=size)
         # sample from component
-        return array([self.pdfs[j].rvs() for j in i])
+        return array([self.ds[j].rvs() for j in i])
 
     def pdf(self, x):
-        return sum([p.pdf(x) * w for w, p in zip(self.w, self.pdfs)])
+        return sum([d.pdf(x) * w for w, d in zip(self.w, self.ds)])
+
+    def ppf(self, q):
+        from scipy.optimize import minimize
+        x0 = sum([d.ppf(q) * w for w, d in zip(self.w, self.ds)])
+        return minimize(lambda t: np.sum((self.cdf(t) - q)**2), x0).x
+
+    def cdf(self, x):
+        return sum([d.cdf(x) * w for w, d in zip(self.w, self.ds)])
+
+    def mean(self):
+        return sum([d.mean() * w for w, d in zip(self.w, self.ds)])
 
 
 def spherical(size):
@@ -313,7 +323,6 @@ def sample(w, size=None, u=None):
     """
     c = cumsum(w)
     if u is None:
-        assert size is None
         u = uniform(0,1,size=size)
     return c.searchsorted(u * c[-1])
 
@@ -325,5 +334,40 @@ def log_sample(w):
     return sample(a)
 
 
+
+def test_mixture():
+
+    d = [st.norm(1, 2), st.norm(2, .5), st.norm(3, .1)]
+
+    w = np.array([.2, .7, .1])
+
+    D = Mixture(w, d)
+
+    S = D.rvs(100_000)
+
+    assert abs(D.mean() - S.mean()) < 0.005
+
+    a, b = -5, 5
+
+    compare_samples_to_distr(D, S, a, b, bins=100)
+    pl.show()
+
+#    if 1:
+#        us = np.linspace(0.01, 0.99, 100)
+#        for u in us:
+#            v = D.cdf(D.ppf(u))
+#            err = abs(u - v)/abs(u)
+#            assert err < 1e-3, err
+#
+#    if 1:
+#        xs = np.linspace(a, b, 100)
+#        for x in xs:
+#            y = D.ppf(D.cdf(x))
+#            if D.pdf(x) > 0:
+#                err = abs(x - y)/abs(x)
+#                assert err < 1e-3, [err, x, y]
+
+
 if __name__ == '__main__':
     test_truncated_distribution()
+    test_mixture()

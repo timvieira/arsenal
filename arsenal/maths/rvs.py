@@ -59,14 +59,14 @@ class TruncatedDistribution:
     def sf(self, x):
         return 1-self.cdf(x)
     def pdf(self, x):
-        return (self.a <= x) * (x <= self.b) * self.d.pdf(x) / self.cdf_w
+        return (self.a < x) * (x <= self.b) * self.d.pdf(x) / self.cdf_w
     def rvs(self, size=None):
         u = uniform(0, 1, size=size)
         return self.ppf(u)
     def ppf(self, u):
         return self.d.ppf(self.cdf_a + u * self.cdf_w)
     def cdf(self, x):
-        return np.minimum(1, (self.a <= x) * (self.d.cdf(x) - self.cdf_a) / self.cdf_w)
+        return np.minimum(1, (self.a < x) * (self.d.cdf(x) - self.cdf_a) / self.cdf_w)
     def mean(self):
         # The truncated mean is unfortunately not analytical
         return quad(lambda x: x * self.pdf(x), self.a, self.b)[0]

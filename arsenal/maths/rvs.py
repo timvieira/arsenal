@@ -22,6 +22,28 @@ def anneal(p, *, invT=None, T=None):
     return p
 
 
+class Max:
+    def __init__(self, X, Y):
+        self.X = X
+        self.Y = Y
+
+    def cdf(self, t):
+        return self.X.cdf(t)*self.Y.cdf(t)
+
+    def pdf(self, t):
+        X = self.X; Y = self.Y
+        #  d/dt[cdf(t)] = d/dt[X.cdf(t)*Y.cdf(t)]
+        #               = X.cdf(t)*d/dt[Y.cdf(t)] + d/dt[X.cdf(t)]*Y.cdf(t)
+        #               = X.cdf(t)*Y.pdf(t) + X.pdf(t)*Y.cdf(t)
+        return X.pdf(t)*Y.cdf(t) + X.cdf(t)*Y.pdf(t)
+
+    def ppf(self, u):
+        raise ValueError('no closed form for ppf(max(X,Y))')
+
+    def rvs(self, size):
+        return np.maximum(self.X.rvs(size), self.Y.rvs(size))
+
+
 class _BruteForce:
     """
     Base class for tabular representation of a distribution
@@ -82,12 +104,12 @@ def show_distr(D, a, b, resolution=1000):
     us = np.linspace(0, 1, resolution)
     fig, ax = pl.subplots(figsize=(12,4), ncols=3)
 
-    ax[0].plot(xs, D.pdf(xs))
-    ax[0].set_ylabel('f(x)')
-    ax[0].set_xlabel('x')
-    ax[0].set_title('probability density function')
-    ax[0].set_xlim(a, b)
-
+    if hasattr(D, 'pdf'):
+        ax[0].plot(xs, D.pdf(xs))
+        ax[0].set_ylabel('f(x)')
+        ax[0].set_xlabel('x')
+        ax[0].set_title('probability density function')
+        ax[0].set_xlim(a, b)
 
     ax[1].plot(xs, D.cdf(xs))
     ax[1].set_ylabel('F(x)')
@@ -96,11 +118,12 @@ def show_distr(D, a, b, resolution=1000):
     ax[1].set_xlim(a, b)
 
 
-    ax[2].plot(us, D.ppf(us))
-    ax[2].set_ylabel('$F^{-1}(u)$')
-    ax[2].set_xlabel('u')
-    ax[2].set_xlim(0, 1)
-    ax[2].set_title('quantile function')
+    if hasattr(D, 'ppf'):
+        ax[2].plot(us, D.ppf(us))
+        ax[2].set_ylabel('$F^{-1}(u)$')
+        ax[2].set_xlabel('u')
+        ax[2].set_xlim(0, 1)
+        ax[2].set_title('quantile function')
 
     fig.tight_layout()
 

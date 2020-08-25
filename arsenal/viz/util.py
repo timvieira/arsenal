@@ -19,14 +19,15 @@ from arsenal.terminal import colors
 from arsenal.misc import ddict
 
 
-from palettable.colorbrewer import qualitative
+#from palettable.colorbrewer import qualitative
 
 
 simple_palette = ['r','g','b','y','c','m','k']
-default_palette = np.array(qualitative.Set1_6.mpl_colors)
+#default_palette = np.array(qualitative.Set1_6.mpl_colors)
 
 
-def name2color(palette = default_palette):
+#def name2color(palette = default_palette):
+def name2color(palette = simple_palette):
     "Create a mapping from names to matplotlib colors."
     palette = list(palette)
     i = -1

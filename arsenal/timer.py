@@ -162,8 +162,8 @@ class Timer(object):
     def plot_feature(self, feature, timecol='timer', ax=None, scatter=False, **kw):
         if ax is None: ax = pl.figure().add_subplot(111)
         df = self.dataframe(timecol)
-#        a = df.groupby(feature).median()
-        a = df.groupby(feature).mean()
+        a = df.groupby(feature).median()
+#        a = df.groupby(feature).mean()
 
         X = a.index
         Y = a[timecol]

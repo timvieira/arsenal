@@ -474,7 +474,7 @@ def d_softmax(out, x, adj):
     """
     out = softmax(x), adj are the adjoints we're chain-ruling together.
     """
-    g = adj - adj.dot(out)
+    g = adj - adj @ out
     g *= out
     return g
 

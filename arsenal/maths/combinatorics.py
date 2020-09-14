@@ -34,10 +34,10 @@ def sample(S, k, ordered, replace):
     else:
         for i, s in enumerate(S):
 
-            if     ordered and not replace: X = S[:i] + S[i+1:]  # select
-            if not ordered and not replace: X =         S[i+1:]  # choose
             if     ordered and     replace: X = S[:i] + S[i:]    # string
+            if     ordered and not replace: X = S[:i] + S[i+1:]  # select
             if not ordered and     replace: X =         S[i:]    # ????
+            if not ordered and not replace: X =         S[i+1:]  # choose
 
             for x in sample(X, k-1, ordered, replace):
                 yield x + (s,)
@@ -107,7 +107,7 @@ def string(S, k):
 # TODO: if we "parse" left-to-right (instead of top-down) then we can support
 # fair enumeration over infinite sequences S.
 def trees(S):
-    "Generate all balanced trees over sequence S."
+    "Generate all binary trees over sequence S."
     S = tuple(S)
 
     def _trees(i, k):

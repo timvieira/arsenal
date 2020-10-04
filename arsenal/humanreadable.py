@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from time import clock, localtime, strftime
+from time import time, localtime, strftime
 import atexit
 
 
@@ -154,10 +154,10 @@ def datestr(then, now=None):
 # TODO: use htime and marquee
 def print_elapsed_time():
     "register an exit hook which prints the start, finish, and elapsed times of a script."
-    begin = clock()
+    begin = time()
     started = localtime()
     def hook():
-        secs = clock() - begin
+        secs = time() - begin
         mins, secs = divmod(secs, 60)
         hrs, mins = divmod(mins, 60)
         print()

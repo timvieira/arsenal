@@ -310,8 +310,7 @@ def mean_confidence_interval(a, confidence=0.95):
     h = a.std(ddof=1) / sqrt(n) * stats.t._ppf((1+confidence)/2., n-1)
     return m, m-h, m+h
 
-
-def bernstein(samples, delta, R):
+def bernstein(samples, delta, R, check=True):
     """Plug-n-chug empirical Bernstein bound, computes "error bars" which hold with
     probability `1-delta` for the mean of independent samples from a given range
     `R=b-a` (known a priori).
@@ -341,7 +340,8 @@ def bernstein(samples, delta, R):
     n = len(samples)
     if n <= 1: return np.nan
     V = np.var(samples, ddof=1)   # sample variance
-    assert np.ptp(samples) <= R
+    if check and np.ptp(samples) > R:
+        raise ValueError(f'Sample range exceeded declared bound `{np.ptp(samples)} > {R}`')
     return sqrt(V*2*log(2.0/delta)/n) + R*(7.0/3.0)*log(2.0/delta)/(n-1)
 
 

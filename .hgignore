@@ -20,6 +20,8 @@ coverage-report
 .pytest_cache/
 *.so
 *.c
+arsenal/datastructures/heap/*.cpp
+arsenal/datastructures/heap/*.html
 
 build/*
 dist/*

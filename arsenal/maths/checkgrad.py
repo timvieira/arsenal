@@ -16,6 +16,47 @@ from scipy.linalg import norm
 from arsenal import iterview
 
 
+def fd_Hessian(f, x, eps=1e-5):
+    [d] = x.flatten().shape
+    x = x.flat
+    [F] = f().shape
+    H = np.zeros((d,d,F))
+    for i in range(d):
+        for j in range(d):
+            # central-difference approximation of Hessian
+
+            x_i = x[i]
+            x_j = x[j]
+
+            x[i] = x_i + eps
+            x[j] = x_j + eps
+
+            bb = f()
+
+            x[i] = x_i + eps
+            x[j] = x_j - eps
+
+            ba = f()
+
+            x[i] = x_i - eps
+            x[j] = x_j + eps
+
+            ab = f()
+
+            x[i] = x_i - eps
+            x[j] = x_j - eps
+
+            aa = f()
+
+            # reset
+            x[i] = x_i
+            x[j] = x_j
+
+            H[i,j] = (bb - ba - ab + aa) / (4*eps**2)
+
+    return H
+
+
 def prox_numerical(f, x, s, jac=None):
     "Numerically estimate the proximal operator `Prox_{s*f}(x)`."
 

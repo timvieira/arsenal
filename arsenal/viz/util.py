@@ -86,7 +86,7 @@ def contour_plot(f, xdomain, ydomain, color='viridis', alpha=0.5, levels=None, a
     ax.clabel(contours, inline=True, fontsize=8)
     if color is not None:
         ax.imshow(Z, extent=[xmin, xmax, ymin, ymax], origin='lower', cmap=color, alpha=alpha)
-        ax.axis(aspect='scalar')
+        #ax.axis(aspect='scalar')
     ax.figure.tight_layout()
     ax.set_xlim(xmin,xmax); ax.set_ylim(ymin,ymax)
 

@@ -35,6 +35,7 @@ class Item:
         return self.cost < other.cost
 
 
+# XXX: better to just binarize the product (assuming its associative)
 def sorted_product(p, *iters):
     """
     Sorted product of `iters`, where the output is sorted by a monotonic product
@@ -56,12 +57,7 @@ def sorted_product(p, *iters):
     y = (0,)*n
     heappush(q, Item(p(vals(y)), 0, y))
 
-#    from collections import Counter
-#    pushes = Counter()
-
-
-    while q:  # this line is slightly wrong due to a bug in prioritydict
-
+    while q:
         item = heappop(q)
         x = item.elems
         j = item.index
@@ -84,18 +80,11 @@ def sorted_product(p, *iters):
                 # requested more iterates than it has.
                 continue
 
-            # Efficiency improvement: memoize the prefix/suffix products to save
-            # on the cost of p here.  We know that it differs from the priority
-            # of the emitted `p(vals(x))` in only position `i`.
-            #
-            # Are there other tricks to reduce the number of pushes?
+            # TODO: Efficiency improvement: memoize the prefix/suffix products
+            # to save on the cost of p here.  We know that it differs from the
+            # priority of the emitted `p(vals(x))` in only position `i`.
+            # Alternatively, binarize the product.
             heappush(q, Item(p(vals(y)), i, y))
-
-#            pushes[y] += 1
-
-#    print('PUSHES BY ITEM:', {k:v for k,v in pushes.items() if v > 1})
-#    print('TOTAL PUSHES:', sum(pushes.values()))
-
 
 
 def main():

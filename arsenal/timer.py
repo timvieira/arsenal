@@ -136,6 +136,7 @@ class Timer(object):
             # use_continuity=True, alternative=None
             # alternative = {None, ‘two-sided’, ‘less’, ‘greater’}
 
+            # XXX: support Wilcoxon signed rank test for paired examples.
             #print(np.array(self.times) - np.array(other.times))
             U = mannwhitneyu(self.times, other.times)
 

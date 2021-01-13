@@ -431,6 +431,12 @@ def logsumexp(arr, axis=None):
     return out
 
 
+def hardmax(x):
+    p = np.zeros_like(x)
+    p[x.argmax()] = 1
+    return p
+
+
 def softmax(x, axis=None):
     """
     >>> x = [1, -10, 100, .5]

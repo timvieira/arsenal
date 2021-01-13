@@ -103,6 +103,7 @@ def jenkins32(a):
 
 # TODO: might be good to write in Cython and provide a few fast hash functions
 # for strings, ints, and tuples.
+#   ^ I have a reasonable implementation in dyna.learn.features
 class FeatureHashing(AbstractIntegerizer):
     """
     >>> h = FeatureHashing(jenkins32, 8)

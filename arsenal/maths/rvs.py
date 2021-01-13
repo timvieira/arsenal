@@ -334,6 +334,9 @@ class Empirical:
         assert np.all((0 <= q) & (q <= 1))
         return np.quantile(self.x, q, interpolation='lower')
 
+    def plot(self):
+        pl.plot(self.x, self.cdf(self.x))
+
     ppf = quantile
 
 cdf = Empirical

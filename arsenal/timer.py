@@ -74,7 +74,7 @@ class Benchmark(object):
                     methods[name]()
 
 
-class Timer(object):
+class Timer:
     """
     >>> from time import sleep
     >>> a = Timer('A')
@@ -160,7 +160,9 @@ class Timer(object):
 #            if x != self:
 #                self.compare(x, **kw)
 
-    def plot_feature(self, feature, timecol='timer', ax=None, scatter=False, **kw):
+    def plot_feature(self, feature, timecol='timer',
+                     ax=None, label=None, scatter=False,
+                     show_curve=False, **kw):
         if ax is None: ax = pl.figure().add_subplot(111)
         df = self.dataframe(timecol)
         a = df.groupby(feature).median()
@@ -171,17 +173,21 @@ class Timer(object):
         ax.set_xlabel(feature)
         ax.set_ylabel('time (seconds)')
 
-        if 'label' not in kw:
-            # use name of the timer as default label.
-            kw['label'] = f'{self.name}'
+        if label is None: label = self.name
 
-        [line] = ax.plot(X, Y, lw=2, alpha=0.5, **kw)
-        kw.pop('label', None) # delete label so it doesn't appear twice in the legend
+        [line] = ax.plot(X, Y, lw=2, alpha=0.5, label=label, **kw)
         kw.pop('c', None)
 
         c = line.get_color()
         ax.scatter(X, Y, c=c, lw=0, label=None, alpha=0.25, **kw)
         #ax.scatter(df[feature], df[timecol], c=c, alpha=0.25, marker='.', label=None, **kw)
+
+        if show_curve:
+            xs = np.array(X); ys = np.array(Y)
+            assert np.all(xs > 0) and np.all(ys > 0)
+            a,b = np.polyfit(np.log(xs), np.log(ys), deg=1)
+            l = r'%s $\approx {%.2f} \cdot $%s$^{%.2f}$' % (label, np.exp(b), feature, a)
+            ax.plot(xs, np.exp(b)*xs**a, alpha=0.5, label=l, c=c, linestyle=':')
 
         data = []
         for f, dd in df.groupby(feature):

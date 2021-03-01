@@ -437,6 +437,22 @@ def hardmax(x):
     return p
 
 
+def simpless(w, B):
+    """
+    Reparameterization transform similar to softmax, but for the constraints set
+      {p | p >= 0, sum(p) <= B}.
+    """
+
+    # Assuming B = 1,
+    # pi = exp(xi) / 1 + sum_j exp(xj)
+    #    = exp(xi - b) * exp(b) / exp(b)*exp(-b) + sum exp(xj - b) * exp(b)
+    #    = exp(xi - b) / exp(-b) + sum_j exp(xj - b)
+
+    b = w.max()
+    e = np.exp(w - b)
+    return B * e / (np.exp(-b) + e.sum())
+
+
 def softmax(x, axis=None):
     """
     >>> x = [1, -10, 100, .5]
@@ -478,7 +494,12 @@ def softmax(x, axis=None):
 # TODO: add support for the axis argument.
 def d_softmax(out, x, adj):
     """
-    out = softmax(x), adj are the adjoints we're chain-ruling together.
+    out = softmax(x), adj are the adjoints we are chaining together.
+
+        A(x) = logsumexp(x)
+    ∇  A(x) = softmax(x)
+    ∇² A(x) = d_softmax(x)   % this method.
+
     """
     g = adj - adj @ out
     g *= out
@@ -487,6 +508,7 @@ def d_softmax(out, x, adj):
 
 # TODO: move elsewhere (test cases for this method live with my proximal
 # operators).  This method should probably move there.
+# XXX: is this equivalent to "sparsemax"?
 def project_onto_simplex(a, radius=1.0):
     """
     Project point a to the probability simplex.

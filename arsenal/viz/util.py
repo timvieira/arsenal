@@ -132,21 +132,20 @@ class plot_xsection:
             yield self.a*(1-t) + self.b*t
 
 
-class NumericalDebug(object):
+class NumericalDebug:
     """Incrementally builds a DataFrame, includes plotting and comparison method.
 
     The quickest way to use it is
 
       >>> from arsenal.viz import DEBUG
       >>> d = DEBUG['test1']
-      >>> d.update(expect=1, got=1)
-      >>> d.update(expect=1, got=1.01)
-      >>> d.update(expect=1, got=0.99)
-      >>> d.df
-         expect   got
-      0       1  1.00
-      1       1  1.01
-      2       1  0.99
+      >>> d.update(want=1, have=1)
+      >>> d.update(want=1, have=1.01)
+      >>> d.update(want=1, have=0.99)
+         want  have
+      0     1  1.00
+      1     1  1.01
+      2     1  0.99
 
     To plots and runs numerical comparison tests,
 
@@ -175,14 +174,14 @@ class NumericalDebug(object):
         self.uptodate = False
         return self
 
-    def compare(self, expect='expect', got='got', show_regression=1, scatter=1, **kw):
+    def compare(self, want='want', have='have', show_regression=1, scatter=1, **kw):
         from arsenal.maths import compare
         if self.ax is None:
             self.ax = pl.figure().add_subplot(111)
         if self.df.empty:
             return
         with update_ax(self.ax):
-            compare(expect, got, data=self.df).plot(ax=self.ax, **kw)
+            compare(want, have, data=self.df).plot(ax=self.ax, **kw)
 
 # Global references to numerical debugger class.
 DEBUG = ddict(NumericalDebug)
@@ -257,3 +256,15 @@ def scatter_manager(name, with_ax=False, xlabel=None, ylabel=None, title=None, *
             yield data
         x,y = list(zip(*data))
         ax.scatter(x, y, alpha=0.5, lw=0, **style)
+
+
+def test():
+    d = DEBUG['test1']
+    d.update(want=1, have=1)
+    d.update(want=1, have=1.01)
+    d.update(want=1, have=0.99)
+    print(d.df)
+
+
+if __name__ == '__main__':
+    test()

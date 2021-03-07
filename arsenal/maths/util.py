@@ -177,10 +177,10 @@ def norm(x, p=2):
     return la.norm(x, p)
 
 
-def zero_retrieval(expect, got):
+def zero_retrieval(want, have):
     "How good are we at retrieving zero values? Measured with F1 score."
-    assert expect.shape == got.shape
-    return f1(expect == 0, got == 0)
+    assert want.shape == have.shape
+    return f1(want == 0, have == 0)
 
 
 def f1(A, B):
@@ -648,7 +648,7 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=0.001, color=1):
         assert not np.isnan(a).any() and not np.isnan(b).any()
     except (TypeError, AssertionError):
         pre = {"%s: " % name if name else ""}
-        msg = f'{pre}expected {a}, got {b}'
+        msg = f'{pre}want {a}, have {b}'
         if throw:
             raise AssertionError(msg)
         else:

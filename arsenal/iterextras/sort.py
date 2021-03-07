@@ -136,13 +136,13 @@ def main():
         for p in [np.product, np.sum, tuple, wprod]:
             # enumerate and sort; not lazy
             want = list(sorted(p(x) for x in itertools.product(*iters)))
-            got = list(sorted_product(p, *iters))
+            have = list(sorted_product(p, *iters))
             print()
             print('product operator:', p.__name__)
-            print('GOT:', got)
-            #if got != want:
+            print('HAVE:', have)
+            #if have != want:
             print('WANT:', want)
-            assert got == want
+            assert have == want
         print('pass.')
 
     print('===========')

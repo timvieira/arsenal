@@ -22,8 +22,8 @@ def pp_plot(a, b, pts=100, show_line=True):
     pl.plot(A(x), B(x), alpha=1.0)
 
 
-def check_equal(want, got, verbose=0, **kwargs):
-    c = compare(want, got, verbose=verbose, **kwargs)
+def check_equal(want, have, verbose=0, **kwargs):
+    c = compare(want, have, verbose=verbose, **kwargs)
     if c.max_relative_error > 0.01:
         assert False, c.format_message()
     return c
@@ -53,29 +53,29 @@ def align(X, Y, distance=lambda x,y: abs(x - y)):
     return result
 
 
-class compare(object):
+class compare:
 
-    def __init__(self, want, got, name=None, data=None, P_LARGER=0.9,
+    def __init__(self, want, have, name=None, data=None, P_LARGER=0.9,
                  regression=True, ax=None, alphabet=None,
-                 want_label=None, got_label=None, verbose=1):
+                 want_label=None, have_label=None, verbose=1):
         """Compare vectors.
 
         Arguments:
 
           - Specifying data for comparison two methods:
 
-            1) `want`, `got`: two numeric one-dimensional arrays which we'd like
+            1) `want`, `have`: two numeric one-dimensional arrays which we'd like
                to compare (the argument names come for software testing). This
                method requires argument `data=None`.
 
-            2) `data`: instance of `DataFrame`, expects arguments `want` and `got`
+            2) `data`: instance of `DataFrame`, expects arguments `want` and `have`
                to be column labels.
 
           - `name`: name of this comparison.
 
         Note:
 
-         - when plotting `want` is the y-axis, `got` is the x-axis. This is by
+         - when plotting `want` is the y-axis, `have` is the x-axis. This is by
            convention that `want` is the dependent variable (regression target).
 
         TODO:
@@ -93,50 +93,50 @@ class compare(object):
         if isinstance(alphabet, Alphabet):
             alphabet = list(alphabet)
 
-        if isinstance(want, dict) and isinstance(got, dict):
+        if isinstance(want, dict) and isinstance(have, dict):
             alphabet = list(want.keys()) if alphabet is None else alphabet
-            assert set(got.keys()) == set(alphabet), \
-                'Keys differ.\n  got keys  = %s\n  want keys = %s' % (set(got.keys()), set(alphabet))
+            assert set(have.keys()) == set(alphabet), \
+                'Keys differ.\n  have keys  = %s\n  want keys = %s' % (set(have.keys()), set(alphabet))
             want = [want[k] for k in alphabet]
-            got = [got[k] for k in alphabet]
+            have = [have[k] for k in alphabet]
 
-        if isinstance(want, np.ndarray) and isinstance(got, np.ndarray):
+        if isinstance(want, np.ndarray) and isinstance(have, np.ndarray):
             assert alphabet is None
             alphabet = Alphabet(dict(np.ndenumerate(want)).keys())
 
-            assert want.shape == got.shape, [want.shape, got.shape]
+            assert want.shape == have.shape, [want.shape, have.shape]
             want = want.flatten()
-            got = got.flatten()
+            have = have.flatten()
 
         if data is not None:
             assert isinstance(want, (int, str)), \
-                'expected a column name got %s' % type(want)
-            assert isinstance(got, (int, str)), \
-                'expected a column name got %s' % type(got)
+                'expected a column name have %s' % type(want)
+            assert isinstance(have, (int, str)), \
+                'expected a column name have %s' % type(have)
 
             if want_label is None: want_label = want
-            if got_label is None: got_label = got
+            if have_label is None: have_label = have
 
             want = data[want]
-            got = data[got]
+            have = data[have]
 
         else:
             if want_label is None: want_label = 'expect'
-            if got_label is None: got_label = 'got'
+            if have_label is None: have_label = 'have'
 
             want = np.asarray(want)
-            got = np.asarray(got)
+            have = np.asarray(have)
 
-            data = pd.DataFrame({want_label: want, got_label: got})
+            data = pd.DataFrame({want_label: want, have_label: have})
 
-        assert want.shape == got.shape, [want.shape, got.shape]
+        assert want.shape == have.shape, [want.shape, have.shape]
         [n] = want.shape
 
         self.want = want
-        self.got = got
+        self.have = have
         self.alphabet = alphabet
         self.ax = ax
-        self.got_label = got_label
+        self.have_label = have_label
         self.want_label = want_label
         self.n = n
         self.coeff = None
@@ -146,43 +146,43 @@ class compare(object):
         # Check that vectors are finite.
         if not np.isfinite(want).all():
             tests.append(['want finite', progress(np.isfinite(want).sum(), n), False])
-        if not np.isfinite(got).all():
-            tests.append(['got finite', progress(np.isfinite(got).sum(), n), False])
+        if not np.isfinite(have).all():
+            tests.append(['have finite', progress(np.isfinite(have).sum(), n), False])
 
         ne = norm(want)
-        ng = norm(got)
+        ng = norm(have)
         ok = abs(ne-ng)/ne < 0.01 if ne != 0 else True
 
         if n > 1:
             tests.append(['norms', '[%g, %g]' % (ne, ng), ok])
-            #F = zero_retrieval(want, got)
+            #F = zero_retrieval(want, have)
             #tests.append(['zero F1', F, F > 0.99])
 
         # Correlation statistics
         if n > 1:
-            #self.cosine = cosine(want, got)
+            #self.cosine = cosine(want, have)
             #tests.append(['cosine', self.cosine, (self.cosine > 0.99999)])   # cosine similarities must be really high.
-            self.pearson = 1.0 if ne == ng == 0 else pearsonr(want, got)[0]
+            self.pearson = 1.0 if ne == ng == 0 else pearsonr(want, have)[0]
             tests.append(['pearson', self.pearson, (self.pearson > 0.99999)])
-            self.spearman = spearmanr(want, got)[0]
+            self.spearman = spearmanr(want, have)[0]
             tests.append(['spearman', self.spearman, (self.spearman > 0.99999)])
 
         # TODO: this check should probably take into account the scale of the data.
-        d = linf(want, got)
+        d = linf(want, have)
         self.max_err = d
         tests.append(['ℓ∞', d, None])
-        tests.append(['ℓ₂', np.linalg.norm(want - got), None])
+        tests.append(['ℓ₂', np.linalg.norm(want - have), None])
 
         # same sign check (weak agreement, but useful sanity check -- especially
         # for gradients)
         x = want
-        y = got
+        y = have
         s = np.asarray(~((x >= 0) ^ (y >= 0)), dtype=int)
         p = s.sum() * 100.0 / len(s)
         tests.append(['same-sign', '%s%% (%s/%s)' % (p, s.sum(), len(s)), p == 100.0])
 
         # relative error
-        r = relative_difference(want, got)
+        r = relative_difference(want, have)
         r = np.max(r[np.isfinite(r)])
         #tests.append(['max rel err', r, r <= 0.01])
         self.max_relative_error = r
@@ -194,12 +194,12 @@ class compare(object):
 
         # TODO: can provide descriptive statistics for each vector
         #tests.append(['range (want)', [want.min(), want.max()], 2])
-        #tests.append(['range (got)   ', [got.min(), got.max()], 2])
+        #tests.append(['range (have)   ', [have.min(), have.max()], 2])
 
         # regression and rescaled error only valid for n >= 2
 #        if n >= 2:
 #            es = abs(want).max()
-#            gs = abs(got).max()
+#            gs = abs(have).max()
 #            if es == 0:
 #                es = 1
 #            if gs == 0:
@@ -207,7 +207,7 @@ class compare(object):
 #            if 0:
 #                # rescaled error
 #                E = want / es
-#                G = got / gs
+#                G = have / gs
 #                R = abs(E - G)
 #                r = np.mean(R)
 #                tests.append(['mean rescaled error', r, r <= 1e-5])
@@ -218,12 +218,12 @@ class compare(object):
         if n >= 2:
             # These tests check if one of the datasets is consistently larger than the
             # other. The threshold for error is based on `P_LARGER` ("percent larger").
-            L = ((want-got) > 0).sum()
+            L = ((want-have) > 0).sum()
             if L >= P_LARGER * n:
                 tests.append(['want is larger', progress(L, n), 0])
-            L = ((got-want) > 0).sum()
+            L = ((have-want) > 0).sum()
             if L >= P_LARGER * n:
-                tests.append(['got is larger', progress(L, n), 0])
+                tests.append(['have is larger', progress(L, n), 0])
 
         self.tests = tests
         if verbose:
@@ -261,7 +261,7 @@ class compare(object):
 #        if seaborn:
 #            import seaborn as sns
 #            sns.set_context(rc={"figure.figsize": (7, 5)})
-#            g = sns.JointGrid(self.got_label, self.want_label, data=self.data)
+#            g = sns.JointGrid(self.have_label, self.want_label, data=self.data)
 #            g.plot(sns.regplot, sns.distplot, spearmanr)
 #            print("Pearson's r: {0}".format(self.pearson))
 #        else:
@@ -269,16 +269,16 @@ class compare(object):
             if self.ax is None:
                 self.ax = pl.figure().add_subplot(111)
 
-            self.ax.scatter(self.got, self.want, lw=0, alpha=0.5, **scatter_kw)
+            self.ax.scatter(self.have, self.want, lw=0, alpha=0.5, **scatter_kw)
 
-            self.ax.set_xlabel(self.got_label)
+            self.ax.set_xlabel(self.have_label)
             self.ax.set_ylabel(self.want_label)
 
             # Keeps the plot region tight against the data (allow 5% of the
             # data-range for padding so that points in the scatter plot aren't
             # partially clipped.)
-#            xeps = 0.05 * np.ptp(self.got)
-#            self.ax.set_xlim(self.got.min() - xeps, self.got.max() + xeps)
+#            xeps = 0.05 * np.ptp(self.have)
+#            self.ax.set_xlim(self.have.min() - xeps, self.have.max() + xeps)
 
 #            yeps = 0.05 * np.ptp(self.want)
 #            self.ax.set_ylim(self.want.min() - yeps, self.want.max() + yeps)
@@ -306,7 +306,7 @@ class compare(object):
         if self.coeff is not None and np.isfinite(self.coeff).all():
             xa, xb = self.ax.get_xlim()
             A = np.ones((self.n, 2))
-            A[:,0] = self.got
+            A[:,0] = self.have
             # plot estimated line
             ys = A @ self.coeff
             self.ax.plot(A[:,0], ys, c='r', alpha=0.5)
@@ -319,14 +319,14 @@ class compare(object):
         if self.n < 2:
             return
         # data can't contain any NaNs
-        if not np.isfinite(self.got).all() or not np.isfinite(self.want).all():
+        if not np.isfinite(self.have).all() or not np.isfinite(self.want).all():
             self.tests.append(['regression',
                                'did not run due to NaNs in data',
                                0])
             return
 
         A = np.ones((self.n, 2))
-        A[:,0] = self.got
+        A[:,0] = self.have
 
         [self.coeff, residues, _, _] = lstsq(A, self.want)
         self.R = float(np.sqrt(residues)) if residues else 0.0
@@ -358,12 +358,12 @@ class compare(object):
             return z
 
         s_want = dot_aligned(self.want)
-        s_got = dot_aligned(self.got)
+        s_have = dot_aligned(self.have)
 
         if self.alphabet is None:
             self.alphabet = range(self.n)
 
-        for (i,(x,y,sx,sy)) in enumerate(zip(self.want, self.got, s_want, s_got)):
+        for (i,(x,y,sx,sy)) in enumerate(zip(self.want, self.have, s_want, s_have)):
             # XXX: skip zeros.
             #if abs(x) < 1e-10 and abs(y) < 1e-10:
             #    e = 0.0
@@ -378,7 +378,7 @@ class compare(object):
             #df.append({'name':   alphabet[i],
             #           'error':  e,
             #           'want': x,
-            #           'got':    y})
+            #           'have':    y})
 
         df.sort(reverse=1)
 

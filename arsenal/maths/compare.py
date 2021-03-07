@@ -121,7 +121,7 @@ class compare:
             have = data[have]
 
         else:
-            if want_label is None: want_label = 'expect'
+            if want_label is None: want_label = 'want'
             if have_label is None: have_label = 'have'
 
             want = np.asarray(want)

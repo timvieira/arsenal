@@ -1,4 +1,3 @@
-from __future__ import print_function
 import numpy as np
 import pylab as pl
 import pandas as pd
@@ -337,7 +336,6 @@ class compare(object):
 
         slope = float(self.coeff[0])
         intercept = float(self.coeff[1])
-        print(slope, intercept)
         self.tests.append([
             'regression',
             f'[{slope:.3f} {intercept:.3f}] R={self.R:.3f}',

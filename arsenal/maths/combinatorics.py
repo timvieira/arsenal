@@ -64,7 +64,10 @@ def perm_sign(p):
     return -1 if t % 2 else +1
 
 
-from blist import sortedlist
+try:
+    from blist import sortedlist
+except ImportError:
+    pass
 def _fast_inversions(p):
     n = len(p)
     total = 0

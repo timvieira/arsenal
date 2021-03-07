@@ -28,7 +28,7 @@ setuptools.setup(
         'numpy',
         'colored',
         'path.py',
-        'blist',
+        #'blist',
     ],
     ext_modules = cythonize(['arsenal/**/*.pyx']),
     include_dirs = [np.get_include()],

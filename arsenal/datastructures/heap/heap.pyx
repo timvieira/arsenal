@@ -178,6 +178,9 @@ cdef class LocatorMaxHeap(MaxHeap):
         super().pop()
         return k,v
 
+    def popitem(self):
+        return self.pop()
+
     def peek(self):
         return self.key[1], super().peek()
 

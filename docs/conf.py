@@ -76,4 +76,4 @@ sys.path.append(os.path.abspath('../..'))
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('.'))
 
-autodoc_mock_imports = ['matplotlib', 'pylab', 'pandas']
+autodoc_mock_imports = ['matplotlib', 'pylab', 'pandas', 'numpy']

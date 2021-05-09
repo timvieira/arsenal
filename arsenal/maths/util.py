@@ -2,7 +2,6 @@ import random
 import numpy as np
 from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
     asarray, ones, mean, searchsorted, sqrt, isfinite
-from numpy.random import uniform, normal
 import scipy.linalg as la
 from scipy import stats
 from arsenal.terminal import colors
@@ -395,8 +394,7 @@ def logsumexp(arr, axis=None):
     Returns log(sum(exp(arr))) while minimizing the possibility of
     over/underflow.
 
-    Examples
-    --------
+    Examples:
 
     >>> a = arange(10)
     >>> log(sum(exp(a)))
@@ -508,7 +506,6 @@ def d_softmax(out, x, adj):
 
 # TODO: move elsewhere (test cases for this method live with my proximal
 # operators).  This method should probably move there.
-# XXX: is this equivalent to "sparsemax"?
 def project_onto_simplex(a, radius=1.0):
     """
     Project point a to the probability simplex.

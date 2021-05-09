@@ -1,11 +1,21 @@
 # -*- coding: utf-8 -*-
 import sys, os
 from glob import glob
+from subprocess import Popen, PIPE
+
+
+def ansi2html(x):
+    p = Popen('ansi2html.sh', stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    p.stdin.write(str(x).encode('utf-8'))
+    return p.communicate()[0].decode('utf-8')
+
 
 def overline(xs):
     return ''.join(f'{x}\u0305' for x in xs)
 
+
 partial = '∂'
+
 
 class bb:
     A = '𝔸'
@@ -70,6 +80,13 @@ subscript_map = {
 }
 
 
+def superscript(x):
+    return "".join(superscript_map[i] for i in str(x))
+
+def subscript(x):
+    return "".join(subscript_map[i] for i in str(x))
+
+
 def complete_filenames(text, line, begidx, endidx):
     "Util for filename completion."
 
@@ -90,6 +107,7 @@ def ansi(color=None, light=None, bg=3):
     return '\x1b[%s;%s%sm' % (light, bg, color)
 
 _reset = '\x1b[0m'
+
 
 def colorstring(s, c):
     return c + s + _reset
@@ -122,6 +140,7 @@ class colors:
     rightarrow = '→'
     reset = _reset
 
+    ansi2html = ansi2html
 
 #def padr(w):
 #    "get format to pad right elements"
@@ -160,35 +179,66 @@ def marquee(msg=''):
 
 
 import re
-def render(y, debug=False):
+def render(y, **kwargs):
     """
     Render colorful string using 'reset' to mean 'pop the color stack' rather than
     go directly 'normal' color.
     """
-    y = str(y)
-    xs = re.split('(\x1b\[[0-9;]+m)', y)  # tokenize.
-    s = [_reset]      # stack
-    b = []            # buffer
-    prefix = '\x1b['  # control code prefix
-    c = _reset        # current color
-    for x in xs:
-        if debug: print('[render] current token', repr(x))
-        if x.startswith(prefix):
-            if debug: print('[render]   ^ control code')
-            if x == _reset:
-                c = s.pop() if len(s) else _reset
+    return rendering(y, **kwargs).value
+
+
+class rendering:
+    def __init__(self, y, debug=False):
+        y = str(y)
+        xs = re.split('(\x1b\[[0-9;]+m)', y)  # tokenize.
+
+        if debug:
+            msg = lambda *args: print(f'[render]{"    "*len(s)}', *args)
+
+        s = [_reset]      # stack
+        b = []            # buffer
+        prefix = '\x1b['  # control code prefix
+        c = _reset        # current color
+        for x in xs:
+            if debug: msg('current token', repr(x))
+            if x.startswith(prefix):
+                if x == _reset:
+                    if debug: msg('   ^ pop')
+                    c = s.pop() if len(s) else _reset
+                else:
+                    if debug: msg('   ^ control code', x + repr(x) + _reset)
+                    s.append(c)
+                    c = x
+                continue
             else:
-                s.append(c)
-                c = x
-            continue
+                if debug: msg('   ^ color', c + repr(x) + _reset)
+                b.append(c)
+                b.append(x)
+        b.append(_reset)   # always end on reset.
+        self.xs = xs
+        self.value = ''.join(b)
+
+    def __len__(self):
+        return sum(len(x) for x in self.xs if not x.startswith('\x1b['))  # control code prefix
+
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return self.value
+
+    def __format__(self, spec):
+        [(pad, fmt)] = re.findall('^(-?\d*)(s)$', spec)
+        pad = int(pad)
+        if pad > 0:
+            return self.value + ' '*max(0, pad - len(self))
         else:
-            if debug: print('[render]   ^ use color', repr(c))
-            b.append(c)
-            b.append(x)
-    b.append(_reset)   # always end on reset.
-    return ''.join(b)
+            return ' '*max(0, abs(pad) - len(self)) + self.value
+
+
 
 colors.render = render
+colors.rendering = rendering
 
 
 ok   = colors.green     % 'ok'

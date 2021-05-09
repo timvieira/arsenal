@@ -16,12 +16,9 @@ def progress(n, length):
     """
     Returns a string indicating current progress.
     """
-    if length == 0:
-        return ('%5.1f%% (%*d/%d)'
-                % ((float('nan'), len(str(length)), n, length)))
-
+    p = 100 * n / length if length > 0 else 0
     return ('%5.1f%% (%*d/%d)'
-            % ((float(n) / length) * 100, len(str(length)), n, length))
+            % ((p, len(str(length)), n, length)))
 
 
 def progress_bar(max_width, n, length):
@@ -98,33 +95,24 @@ def fmt(start, n, length, width, done=False):
     return string
 
 
-#def iterview(x, msg=None, every=None, mintime=0.25, length=None,
-#             width=None, newline=False, show=True):
-#    #from tqdm import tqdm
-#    return tqdm(x, desc=msg, total=length, ncols=width, miniters=every)
+def iterview(
+        x: 'Iterable',
+        msg: 'Prefix message' = None,
+        mintime: 'show progress at most every `mintime` seconds' = 0.25,
+        length: 'length hint; required when len(x) fails.' = None,
+        width: 'max width of progress bar' = 78,
+        show: 'do not show progress bar if False' = True
+):
+    """
+    Show a progress bar as we move through the iterable `x`.
 
-
-def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newline=False, show=True):
-    """Show aprogress bar as we move through the iterable `x`.
-
-    Arguments:
-
-      - `x`: iterator
-
-      - `every`: number of iterations between printing progress
-
-      - `length`: hint about the length of x, which is required when generators
-          has unknown `len()`.
-
-      - `mintime`: show progress at most every `mintime` seconds.
-
-      - `show`: Show progress bar (i.e., don't show progress bar if False).
+    >>> for i in iterview(range(10000), msg='foo'): pass
+    foo  20.0% ( 2001/10000) [=========>                                  ] 00:00:02
 
     """
 
     if not show:
-        for y in x:
-            yield y
+        yield from x
 
     else:
         start = time()
@@ -133,9 +121,9 @@ def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newli
             try:
                 length = len(x)
             except TypeError:
-                raise AssertionError(f'Iterable `{x!r}` does not have a known length.\n'
-                                     'Please provide in an `x` where `len(x)` is defined '
-                                     'or explicitly provide a value in the `length` argument.')
+                raise TypeError(f'Iterable `{x!r}` does not have a known length.\n'
+                                'Please provide in an `x` where `len(x)` is defined '
+                                'or explicitly provide a value in the `length` argument.')
         else:
             length = int(length)
 
@@ -154,19 +142,12 @@ def iterview(x, msg=None, every=None, mintime=0.25, length=None, width=78, newli
 
         try:
             for n, y in enumerate(x):
-                if every is None or n % every == 0:
-                    if not mintime or time() - last_update >= mintime:
-                        if newline:
-                            sys.stderr.write('%s%s\n' % (msg, fmt(start, n, length, width)))
-                        else:
-                            sys.stderr.write('\r%s%s' % (msg, fmt(start, n, length, width)))
-                        last_update = time()
+                if not mintime or time() - last_update >= mintime:
+                    sys.stderr.write('\r%s%s' % (msg, fmt(start, n, length, width)))
+                    last_update = time()
                 yield y
         finally:
-            if newline:
-                sys.stderr.write('%s%s\n' % (msg, fmt(start, n+1, length, width, done=1)))
-            else:
-                sys.stderr.write('\r%s%s\n' % (msg, fmt(start, n+1, length, width, done=1)))
+            sys.stderr.write('\r%s%s\n' % (msg, fmt(start, n+1, length, width, done=1)))
 
 
 def tests():
@@ -174,14 +155,11 @@ def tests():
     from time import sleep
 
     # Check for error
-#    with assert_throws(AssertionError):
-#        list(iterview((None for _ in range(5))))
+    with assert_throws(TypeError):
+        list(iterview((None for _ in range(5))))
 
     # won't throw an error because length is passed in
     list(iterview((None for _ in range(5)), length=5))
-
-    for _ in iterview(range(400), every=20):
-        sleep(0.005)
 
     for _ in iterview(range(10000), msg='foo', mintime=0.25):
         sleep(0.0001)

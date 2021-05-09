@@ -1,31 +1,15 @@
-# Minimal makefile for Sphinx documentation
-#
-
-# You can set these variables from the command line.
-SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
-SOURCEDIR     = .
-BUILDDIR      = _build
-
 cython:
 	python setup.py build_ext -i
 
-# Put it first so that "make" without argument is like "make help".
-help:
-	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
-.PHONY: help Makefile
-
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
+docs:
+	sphinx-apidoc -o docs arsenal --full
+	(cd docs && make html)
 
 clean:
-	rm -rf coverage-report
+	rm -rf coverage-report .coverage
+	rm -rf docs
 
-test-coverage:
+coverage:
 	find arsenal -name '*.py' -exec coverage run --rcfile .coveragerc -a {} \;
 	coverage html --rcfile .coveragerc --include './*' -d coverage-report
 	xdg-open coverage-report/index.html

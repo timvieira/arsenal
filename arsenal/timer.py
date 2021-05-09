@@ -1,4 +1,4 @@
-import pylab as pl
+import matplotlib.pyplot as pl
 import pandas as pd
 import numpy as np
 from sys import stderr

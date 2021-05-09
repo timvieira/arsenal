@@ -1,4 +1,4 @@
-import pylab as pl
+import matplotlib.pyplot as pl
 from numpy import sqrt, mean, array, zeros, mat
 from numpy.linalg import svd
 from mpl_toolkits.mplot3d import Axes3D
@@ -44,6 +44,6 @@ def mds_plot2D(points, distance):
 
 def mds_plot3D(points, distance):
     Y, _ = mds(distance, 3)
-    ax = Axes3D(pylab.figure())
+    ax = Axes3D(pl.figure())
     ax.scatter(Y[:,0], Y[:,1], Y[:,2])
     list(map(ax.text, Y[:,0], Y[:,1], Y[:,2], points))  # add labels to points

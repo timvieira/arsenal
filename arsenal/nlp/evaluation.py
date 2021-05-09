@@ -125,7 +125,9 @@ def plot_confusion(y_true, y_pred, alphabet, normalized=False):
        class)
 
     """
-    import pylab as pl, numpy as np
+    import numpy as np
+    import matplotlib.pyplot as pl
+
     from sklearn.metrics import confusion_matrix
 
     def plot_confusion_matrix(cm, title='Confusion matrix', cmap=pl.cm.Blues):

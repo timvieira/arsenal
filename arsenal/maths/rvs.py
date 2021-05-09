@@ -1,5 +1,5 @@
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as pl
 import scipy.stats as st
 from numpy.random import uniform, normal
 from numpy import array, exp, cumsum, asarray
@@ -180,8 +180,7 @@ def compare_samples_to_distr(D, samples, a, b, bins):
 
 
 def test_truncated_distribution():
-
-    import pylab as pl
+    import matplotlib.pyplot as pl
     import scipy.stats as st
     d = st.lognorm(1.25)
 

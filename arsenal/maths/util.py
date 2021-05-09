@@ -38,7 +38,7 @@ def restore_random_state(seed=None):
 
 
 def fit_curve(xs, ys):
-    import pylab as pl
+    import matplotlib.pyplot as pl
     xs = np.array(xs); ys = np.array(ys)
     assert np.all(xs > 0) and np.all(ys > 0)
     a,b = np.polyfit(np.log(xs), np.log(ys), deg=1)

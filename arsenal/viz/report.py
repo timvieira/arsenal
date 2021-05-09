@@ -1,4 +1,4 @@
-import pylab as pl
+import matplotlib.pyplot as pl
 import numpy as np
 import pandas as pd
 from collections import defaultdict

@@ -1,5 +1,5 @@
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as pl
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr
 from scipy.linalg import lstsq, norm

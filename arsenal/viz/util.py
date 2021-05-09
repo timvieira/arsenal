@@ -7,8 +7,7 @@ if not environ.get('DISPLAY'):
     DISPLAY = False
 
 import pandas as pd
-import pylab as pl
-import numpy as np
+import matplotlib.pyplot as pl
 #from sys import stderr
 from collections import defaultdict
 from contextlib import contextmanager

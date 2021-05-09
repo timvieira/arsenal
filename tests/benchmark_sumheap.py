@@ -1,5 +1,6 @@
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as pl
+
 from arsenal.maths import compare, random_dist
 from collections import Counter
 from arsenal.maths.combinatorics import permute

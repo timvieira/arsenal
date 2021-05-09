@@ -40,7 +40,7 @@ def sorted_intersection(A, B):
 
 def test():
     import numpy as np
-    import pylab as pl
+    import matplotlib.pyplot as pl
     from arsenal.timer import timers
     from arsenal import iterview
 

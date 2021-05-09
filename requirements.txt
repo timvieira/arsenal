@@ -5,3 +5,6 @@ cython
 matplotlib
 colored
 path.py
+IPython
+tqdm
+psutil

@@ -158,20 +158,21 @@ def check(x, t='pass', f='fail'):
     return colors.green % t if x else colors.red % f
 
 
-def color01(x, fmt='%.10f', min_color=235, max_color=255):
-    "Colorize numbers in [0,1] based on value; darker means smaller value."
-    import colored
-    if not (0 <= x <= 1 + 1e-10):
-        return colors.red % fmt % x
-    width = max_color - min_color
-    color = min_color + int(round(x*width))
-    return '%s%s%s' % (colored.fg(color), (fmt % x), colored.attr('reset'))
+#def color01(x, fmt='%.10f', min_color=235, max_color=255):
+#    "Colorize numbers in [0,1] based on value; darker means smaller value."
+#    import colored
+#    if not (0 <= x <= 1 + 1e-10):
+#        return colors.red % fmt % x
+#    width = max_color - min_color
+#    color = min_color + int(round(x*width))
+#    return '%s%s%s' % (colored.fg(color), (fmt % x), colored.attr('reset'))
 
 
 def console_width(minimum=None, default=80):
     "Return width of available window area."
-    from tqdm._utils import _environ_cols_wrapper
-    return max(minimum or 0, _environ_cols_wrapper()(sys.stdout) or default)
+    from tqdm.utils import _screen_shape_wrapper
+    x = _screen_shape_wrapper()(sys.stdout)[0]
+    return max(minimum or 0, x or default)
 
 
 def marquee(msg=''):
@@ -257,10 +258,10 @@ def tests():
     print(colors.italic % 'italic')
     print(colors.strike % 'strike')
 
-    import numpy as np
-    for x in np.linspace(0, 1, 15):
-        print(color01(x, fmt='%.2f'), end=' ')
-    print()
+    #import numpy as np
+    #for x in np.linspace(0, 1, 15):
+    #    print(color01(x, fmt='%.2f'), end=' ')
+    #print()
 
     w = console_width()
     print('Console width:', w, sep=' ')

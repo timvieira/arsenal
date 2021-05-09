@@ -3,7 +3,6 @@ scipy
 pandas
 cython
 matplotlib
-colored
 path.py
 IPython
 tqdm

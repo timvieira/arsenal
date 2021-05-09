@@ -52,14 +52,6 @@ arsenal.maths.featureselection module
    :undoc-members:
    :show-inheritance:
 
-arsenal.maths.heap3 module
---------------------------
-
-.. automodule:: arsenal.maths.heap3
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 arsenal.maths.inv module
 ------------------------
 

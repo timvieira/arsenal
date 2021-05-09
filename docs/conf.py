@@ -78,5 +78,6 @@ sys.path.append(os.path.abspath('.'))
 
 autodoc_mock_imports = [
     'matplotlib', 'pylab', 'pandas', 'numpy', 'scipy',
-    'arsenal.datastructures.heap'
+    'arsenal.datastructures.heap', 'IPython', 'psutil', 'path',
+    'mpl_toolkits',
 ]

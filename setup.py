@@ -26,6 +26,8 @@ setuptools.setup(
     install_requires = [
         #'keyring',        # this is an annoying dependency
         'numpy',
+        'scipy',
+        'matplotlib',
         'colored',
         'path.py',
         #'blist',

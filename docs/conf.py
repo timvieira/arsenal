@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'arsenal'
-copyright = '2021, Author'
-author = 'Author'
+copyright = '2019, Tim Vieira'
+author = 'Tim Vieira'
 
 
 # -- General configuration ---------------------------------------------------
@@ -30,6 +30,7 @@ author = 'Author'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinx.ext.mathjax',
     'sphinx.ext.todo',
 ]
 
@@ -73,3 +74,4 @@ todo_include_todos = True
 import os; import sys
 sys.path.append(os.path.abspath('../..'))
 sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.abspath('.'))

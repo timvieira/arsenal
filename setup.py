@@ -28,6 +28,7 @@ setuptools.setup(
         'numpy',
         'scipy',
         'pandas',
+        'cython',
         'matplotlib',
         'colored',
         'path.py',

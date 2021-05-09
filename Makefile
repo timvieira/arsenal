@@ -7,7 +7,7 @@ doc:
 
 clean:
 	rm -rf coverage-report .coverage
-	rm -rf docs/_build docs/*.rst docs/_templates docs/_static
+	rm -rf docs/_build docs/_templates docs/_static
 
 coverage:
 	find arsenal -name '*.py' -exec coverage run --rcfile .coveragerc -a {} \;

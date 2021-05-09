@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as pl
 import scipy.stats as st
-from numpy.random import uniform, normal
 from numpy import array, exp, cumsum, asarray
 from numpy.linalg import norm
 from scipy.integrate import quad
@@ -83,7 +82,7 @@ class TruncatedDistribution:
     def pdf(self, x):
         return (self.a < x) * (x <= self.b) * self.d.pdf(x) / self.cdf_w
     def rvs(self, size=None):
-        u = uniform(0, 1, size=size)
+        u = np.random.uniform(0, 1, size=size)
         return self.ppf(u)
     def ppf(self, u):
         return self.d.ppf(self.cdf_a + u * self.cdf_w)
@@ -264,7 +263,7 @@ class Mixture(object):
 
 def spherical(size):
     "Generate random vector from spherical Gaussian."
-    x = normal(0, 1, size=size)
+    x = np.random.normal(0, 1, size=size)
     x /= norm(x, 2)
     return x
 
@@ -348,7 +347,7 @@ def sample(w, size=None, u=None):
     """
     c = cumsum(w)
     if u is None:
-        u = uniform(0,1,size=size)
+        u = np.random.uniform(0,1,size=size)
     return c.searchsorted(u * c[-1])
 
 

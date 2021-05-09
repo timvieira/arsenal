@@ -13,3 +13,6 @@ coverage:
 	find arsenal -name '*.py' -exec coverage run --rcfile .coveragerc -a {} \;
 	coverage html --rcfile .coveragerc --include './*' -d coverage-report
 	xdg-open coverage-report/index.html
+
+test:
+	find arsenal -name '*.py' -exec python {} \;

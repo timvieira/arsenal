@@ -1,7 +1,7 @@
 cython:
 	python setup.py build_ext -i
 
-docs:
+doc:
 	sphinx-apidoc -o docs arsenal --full
 	(cd docs && make html)
 

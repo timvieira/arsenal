@@ -27,6 +27,7 @@ setuptools.setup(
         #'keyring',        # this is an annoying dependency
         'numpy',
         'scipy',
+        'pandas',
         'matplotlib',
         'colored',
         'path.py',

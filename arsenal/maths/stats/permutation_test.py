@@ -55,7 +55,7 @@ def bf_paired_perm_test(xs, ys, statistic=np.mean):
     return p
 
 
-def verbose_paired_perm_test(xs, ys, nmc=1000, threshold=0.05, fmt='%.4f'):
+def verbose_paired_perm_test(xs, ys, nmc=10_000, threshold=0.05, fmt='%.4f'):
     "Let xs be the system you want be greater."
     from arsenal.terminal import colors
 
@@ -74,10 +74,14 @@ def verbose_paired_perm_test(xs, ys, nmc=1000, threshold=0.05, fmt='%.4f'):
         c = colors.yellow
         d = '~'
 
+    #print('brute-force', bf_paired_perm_test(xs, ys))
+
     print('[paired perm] %s (p=%s)' % (c % 'X (%s) %s Y (%s)' % (fmt % mx,
                                                                  d,
                                                                  fmt % my),
                                        fmt % p))
+
+    return p
 
 
 if __name__ == '__main__':

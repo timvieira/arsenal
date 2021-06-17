@@ -214,7 +214,7 @@ class rendering:
             else:
                 if debug: msg('   ^ color', c + repr(x) + _reset)
                 b.append(c)
-                b.append(x)
+                b.append(x + _reset)
         b.append(_reset)   # always end on reset.
         self.xs = xs
         self.value = ''.join(b)
@@ -278,6 +278,13 @@ def tests():
     x = colors.normal % f'normal {r} normal'
     print(render(x))
 
+    # SDD: make sure we reset after dark
+    print(render(
+        (colors.light.blue % 'light %s light'
+         % colors.dark.blue % 'dark %s dark'
+         % colors.blue % 'regular'),
+        #debug = True,
+    ))
 
 
 if __name__ == '__main__':

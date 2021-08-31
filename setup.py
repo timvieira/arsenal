@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 from Cython.Build import cythonize
 
 
-with open('README.rst', "r") as fh:
+with open('README.md', "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(

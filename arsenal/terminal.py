@@ -246,6 +246,16 @@ ok   = colors.green     % 'ok'
 warn = colors.yellow    % 'warn'
 fail = colors.light.red % 'fail'
 bad  = colors.light.red % 'bad'
+error  = colors.light.red % 'error'
+
+colors.ok = ok
+colors.warn = warn
+colors.fail = fail
+colors.bad = bad
+
+thumbs_up = '👍'
+thumbs_down = '👎'
+
 
 def tests():
     for c in 'black, red, green, yellow, blue, magenta, cyan, white'.split(', '):
@@ -285,6 +295,8 @@ def tests():
          % colors.blue % 'regular'),
         #debug = True,
     ))
+
+    print(thumbs_up, thumbs_down)
 
 
 if __name__ == '__main__':

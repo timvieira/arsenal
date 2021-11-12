@@ -109,10 +109,10 @@ class compare:
             have = have.flatten()
 
         if data is not None:
-            assert isinstance(want, (int, str)), \
-                'expected a column name have %s' % type(want)
-            assert isinstance(have, (int, str)), \
-                'expected a column name have %s' % type(have)
+#            assert isinstance(want, (int, str)), \
+#                'expected a column name have %s' % type(want)
+#            assert isinstance(have, (int, str)), \
+#                'expected a column name have %s' % type(have)
 
             if want_label is None: want_label = want
             if have_label is None: have_label = have
@@ -179,7 +179,7 @@ class compare:
         y = have
         s = np.asarray(~((x >= 0) ^ (y >= 0)), dtype=int)
         p = s.sum() * 100.0 / len(s)
-        tests.append(['same-sign', '%s%% (%s/%s)' % (p, s.sum(), len(s)), p == 100.0])
+        tests.append(['same-sign', f'{p:.2f}% ({s.sum()}/{len(s)})', p == 100.0])
 
         # relative error
         r = relative_difference(want, have)

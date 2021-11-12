@@ -79,6 +79,16 @@ subscript_map = {
     "-": "₋", "=": "₌", "(": "₍", ")": "₎",
 }
 
+arrows = {
+    'u':  '↑',
+    'ur': '↗',
+    'r':  '→',
+    'dr': '↘',
+    'd':  '↓',
+    'dl': '↙',
+    'l':  '←',
+    'ul': '↖',
+}
 
 def superscript(x):
     return "".join(superscript_map[i] for i in str(x))
@@ -248,13 +258,16 @@ fail = colors.light.red % 'fail'
 bad  = colors.light.red % 'bad'
 error  = colors.light.red % 'error'
 
+
+thumbs_up = '👍'
+thumbs_down = '👎'
+poop = poo = turd = '💩'
+
+colors.poop = poop
 colors.ok = ok
 colors.warn = warn
 colors.fail = fail
 colors.bad = bad
-
-thumbs_up = '👍'
-thumbs_down = '👎'
 
 
 def tests():

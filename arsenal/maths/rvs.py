@@ -353,10 +353,10 @@ def sample(w, size=None, u=None):
 
 def log_sample(w):
     "Sample from unnormalized log-distribution."
-    a = w - w.max()
+    a = np.array(w, dtype=float)
+    a -= a.max()
     exp(a, out=a)
     return sample(a)
-
 
 
 def test_mixture():

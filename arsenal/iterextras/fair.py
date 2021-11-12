@@ -57,18 +57,15 @@ def fair_product(*iterables):
 def merge_roundrobin(*iterables):
     """
     Merge iterators with a round-robin scheduler.
+    Original implementation by George Sakkis.
 
     >>> list(merge_roundrobin('ABC', 'D', 'EF'))
     ['A', 'D', 'E', 'B', 'F', 'C']
-
-    Recipe credited to George Sakkis
 
     >>> from itertools import count
     >>> from arsenal.iterextras.util import take
     >>> list(take(10, merge_roundrobin('ABC', count(), 'E')))
     ['A', 0, 'E', 'B', 1, 'C', 2, 3, 4, 5]
-
-    Recipe credited to George Sakkis
 
     """
     pending = len(iterables)

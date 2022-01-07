@@ -39,9 +39,13 @@ def timelimit(seconds):
     finished
 
     """
+    if seconds is None:
+        yield
+        return
 
     def signal_handler(signum, frame):
         raise Timeout(f'Call took longer than {seconds} seconds.')
+
     signal.signal(signal.SIGALRM, signal_handler)
     signal.setitimer(signal.ITIMER_REAL, seconds)
     try:

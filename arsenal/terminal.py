@@ -262,12 +262,15 @@ error  = colors.light.red % 'error'
 thumbs_up = '👍'
 thumbs_down = '👎'
 poop = poo = turd = '💩'
+timeout = '⌛'
+
 
 colors.poop = poop
 colors.ok = ok
 colors.warn = warn
 colors.fail = fail
 colors.bad = bad
+colors.timeout = timeout
 
 
 def tests():

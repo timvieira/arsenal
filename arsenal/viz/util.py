@@ -6,7 +6,7 @@ if not environ.get('DISPLAY'):
     matplotlib.use('Agg')
     DISPLAY = False
 
-import pandas as pd
+import pandas as pd, numpy as np
 import matplotlib.pyplot as pl
 #from sys import stderr
 from collections import defaultdict

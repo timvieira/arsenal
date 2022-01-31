@@ -14,3 +14,4 @@ from arsenal.assertions import assert_throws
 from arsenal.robust import timelimit, Timeout
 from arsenal.maths import restore_random_state
 from arsenal.datastructures import *
+from arsenal.testing_framework import *

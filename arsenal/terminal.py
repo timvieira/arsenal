@@ -152,6 +152,11 @@ class colors:
 
     ansi2html = ansi2html
 
+    @staticmethod
+    def line(n):
+        return '─'*(n)
+
+
 #def padr(w):
 #    "get format to pad right elements"
 #    return '%%%ss' % w

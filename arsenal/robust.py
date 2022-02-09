@@ -48,10 +48,8 @@ def timelimit(seconds):
 
     signal.signal(signal.SIGALRM, signal_handler)
     signal.setitimer(signal.ITIMER_REAL, seconds)
-    try:
-        yield
-    finally:
-        signal.setitimer(signal.ITIMER_REAL, 0)   # disables alarm
+    yield
+    signal.setitimer(signal.ITIMER_REAL, 0)   # disables alarm
 
 
 #_______________________________________________________________________________

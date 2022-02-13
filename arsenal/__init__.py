@@ -15,3 +15,4 @@ from arsenal.robust import timelimit, Timeout
 from arsenal.maths import restore_random_state
 from arsenal.datastructures import *
 from arsenal.testing_framework import *
+from arsenal.datastructures.multimap import MultiMap

@@ -31,7 +31,8 @@ class MultiMap:
         m = tuple(i for i, y in enumerate(query) if not isinstance(y, slice))
         k = tuple(y for i, y in enumerate(query) if not isinstance(y, slice))
         if m not in self.index: self._index(m)
-        return MultiMap({x: self.vals[x] for x in self.index[m].get(k, set())})
+        return MultiMap({x: self.vals[x] for x in self.index[m].get(k, set())
+                         if len(x) == len(query)})
 
     def _index(self, m):
         self.index[m] = ix = {}

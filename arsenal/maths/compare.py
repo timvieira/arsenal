@@ -94,11 +94,11 @@ class compare:
             alphabet = list(alphabet)
 
         if isinstance(want, dict) and isinstance(have, dict):
-            alphabet = list(want.keys()) if alphabet is None else alphabet
-            assert set(have.keys()) == set(alphabet), \
-                'Keys differ.\n  have keys  = %s\n  want keys = %s' % (set(have.keys()), set(alphabet))
-            want = [want[k] for k in alphabet]
-            have = [have[k] for k in alphabet]
+            alphabet = list(want.keys() | have.keys()) if alphabet is None else alphabet
+            #assert set(have.keys()) == set(alphabet), \
+            #    'Keys differ.\n  have keys  = %s\n  want keys = %s' % (set(have.keys()), set(alphabet))
+            want = [want.get(k, 0) for k in alphabet]
+            have = [have.get(k, 0) for k in alphabet]
 
         if isinstance(want, np.ndarray) and isinstance(have, np.ndarray):
             assert alphabet is None

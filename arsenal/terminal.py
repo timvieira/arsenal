@@ -79,16 +79,17 @@ subscript_map = {
     "-": "₋", "=": "₌", "(": "₍", ")": "₎",
 }
 
-arrows = {
-    'u':  '↑',
-    'ur': '↗',
-    'r':  '→',
-    'dr': '↘',
-    'd':  '↓',
-    'dl': '↙',
-    'l':  '←',
-    'ul': '↖',
-}
+class arrow:
+    u = up = '↑'
+    ur = '↗',
+    r = right = '→'
+    dr = '↘',
+    dl = '↙'
+    d = down = '↓'
+    l = left =  '←'
+    ul = '↖'
+
+arrows = arrow.__dict__
 
 def superscript(x):
     return "".join(superscript_map[i] for i in str(x))

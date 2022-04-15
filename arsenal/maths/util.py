@@ -666,6 +666,14 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=0.001, color=1):
                 print(msg, colors.green % 'ok' if err < tol else colors.red % 'fail', sep=' ')
 
 
+def quadratic_formula(a,b,c):
+    assert a != 0, 'this is a linear function!'
+    return [
+        (-b + np.sqrt(b**2 - 4*a*c)) / (2*a),
+        (-b - np.sqrt(b**2 - 4*a*c)) / (2*a),
+    ]
+
+
 if __name__ == '__main__':
 
     def run_tests():

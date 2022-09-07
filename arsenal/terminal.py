@@ -140,6 +140,19 @@ class colors:
         black, red, green, yellow, blue, magenta, cyan, white = \
             [colorstring('%s', ansi(c, 0, bg=4)) for c in range(8)]
 
+        def rgb(r,g,b):
+            return f"\x1b[48;2;{r};{g};{b}m%s\x1b[0m"
+
+        orange = rgb(255, 165, 0)
+        rgb = staticmethod(rgb)
+
+    def rgb(r,g,b):
+        return f"\x1b[38;2;{r};{g};{b}m%s\x1b[0m"
+
+    orange = rgb(255, 165, 0)
+
+    rgb = staticmethod(rgb)
+
     normal = '\x1b[0m%s\x1b[0m'
     bold = '\x1b[1m%s\x1b[0m'
     italic = "\x1b[3m%s\x1b[0m"

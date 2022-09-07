@@ -14,6 +14,8 @@ def iterview(
         transient = False,
 ):
 
+    if not show: return x
+
     from rich.progress import track
     return track(x,
                  description=msg,

@@ -332,8 +332,19 @@ class Empirical:
         assert np.all((0 <= q) & (q <= 1))
         return np.quantile(self.x, q, interpolation='lower')
 
-    def plot(self):
+    def plot(self, confidence=0.95):
         pl.plot(self.x, self.cdf(self.x))
+
+        if confidence is not None:
+            # show confidence bands (derived from the DKW inequality)
+            # https://bjlkeng.github.io/posts/the-empirical-distribution-function/
+            # https://en.wikipedia.org/wiki/Dvoretzky%E2%80%93Kiefer%E2%80%93Wolfowitz_inequality
+            eps = np.sqrt(np.log(2 / (1-confidence)) / (2 * self.n))
+            pl.fill_between(self.x,
+                            np.maximum(0, self(self.x) - eps),   # lower
+                            np.minimum(1, self(self.x) + eps),   # upper
+                            alpha=0.1,
+                            label=f'{confidence:.2f} confidence band')
 
     ppf = quantile
 
@@ -369,7 +380,7 @@ def test_mixture():
 
     S = D.rvs(100_000)
 
-    assert abs(D.mean() - S.mean()) < 0.005
+    assert abs(D.mean() - S.mean()) < 0.005, abs(D.mean() - S.mean())
 
     a, b = -5, 5
 
@@ -392,6 +403,16 @@ def test_mixture():
 #                assert err < 1e-3, [err, x, y]
 
 
+def test_cdf():
+    n = 1_000
+    x = np.random.normal(0,1,size=n)
+    cdf(x).plot()
+    pl.legend(loc='best')
+    pl.show()
+
+
 if __name__ == '__main__':
-    test_truncated_distribution()
-    test_mixture()
+    #test_truncated_distribution()
+    #test_mixture()
+    from arsenal import testing_framework
+    testing_framework(globals())

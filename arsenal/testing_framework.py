@@ -74,7 +74,7 @@ def testing_framework(tests):
     return TestingFramework(tests).run()
 
 
-class TestFailure(Exception): pass
+class FailedTest(Exception): pass
 
 
 class OverviewManager:
@@ -123,7 +123,7 @@ class OverviewManager:
                     msg = ''.join(traceback.format_exception(*sys.exc_info()))
                     if isinstance(e, self.suppress_exceptions):
                         print(e.__class__.__name__, msg)
-                    elif isinstance(e, (AssertionError, TestFailure)):
+                    elif isinstance(e, (AssertionError, FailedTest)):
                         print(colors.render(colors.light.red % msg))
                     else:
                         print(colors.render(colors.red % msg))

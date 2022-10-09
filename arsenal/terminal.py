@@ -290,6 +290,16 @@ colors.warn = warn
 colors.fail = fail
 colors.bad = bad
 colors.timeout = timeout
+colors.thumbs_up = '👍'
+colors.thumbs_down = '👎'
+
+check = colors.green % '✔' #'✓'
+xmark = colors.dark.red % '✘' # ☒ - Unicode Character Table
+def mark(x): return check if x else xmark
+
+colors.mark = mark
+colors.check = check
+colors.xmark = xmark
 
 
 def tests():

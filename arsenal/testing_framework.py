@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 from contextlib import contextmanager
 from IPython.core import ultratb
 
-from arsenal import colors
 from arsenal.maths import restore_random_state
 
 
@@ -47,11 +46,11 @@ class TestingFramework:
             seeds = [args.seed]
 
         for name in self.find_tests():
-            print(colors.light.yellow % ('#' + '_'*79))
-            print(colors.light.yellow % f'# {name}')
+            print(colors.light.yellow % colors.thick_line(80))
+            print(colors.light.yellow % f'{name}')
             for seed in seeds:
                 with restore_random_state(seed):
-                    with self.overview(f'{name} (seed={seed})'):
+                    with self.overview(f'{name} (seed={seed})' if seed is not None else f'{name}'):
                         self.tests[name]()
             print()
         self.overview.report()
@@ -88,7 +87,7 @@ class OverviewManager:
         self.callback = None
 
         # Hardcoded log file
-        self.f = open('failed', 'w')   # track recent failure tests and run those first.
+        #self.f = open('failed', 'w')   # track recent failure tests and run those first.
 
         # When the user send sigquit, we will still try to print the test
         # summary (i.e., call `report` with whatever progress was made).
@@ -107,7 +106,7 @@ class OverviewManager:
     @contextmanager
     def __call__(self, name):
         print()
-        print(colors.yellow % '================================================')
+        print(colors.yellow % colors.line(80))
         print(colors.yellow % 'Running %s' % name)
 
         if self.overview:
@@ -129,7 +128,7 @@ class OverviewManager:
                         print(colors.render(colors.red % msg))
                 self.summary.append('%s %s: %s %s' % (colors.red % 'fail', name, type(e).__name__, colors.render(e)))
                 self.failed += 1
-                print(name, file=self.f); self.f.flush()
+                #print(name, file=self.f); self.f.flush()
 
             else:
                 self.summary.append('%s %s' % (colors.green % 'pass', name))
@@ -142,8 +141,8 @@ class OverviewManager:
     def report(self):
         if not self.overview: return
         print()
-        print(colors.yellow % 'Summary')
-        print(colors.yellow % '================================================')
+        print(colors.light.yellow % 'Summary')
+        print(colors.light.yellow % colors.thick_line(80))
         for x in sorted(self.summary, key=lambda x: 'fail' in x):
             print(x)
         print()

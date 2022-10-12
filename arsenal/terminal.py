@@ -170,6 +170,9 @@ class colors:
     def line(n):
         return '─'*(n)
 
+    @staticmethod
+    def thick_line(n):
+        return ('━'*80)
 
 #def padr(w):
 #    "get format to pad right elements"

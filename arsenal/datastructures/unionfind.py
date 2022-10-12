@@ -89,3 +89,7 @@ class UnionFind:
             root = self[x]  # does path compression as a side effect
             classes[root].add(x)
         return classes.values()
+
+    def class_of(self, x):
+        root = self[x]
+        return [y for y in self if self[y] == root]

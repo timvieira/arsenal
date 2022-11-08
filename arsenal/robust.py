@@ -51,6 +51,7 @@ def timelimit(seconds):
     yield
     signal.setitimer(signal.ITIMER_REAL, 0)   # disables alarm
 
+timelimit.Timeout = Timeout
 
 #_______________________________________________________________________________
 #

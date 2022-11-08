@@ -89,6 +89,20 @@ class arrow:
     l = left =  '←'
     ul = '↖'
 
+    class long:
+        right = r = '⟶'
+        leftright = lr = '⟷'
+        left = l = '⟵'
+
+    class Long:
+        leftright = lr = '⟺'
+        left = l = '⟸'
+        right = r = '⟹'
+
+    class squiggle:
+        right = r = '⟿'
+
+
 arrows = arrow.__dict__
 
 def superscript(x):
@@ -124,7 +138,11 @@ def colorstring(s, c):
     return c + s + _reset
 
 
+_arrow = arrow
 class colors:
+
+    arrow = _arrow
+
     black, red, green, yellow, blue, magenta, cyan, white = \
         [colorstring('%s', ansi(c, 0)) for c in range(8)]
 
@@ -173,6 +191,10 @@ class colors:
     @staticmethod
     def thick_line(n):
         return ('━'*80)
+
+    @staticmethod
+    def mark_(x): return '✔' if x else '✘'
+
 
 #def padr(w):
 #    "get format to pad right elements"

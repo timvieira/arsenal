@@ -29,19 +29,18 @@ def check_equal(want, have, verbose=0, **kwargs):
     return c
 
 
-def align(X, Y, distance=lambda x,y: abs(x - y)):
+def align(X, Y, distance=lambda x,y: abs(x - y), maximize=False):
     """
     Find a cheap alignment of X and Y.
     """
     from scipy.optimize import linear_sum_assignment
-    assert len(X) == len(Y)
-    n = len(X)
-    c = np.zeros((n, n))
+    n = len(X); m = len(Y)
+    c = np.zeros((n, m))
     for i, x in enumerate(X):
         for j, y in enumerate(Y):
             c[i,j] = distance(x, y)
 
-    rs,cs = linear_sum_assignment(c)
+    rs,cs = linear_sum_assignment(c, maximize=maximize)
 
     class result:
         cost = c[rs,cs].sum()
@@ -49,6 +48,7 @@ def align(X, Y, distance=lambda x,y: abs(x - y)):
         y = list(Y[c] for c in cs)
         x_ind = rs
         y_ind = cs
+        cost_matrix = c
 
     return result
 

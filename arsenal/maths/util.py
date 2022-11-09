@@ -211,17 +211,20 @@ def f1(A, B):
 def relative_difference(a, b):
     """Element-wise relative difference of two arrays
 
-    Definition:
-      { 0                          if if x=y=0
-      { abs(x-y) / max(|x|, |y|)   otherwise
+    $$
+    \begin{cases}
+    0                        & \mathrm{if } x = y = 0 \\
+    |x-y| / \max(|x|, |y|)   & \mathrmPotherwise}`
+    \end{cases}
+    $$
 
     Choices for denominator include:
 
-      max(|x|, |y|)  # problem with x=y=0
+      - $\max(|x|, |y|)$: problem with $x=y=0$
 
-      avg(x, y)      # problem with x = -y; gives geometric mean
+      - $\mathrm{avg}(x, y)$: problem with $x = -y$; gives geometric mean
 
-      avg(|x|, |y|)  # problem when x=y=0
+      - $\mathrm{avg}(|x|, |y|)$: problem when $x=y=0$
 
     Further reading:
       http://en.wikipedia.org/wiki/Relative_change_and_difference
@@ -311,12 +314,12 @@ def mean_confidence_interval(a, confidence=0.95):
 
 def bernstein(samples, delta, R, check=True):
     """Plug-n-chug empirical Bernstein bound, computes "error bars" which hold with
-    probability `1-delta` for the mean of independent samples from a given range
+    probability `1-δ` for the mean of independent samples from a given range
     `R=b-a` (known a priori).
 
-    Returns epsilon such that the following bound hold,
+    Returns ε such that the following bound hold,
 
-      p( mean(samples) - true_mean <= eps ) >= 1-delta
+      `p( mean(samples) - true_mean ≤ ε ) ≥ 1-δ`
 
     We assume that sample are independent (not necessarily identically
     distributed).
@@ -324,12 +327,12 @@ def bernstein(samples, delta, R, check=True):
     Bound is based on sample variance `V` and a priori knowledge that RVs in are
     in the range `[a,b]` (although we only really require a known range `b-a`)
 
-    The bound holds with probability `>=(1-delta)`.
+    The bound holds with probability `≥(1-δ)`.
 
     The sample mean has symmetric deviations so we get a two-sided bound by
-    passing in 2*delta, i.e.,
+    passing in 2*δ, i.e.,
 
-      p( |mean(samples) - true_mean| <= eps ) >= 1-2*delta
+      `p( |mean(samples) - true_mean| ≤ ε ) ≥ 1-2*δ`
 
     This is analogous to p-values, which make assumption of normally distributed
     random variables. This means that the bounds can be 'tighter', but the
@@ -438,7 +441,7 @@ def hardmax(x):
 def simpless(w, B):
     """
     Reparameterization transform similar to softmax, but for the constraints set
-      {p | p >= 0, sum(p) <= B}.
+      ${p | p ≥ 0, sum(p) ≤ B}.$
     """
 
     # Assuming B = 1,
@@ -453,6 +456,9 @@ def simpless(w, B):
 
 def softmax(x, axis=None):
     """
+    Compute softmax avoiding numerical overflow using [this
+    trick](https://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick/).
+
     >>> x = [1, -10, 100, .5]
     >>> softmax(x)
     array([1.01122149e-43, 1.68891188e-48, 1.00000000e+00, 6.13336839e-44])
@@ -463,19 +469,22 @@ def softmax(x, axis=None):
     >>> x = [[0, 0, 1000], [1000, 0, 0]]
 
     Normalize by row:
-    >>> softmax(x, axis=0)
-    array([[0. , 0.5, 1. ],
-           [1. , 0.5, 0. ]])
+
+      >>> softmax(x, axis=0)
+      array([[0. , 0.5, 1. ],
+             [1. , 0.5, 0. ]])
 
     Normalize by column:
-    >>> softmax(x, axis=1)
-    array([[0., 0., 1.],
-           [1., 0., 0.]])
+
+      >>> softmax(x, axis=1)
+      array([[0., 0., 1.],
+             [1., 0., 0.]])
 
     Normalize by cell:
-    >>> softmax(x, axis=None)
-    array([[0. , 0. , 0.5],
-           [0.5, 0. , 0. ]])
+
+      >>> softmax(x, axis=None)
+      array([[0. , 0. , 0.5],
+             [0.5, 0. , 0. ]])
 
     """
     a = np.array(x, dtype=np.double)
@@ -494,9 +503,9 @@ def d_softmax(out, x, adj):
     """
     out = softmax(x), adj are the adjoints we are chaining together.
 
-        A(x) = logsumexp(x)
-    ∇  A(x) = softmax(x)
-    ∇² A(x) = d_softmax(x)   % this method.
+      `    A(x) = logsumexp(x)`
+      `∇  A(x) = softmax(x)`
+      `∇² A(x) = d_softmax(x)`   % this method.
 
     """
     g = adj - adj @ out
@@ -658,7 +667,7 @@ def assert_equal(a, b, name='', verbose=False, throw=True, tol=0.001, color=1):
     if verbose or np.any(err > tol):
         msg = f'{name}{a} {b} err={err}'
         if throw and err > tol:
-            raise AssertionError(msg + ' >= tolerance (%s)' % tol)
+            raise AssertionError(msg + ' ≥ tolerance (%s)' % tol)
         else:
             if not color:
                 print(msg, 'ok' if err < tol else 'fail', sep=' ')

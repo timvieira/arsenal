@@ -142,18 +142,19 @@ def kleene(S, n=None):
 
 
 def catalan(n):
-    """
-    1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786, 208012, 742900, ...
+    """Catalan numbers:
+    `1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786, 208012, 742900, ...`
 
-    Number of ways to insert n pairs of parentheses in a word of n+1
-    letters.
-      for n=1 there is 1 way: (ab)
-      for n=2 there are 2 ways: ((ab)c) or (a(bc));
-      for n=3 there are 5 ways: ((ab)(cd)), (((ab)c)d), ((a(bc))d), (a((bc)d)), (a(b(cd))).
+    Number of ways to insert balanced parentheses in a sequence of `n+1` symbols.
+
+      - for `n=1` there is 1 way: `(ab)`
+      - for `n=2` there are 2 ways: `((ab)c) or (a(bc))`;
+      - for `n=3` there are 5 ways: `((ab)(cd)), (((ab)c)d), ((a(bc))d), (a((bc)d)), (a(b(cd)))`.
 
     References:
     - https://en.wikipedia.org/wiki/Catalan_number
     - https://oeis.org/A000108
+
     """
     return int(binom(2*n, n)) // (n+1)
 

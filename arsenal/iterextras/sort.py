@@ -6,10 +6,11 @@ def sorted_union(*iterators):
     """
     Merge multiple sorted inputs into a single sorted output.
 
-    Equivalent to:  sorted(itertools.chain(*iterables))
+    Equivalent to `sorted(itertools.chain(*iterables))`, but more efficient and lazy.
 
     >>> list(merge_sorted([1,3,5,7], [0,2,4,8], [5,10,15,20], [], [25]))
     [0, 1, 2, 3, 4, 5, 5, 7, 8, 10, 15, 20, 25]
+
     """
 
     h = [head_iter(s) for s in iterators]

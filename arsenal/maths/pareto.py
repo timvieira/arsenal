@@ -186,8 +186,10 @@ class Pareto(object):
     def lookup_x(self, x):
         """
         Find Pareto point constrained by x.
-            argmax    p.y
-         p: p.x <= x
+
+          argmax       p.y
+          p: p.x <= x
+
         """
         s = self.df
         s = s[s[self.xcol] <= x]    # filter
@@ -199,8 +201,10 @@ class Pareto(object):
     def lookup_y(self, y):
         """
         Find Pareto point constrained by y.
-            argmax    p.x
-         p: p.x >= y
+
+          argmax    p.x
+          p: p.x >= y
+
         """
         s = self.df
         s = s[s[self.ycol] >= y]    # filter

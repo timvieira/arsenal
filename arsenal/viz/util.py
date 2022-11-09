@@ -13,7 +13,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from matplotlib.backends.backend_pdf import PdfPages
 from mpl_toolkits.mplot3d import Axes3D
-from arsenal.terminal import colors
+from arsenal import colors
 #from arsenal.viz.covariance_ellipse import covariance_ellipse
 from arsenal.misc import ddict
 

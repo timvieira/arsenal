@@ -3,7 +3,7 @@ import subprocess, tempfile, http.server
 from functools import wraps
 from io import StringIO
 from contextlib import contextmanager
-from arsenal.terminal import colors
+from arsenal import colors
 
 # TODO: stdio/stderr redirection is available in contextlib; so is exception
 # suppression and even the context decorator.

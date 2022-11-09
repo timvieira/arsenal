@@ -1,5 +1,5 @@
 .. arsenal documentation master file, created by
-   sphinx-quickstart on Sun May  9 15:41:02 2021.
+   sphinx-quickstart on Wed Nov  9 11:38:26 2022.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 

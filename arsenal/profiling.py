@@ -4,7 +4,7 @@ import os
 import sys
 import pstats
 import cProfile
-from arsenal.terminal import colors
+from arsenal import colors
 from contextlib import contextmanager
 
 @contextmanager

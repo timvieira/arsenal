@@ -5,7 +5,7 @@ from sys import stderr
 from time import time
 from contextlib import contextmanager
 from arsenal.humanreadable import htime
-from arsenal.terminal import colors
+from arsenal import colors
 from arsenal.misc import ddict
 from scipy.stats import mannwhitneyu
 

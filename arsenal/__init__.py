@@ -1,6 +1,7 @@
 #from importlib import import_module
 from arsenal.iterview import iterview
 from arsenal.terminal import *
+from arsenal import terminal as colors
 from arsenal.alphabet import Alphabet
 from arsenal.integerizer import Integerizer
 from arsenal.timer import Timer, timers, timeit

@@ -16,13 +16,14 @@ def mc_paired_perm_test(xs, ys, samples=10000, statistic=np.mean):
     """
     Paired permutation test
 
-    >>> xs = np.array([1,2,3,4,5,6])
-    >>> ys = np.array([2,3,4,5,6,7])
-    >>> u = mc_perm_test(xs, ys, 1000)
-    >>> p = mc_paired_perm_test(xs, ys, 1000)
+      >>> xs = np.array([1,2,3,4,5,6])
+      >>> ys = np.array([2,3,4,5,6,7])
+      >>> u = mc_perm_test(xs, ys, 1000)
+      >>> p = mc_paired_perm_test(xs, ys, 1000)
 
     Under the unpaired test, we do not have a significant difference because the
     systems only differ in two positions.
+
       >>> assert u > .40
 
     Under the Paired test, we have more power!
@@ -57,7 +58,7 @@ def bf_paired_perm_test(xs, ys, statistic=np.mean):
 
 def verbose_paired_perm_test(xs, ys, nmc=10_000, threshold=0.05, fmt='%.4f'):
     "Let xs be the system you want be greater."
-    from arsenal.terminal import colors
+    from arsenal import colors
 
     p = mc_paired_perm_test(xs, ys, nmc)
 

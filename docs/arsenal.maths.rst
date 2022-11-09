@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   arsenal.maths.combinatorics
    arsenal.maths.stats
 
 Submodules
@@ -24,14 +25,6 @@ arsenal.maths.cholesky module
 -----------------------------
 
 .. automodule:: arsenal.maths.cholesky
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-arsenal.maths.combinatorics module
-----------------------------------
-
-.. automodule:: arsenal.maths.combinatorics
    :members:
    :undoc-members:
    :show-inheritance:

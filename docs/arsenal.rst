@@ -131,6 +131,14 @@ arsenal.terminal module
    :undoc-members:
    :show-inheritance:
 
+arsenal.testing\_framework module
+---------------------------------
+
+.. automodule:: arsenal.testing_framework
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 arsenal.timer module
 --------------------
 

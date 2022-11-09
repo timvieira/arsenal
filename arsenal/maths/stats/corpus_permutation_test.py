@@ -3,7 +3,7 @@ Paired permutation test for corpus statistics (non-additive).
 """
 import numpy as np
 from arsenal.iterview import iterview
-from arsenal.terminal import colors
+from arsenal import colors
 
 
 def paired_permutation_test(xs, ys, statistic, threshold=0.05, R=10_000, verbose=1):

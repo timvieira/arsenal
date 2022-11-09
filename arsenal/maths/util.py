@@ -4,7 +4,7 @@ from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
     asarray, ones, mean, searchsorted, sqrt, isfinite
 import scipy.linalg as la
 from scipy import stats
-from arsenal.terminal import colors
+from arsenal import colors
 from scipy.stats import pearsonr, spearmanr
 from contextlib import contextmanager
 from scipy.special import expit as sigmoid
@@ -12,7 +12,7 @@ from scipy.special import expit as sigmoid
 
 def wide_dataframe():
     import pandas as pd
-    from arsenal.terminal import console_width
+    from arsenal import console_width
     pd.set_option('display.width', console_width())
 
 

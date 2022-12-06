@@ -42,7 +42,7 @@ def nth(n):
 
 
 def timetuple(s):
-    """htime(x) -> (days, hours, minutes, seconds)"""
+    "htime(x) -> (days, hours, minutes, seconds)"
     s = int(s)
     d, s = divmod(s, 86400)
     h, s = divmod(s, 3600)

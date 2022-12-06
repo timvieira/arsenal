@@ -124,6 +124,14 @@ def atmost(k, seq):
     return True
 
 
+def flatten(xs):
+    if isinstance(xs, (list, tuple)):
+        for x in xs:
+            yield from flatten(x)
+    else:
+        yield xs
+
+
 def partition(data, proportion):
     """
     Deterministically partition `data` according to proportion.

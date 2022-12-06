@@ -2,6 +2,7 @@ import signal
 import sys
 import traceback
 from arsenal import colors
+from arsenal.timer import htime, time
 
 from argparse import ArgumentParser
 from contextlib import contextmanager
@@ -109,6 +110,7 @@ class OverviewManager:
         print(colors.yellow % colors.line(80))
         print(colors.yellow % 'Running %s' % name)
 
+        b4 = time()
         if self.overview:
             try:
                 yield
@@ -136,7 +138,9 @@ class OverviewManager:
         else:
             yield
 
-        print(colors.yellow % 'done')
+        took = time() - b4
+        t = colors.magenta % f'({took:.3g}s)'
+        print(colors.yellow % f'done {t}')
 
     def report(self):
         if not self.overview: return

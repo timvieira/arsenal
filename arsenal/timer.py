@@ -19,6 +19,11 @@ class Benchmark(object):
         self.title = title
         self.timers = ddict(Timer)
     def __getitem__(self, name):
+        if isinstance(name, list):
+            b = Benchmark(self.title)
+            for x in name:
+                b.timers[x] = self.timers[x]
+            return b
         return self.timers[name]
     def compare(self, statistic=np.median):
         if len(self.timers) == 0:

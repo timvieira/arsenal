@@ -7,7 +7,7 @@ from time import time
 from arsenal.viz.util import update_ax
 from arsenal.misc import ddict
 
-class LearningCurve(object):
+class LearningCurve:
     """
     Plot learning curve as data arrives.
     """

@@ -97,8 +97,7 @@ class OverviewManager:
         # but the current scheme, but the current usage does not make that easy.
         signal.signal(signal.SIGQUIT, self.SIGQUIT)
 
-        from dyna.exceptions import SolverLimitation, InstFault
-        self.suppress_exceptions = (SolverLimitation, InstFault, KeyboardInterrupt)
+        self.suppress_exceptions = (KeyboardInterrupt,)
 
     def SIGQUIT(self, sig, frame):   # pylint: disable=unused-argument
         self.report()

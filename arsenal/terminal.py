@@ -304,15 +304,14 @@ thumbs_down = '👎'
 poop = poo = turd = '💩'
 timeout = '⌛'
 
-
-
-
-thumbs_up = '👍'
-thumbs_down = '👎'
-
 check = green % '✔' #'✓'
 xmark = dark.red % '✘' # ☒ - Unicode Character Table
 def mark(x): return check if x else xmark
+
+def percent(num, den):
+    if den == 0:
+        return f'{100:.1f}% (0/0)'
+    return f'{num*100/den:.1f}% ({num}/{den})'
 
 
 def tests():

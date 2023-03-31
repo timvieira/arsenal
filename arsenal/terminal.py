@@ -185,7 +185,11 @@ def thick_line(n): return ('━'*80)
 
 def mark_(x): return '✔' if x else '✘'
 
-
+def faster(x, y, color=True):
+    "is x faster than y"
+    msg = f'{x / y:.2f}x faster' if x > y else f'{y / x:.2f}x slower'
+    if color: msg = (green if x > y else yellow) % msg
+    return msg
 
 from textwrap import dedent
 

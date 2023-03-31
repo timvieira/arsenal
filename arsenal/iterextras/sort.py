@@ -36,7 +36,10 @@ class Item:
         return self.cost < other.cost
 
 
-# XXX: better to just binarize the product (assuming its associative)
+# Note: If the product operation is associative, it is best to pick an
+# association order rather than use the k-fold product.  It will speed up the
+# computation by a factor of k: the k-fold products in the inner loop below
+# don't cost O(k) because the effective k is equal to 2.
 def sorted_product(p, *iters):
     """
     Sorted product of `iters`, where the output is sorted by a monotonic product
@@ -81,10 +84,6 @@ def sorted_product(p, *iters):
                 # requested more iterates than it has.
                 continue
 
-            # TODO: Efficiency improvement: memoize the prefix/suffix products
-            # to save on the cost of p here.  We know that it differs from the
-            # priority of the emitted `p(vals(x))` in only position `i`.
-            # Alternatively, binarize the product.
             heappush(q, Item(p(vals(y)), i, y))
 
 

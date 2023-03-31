@@ -94,7 +94,7 @@ class memoize_persistent(object):
 
     def save(self):
         if self.cache and self.dirty:
-            with open(self.filename, 'w') as f:
+            with open(self.filename, 'wb') as f:
                 pickle.dump((self.cache, self.key), f)
             print('[ATEXIT] saved persistent cache for {self.func.__name__} to file "{self.filename}"'.format(self=self))
         else:
@@ -104,7 +104,7 @@ class memoize_persistent(object):
         self.loaded = True
         loaded_key = None
         try:
-            with open(self.filename, 'r') as f:
+            with open(self.filename, 'rb') as f:
                 (cache, loaded_key) = pickle.load(f)
         except IOError:
             pass

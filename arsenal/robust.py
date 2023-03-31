@@ -11,7 +11,7 @@ class Timeout(Exception): pass
 
 
 @contextmanager
-def timelimit(seconds):
+def timelimit(seconds, sig=signal.SIGALRM):
     """
     A decorator to limit a function to `timeout` seconds, raising `Timeout`.
     if it takes longer.
@@ -46,7 +46,7 @@ def timelimit(seconds):
     def signal_handler(signum, frame):
         raise Timeout(f'Call took longer than {seconds} seconds.')
 
-    signal.signal(signal.SIGALRM, signal_handler)
+    signal.signal(sig, signal_handler)
     signal.setitimer(signal.ITIMER_REAL, seconds)
     yield
     signal.setitimer(signal.ITIMER_REAL, 0)   # disables alarm

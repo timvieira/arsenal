@@ -59,7 +59,11 @@ def sorted_product(p, *iters):
     # elements in the heap are wrapped `Item` to make it a min heap.
     q = []
     y = (0,)*n
-    heappush(q, Item(p(vals(y)), 0, y))
+
+    try:
+        heappush(q, Item(p(vals(y)), 0, y))
+    except IndexError:
+        return   # empty
 
     while q:
         item = heappop(q)

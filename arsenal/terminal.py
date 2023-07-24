@@ -165,6 +165,8 @@ def rgb(r,g,b):
 
 orange = rgb(255, 165, 0)
 
+purple = '\x1b[38;5;91m' + '%s' + _reset
+
 
 normal = '\x1b[0m%s\x1b[0m'
 bold = '\x1b[1m%s\x1b[0m'
@@ -188,6 +190,7 @@ def mark_(x): return '✔' if x else '✘'
 def faster(x, y, color=True):
     "is x faster than y"
     msg = f'{x / y:.2f}x faster' if x > y else f'{y / x:.2f}x slower'
+    msg = f'{msg} ({x:g} s vs {y:g} s)'
     if color: msg = (green if x > y else yellow) % msg
     return msg
 
@@ -307,6 +310,8 @@ thumbs_up = '👍'
 thumbs_down = '👎'
 poop = poo = turd = '💩'
 timeout = '⌛'
+
+trophy = '🏆'
 
 lightbulb = '💡'
 fire = '🔥'

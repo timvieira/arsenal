@@ -3,7 +3,8 @@
 
 
 from itertools import product
-from scipy.special import binom, factorial
+from scipy.special import comb as binom, factorial
+from arsenal import colors
 
 
 def n_selections_with_replacement(n, k):
@@ -167,6 +168,45 @@ def enumerate_digraphs(n):
         yield nx.from_numpy_matrix(e, create_using = nx.DiGraph)
 
 
+def sumsto(n, k):
+    assert n >= 0 and k >= 0
+    if k == 0:
+        return
+    elif k == 1:
+        yield (n,)
+    else:
+        for j in range(n+1):
+            for js in sumsto(n-j, k-1):
+                yield (j, *js)
+
+
+# Less efficient version
+#def sumsto(n, k):
+#    assert n >= 0 and k >= 0
+#    for js in product(range(n+1), repeat=k):
+#        if sum(js) == n:
+#            yield js
+
+
+def test_sumsto():
+    for n in range(8):
+        for k in range(n+1):
+            #print(f'\nn={n}, k={k}')
+
+            N = 0
+            for js in sumsto(n, k):
+                N += 1
+                #print(' ➥', js)
+                assert sum(js) == n
+                assert len(js) == k
+                assert all(j >= 0 for j in js)
+
+            have = N
+            want = binom(n+k-1, n)
+            #print('total', colors.mark(have==want), have, want)
+            assert have == want
+
+
 def test_sample():
     print('[sample]')
 
@@ -302,7 +342,5 @@ def test_segementations():
 
 
 if __name__ == '__main__':
-    test_kleene()
-    test_sample()
-    test_trees()
-    test_segementations()
+    from arsenal import testing_framework
+    testing_framework(globals())

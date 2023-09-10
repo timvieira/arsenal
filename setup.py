@@ -31,6 +31,8 @@ setuptools.setup(
         'cython',
         'orderedset',
         'matplotlib',
+        'gprof2dot',
+        'blist',
         #'colored',
         'path.py',
         #'blist',

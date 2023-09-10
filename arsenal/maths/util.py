@@ -565,6 +565,11 @@ def entropy(p):
     p = p[p.nonzero()]
     return -p @ log(p) / log_of_2
 
+
+def d_entropy(p):
+    return -(1/np.log(2) + np.log2(p))
+
+
 def kl_divergence(p, q):
     """ Compute KL divergence of two vectors, K(p || q).
     NOTE: If any value in q is 0.0 then the KL-divergence is infinite.
@@ -686,6 +691,11 @@ def quadratic_formula(a,b,c):
 if __name__ == '__main__':
 
     def run_tests():
+
+        from arsenal.maths import random_dist, fdcheck
+
+        p = random_dist(30)
+        fdcheck(lambda: entropy(p), p, d_entropy(p), throw=False)
 
         # To test the random state we'll run the function below from the same
         # random state using the restore_randome_state util.

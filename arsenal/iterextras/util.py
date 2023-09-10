@@ -272,7 +272,9 @@ def padnone(seq):
 
 
 def ncycles(seq, n):
-    """ Returns the sequence elements n times """
+    """
+    Returns the sequence elements n times.
+    """
     return chain(*repeat(seq, n))
 
 

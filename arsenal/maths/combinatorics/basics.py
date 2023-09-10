@@ -5,28 +5,10 @@
 from itertools import product
 from scipy.special import comb as binom, factorial
 from arsenal import colors
+import itertools
 
 
-def n_selections_with_replacement(n, k):
-    """
-    Number of positive integers solutions to x1 + x2 + … + xn = n+k
-    (Linear diophantine equation)
 
-    https://www.johndcook.com/blog/select_with_replacement/
-    """
-    return binom(n+k-1, k)
-
-
-# TODO: see itertools.{combinations combinations_with_replacement, permutations,
-# product} those implementations are fair because they are based on "pools"
-
-# TODO: implement "fair" versions of all methods (when they exist)
-
-# TODO: implement set-partition enumeration
-
-# TODO: figure out the fair enumerate extension and get all the special cases
-# for free.  We know that a fair enumerator exists because the `string` is a
-# superset of all other sets.
 def sample(S, k, ordered, replace):
     S = tuple(S)
 
@@ -42,6 +24,82 @@ def sample(S, k, ordered, replace):
 
             for x in sample(X, k-1, ordered, replace):
                 yield x + (s,)
+
+
+def select(S, k):
+    "Ordered subsets of size k"
+    return sample(S, k, ordered=True, replace=False)
+
+
+def choose(S, k):
+    """
+    Enumerate unordered subsets of size k from the set S.
+
+    S does not have to be a set, it can be ordered.  The elements returned will each be a k-tuple.
+
+    If `S` is an ordered collection, then the k-tuples returned by this iterator
+    will use the sample order.
+
+    """
+    return sample(S, k, ordered=False, replace=False)
+
+
+def permute(S):
+    "Permutations"
+    return select(S, len(S))
+
+
+def n_selections_with_replacement(n, k):
+    """
+    Number of positive integers solutions to x₁ + x₂ + ⋯ + x_n = n+k
+    (Linear diophantine equation)
+
+    Also known as "((n choose k))" with doubled parentheses instead if single.
+
+    https://www.johndcook.com/blog/select_with_replacement/
+
+    """
+    return binom(n+k-1, k)
+
+
+def sumsto(n, k):
+    assert n >= 0 and k >= 0
+    if k == 0:
+        return
+    elif k == 1:
+        yield (n,)
+    else:
+        for j in range(n+1):
+            for js in sumsto(n-j, k-1):
+                yield (j, *js)
+
+
+# TODO: see itertools.{combinations combinations_with_replacement, permutations,
+# product} those implementations are fair because they are based on "pools"
+
+# TODO: implement "fair" versions of all methods (when they exist)
+
+# TODO: implement set-partition enumeration
+
+# TODO: figure out the fair enumerate extension and get all the special cases
+# for free.  We know that a fair enumerator exists because the `string` is a
+# superset of all other sets.
+
+def sample(S, k, ordered, replace):
+    S = tuple(S)
+
+    if k == 0:
+        yield ()
+    else:
+        for i, s in enumerate(S):
+
+            if     ordered and     replace: X = S[:i] + S[i:]    # string
+            if     ordered and not replace: X = S[:i] + S[i+1:]  # select
+            if not ordered and     replace: X =         S[i:]    # ????
+            if not ordered and not replace: X =         S[i+1:]  # choose
+
+            for x in sample(X, k-1, ordered, replace):
+                yield (s,) + x
 
 
 def select(S, k):
@@ -101,8 +159,8 @@ def powerset(S):
         yield from choose(S, k)
 
 
-# TODO: If use a dovetailed Cartesian products, then we can support fair
-# enumerate over infinite sequences S
+# TODO: If we use a dovetailed Cartesian products, then we can support fair
+# enumerate over infinite sequences S.
 def string(S, k):
     "Strings of length k"
     return sample(S, k, ordered=True, replace=True)
@@ -166,18 +224,6 @@ def enumerate_digraphs(n):
     for e in product(*([[0,1]]*(n*n))):
         e = np.array(e).reshape((n, n))
         yield nx.from_numpy_matrix(e, create_using = nx.DiGraph)
-
-
-def sumsto(n, k):
-    assert n >= 0 and k >= 0
-    if k == 0:
-        return
-    elif k == 1:
-        yield (n,)
-    else:
-        for j in range(n+1):
-            for js in sumsto(n-j, k-1):
-                yield (j, *js)
 
 
 # Less efficient version
@@ -245,8 +291,8 @@ def test_kleene():
     assert length(permute(range(5))) == factorial(5)
 
 
-def length(x):
-    return len(list(x))
+def length(xs):
+    return sum(1 for _ in xs)
 
 
 def flatten(S):
@@ -255,34 +301,6 @@ def flatten(S):
     else:
         for x in S:
             yield from flatten(x)
-
-
-#def xCross(sets, *more):
-#    """
-#    Take the cartesian product of two or more iterables.
-#    The input can be either one argument, a collection of iterables xCross([it1,it2,...]),
-#    or several arguments, each one an iterable xCross(it1, itb, ...).
-#
-#    >>> [(x,y,z) for x,y,z in xCross([1,2], 'AB', [5])]
-#    [(1, 'A', 5), (1, 'B', 5), (2, 'A', 5), (2, 'B', 5)]
-#
-#    """
-#    if more:
-#        sets = chain((sets,), more)
-#    sets = list(sets)
-#    wheels = map(iter, sets) # wheels like in an odometer
-#    digits = [it.next() for it in wheels]
-#    while True:
-#        yield digits[:]
-#        for i in range(len(digits)-1, -1, -1):
-#            try:
-#                digits[i] = wheels[i].next()
-#                break
-#            except StopIteration:
-#                wheels[i] = iter(sets[i])
-#                digits[i] = wheels[i].next()
-#        else:
-#            break
 
 
 def test_trees():
@@ -339,6 +357,34 @@ def test_segementations():
     for n in range(2, 10):
         print(f'[segmentations] n={n}')
         test(tuple(map(str,range(n))))
+
+
+#class Collection:
+#    def __init__(self, xs):
+#        self.xs = list(xs)
+#    def __hash__(self):
+#        return hash(self.xs)
+#    def __repr__(self):
+#        return repr(self.xs)
+#    def __eq__(self, other):
+#        return self.xs == other.xs
+#    def choose(self, k):
+#        return Collection(choose(self.xs, k))
+#    def permute(self):
+#        return Collection(permute(self.xs))
+#    def select(self, k):
+#        return Collection(select(self.xs, k))
+#    def strings(self, k):
+#        return Collection(sample(self.xs, k, ordered=True, replace=True))
+#    def misc(self, k):
+#        return Collection(sample(self.xs, k, ordered=False, replace=True))
+#
+
+#print(Collection('abcd').choose(3))
+#print(Collection('ab').strings(3))
+#print(Collection('ab').misc(3))
+#print(Collection('abcd').select(3))
+#exit()
 
 
 if __name__ == '__main__':

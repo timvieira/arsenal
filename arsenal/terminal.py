@@ -81,9 +81,9 @@ subscript_map = {
 
 class arrow:
     u = up = '↑'
-    ur = '↗',
+    ur = '↗'
     r = right = '→'
-    dr = '↘',
+    dr = '↘'
     dl = '↙'
     d = down = '↓'
     l = left =  '←'

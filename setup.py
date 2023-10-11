@@ -32,7 +32,7 @@ setuptools.setup(
         'orderedset',
         'matplotlib',
         'gprof2dot',
-        'blist',
+        #'blist',
         #'colored',
         'path.py',
         #'blist',

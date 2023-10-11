@@ -124,10 +124,10 @@ def atmost(k, seq):
     return True
 
 
-def flatten(xs):
-    if isinstance(xs, (list, tuple)):
+def flatten(xs, types=(list, tuple)):
+    if isinstance(xs, types):
         for x in xs:
-            yield from flatten(x)
+            yield from flatten(x, types)
     else:
         yield xs
 

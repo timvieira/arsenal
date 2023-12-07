@@ -93,13 +93,13 @@ def groupby2(s, key=lambda x: x):
     """
     Eager version of groupby which does what you'd expect groupby to do.
 
-    >>> groupby2(range(10), lambda x: x % 2)
+    >>> dict(groupby2(range(10), lambda x: x % 2))
     {0: [0, 2, 4, 6, 8], 1: [1, 3, 5, 7, 9]}
     """
     groups = defaultdict(list)
     for x in s:
         groups[key(x)].append(x)
-    return dict(groups)
+    return groups
 
 
 def atmost(k, seq):

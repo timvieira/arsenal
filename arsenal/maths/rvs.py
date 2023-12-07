@@ -370,6 +370,13 @@ def log_sample(w):
     return sample(a)
 
 
+def sample_dict(x, *args, **kwargs):
+    "Sample keys from `x` in proportion to their values."
+    keys = np.array(list(x.keys()))
+    vals = np.array(list(x.values()))
+    return keys[sample(vals, *args, **kwargs)]
+
+
 def test_mixture():
 
     d = [st.norm(1, 2), st.norm(2, .5), st.norm(3, .1)]
@@ -409,6 +416,29 @@ def test_cdf():
     cdf(x).plot()
     pl.legend(loc='best')
     pl.show()
+
+
+def test_sample_dict():
+
+    ws = {'a': 9, 'b': 1, 'c': 0}
+    W = sum(ws.values())
+
+    xs = sample_dict(ws, size=10)
+    assert len(xs) == 10
+
+    N = 1_000_000
+    xs = sample_dict(ws, size=N)
+    from collections import Counter
+    c = Counter(xs)
+    for x in ws:
+        print(ws[x]/W, c[x]/N)
+        assert abs(ws[x]/W - c[x]/N) <= 0.001
+
+    x = sample_dict(ws, u=.5)
+    assert x == 'a'
+
+    x = sample_dict(ws, u=.91)
+    assert x == 'b'
 
 
 if __name__ == '__main__':

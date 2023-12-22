@@ -1,7 +1,7 @@
 import random
 import numpy as np
 from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
-    asarray, ones, mean, searchsorted, sqrt, isfinite
+    asarray, ones, mean, searchsorted, sqrt, isfinite, log1p, expm1
 import scipy.linalg as la
 from scipy import stats
 from arsenal import colors
@@ -358,6 +358,24 @@ def lidstone(p, delta):
     return normalize(p + delta)
 
 
+@np.vectorize
+def log1pexp(x):
+    """
+    Numerically stable implementation of log(1+exp(x)) aka softmax(0,x).
+
+    -log1pexp(-x) is log(sigmoid(x))
+    """
+    if x <= -37:
+        return exp(x)
+    elif -37 <= x <= 18:
+        return log1p(exp(x))
+    elif 18 < x <= 33.3:
+        return x + exp(-x)
+    else:
+        return x
+
+
+@np.vectorize
 def logsubexp(x, y):
     """
     Numerically stable computation of subtraction in log-space
@@ -371,6 +389,7 @@ def logsubexp(x, y):
         return x + log1mexp(y-x)
 
 
+@np.vectorize
 def log1mexp(x):
     """
     Numerically stable implementation of log(1-exp(x))

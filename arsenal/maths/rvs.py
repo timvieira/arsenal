@@ -98,6 +98,43 @@ class TruncatedDistribution:
 #        return quad(self.sf, self.a, self.b)[0] + self.a
 
 
+
+# References
+#
+#  - Hypoexponential
+#    https://en.wikipedia.org/wiki/Hypoexponential_distribution
+#
+#  - Márton Balázs, https://people.maths.bris.ac.uk/~mb13434/sumexp.pdf
+#
+#  - Bibinger (2013) "Notes on the sum and maximum of independent exponentially
+#    distributed random variables with different scale parameters"
+#
+#  - https://actuarialmodelingtopics.wordpress.com/2016/08/01/the-hyperexponential-and-hypoexponential-distributions/
+#
+class SumOfExponentials:
+    def __init__(self, w):
+        self.w = w
+        [self.n] = w.shape
+        self.a = np.prod(w)
+        self.B = np.array([np.prod([w[j] - w[i] for j in range(self.n) if j != i]) for i in range(self.n)])
+    def cdf(self, x):
+        return 1-self.a*sum(np.exp(-self.w[j]*x) / (self.w[j] * self.B[j]) for j in range(self.n))
+    def pdf(self, x):
+        return self.a * sum(np.exp(-self.w[j]*x) / self.B[j] for j in range(self.n))
+    def rvs(self, size=None):
+        if size is not None: size = (size, self.n)
+        return -np.sum(np.log(np.random.uniform(0,1,size=size)) / self.w[None,:], axis=1)
+    def mgf(self, t):
+        return self.a / np.product(self.w - t)
+    def d_mgf(self, t, n):
+        # TODO: work out the derivative
+        return nd.Derivative(self.mgf, n=n)(t)
+    def mean(self):
+        return np.sum(1/self.w) # sum of the means
+    def var(self):
+        return np.sum(1/self.w**2) # sum of the variances because they are indep
+
+
 def show_distr(D, a, b, resolution=1000):
     xs = np.linspace(a, b, resolution)
     us = np.linspace(0, 1, resolution)

@@ -7,9 +7,10 @@ from Cython.Build import cythonize
 with open('README.md', "r") as fh:
     long_description = fh.read()
 
+
 setuptools.setup(
     name='arsenal',
-    version='3.0',
+    version='3.0.1',
     author='Tim Vieira',
     author_email='tim.f.vieira@gmail.com',
     description = 'Arsenal of python utilities.',

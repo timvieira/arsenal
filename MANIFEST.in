@@ -1,0 +1,2 @@
+include arsenal/datastructures/heap/heap.pyx
+include arsenal/datastructures/heap/sumheap.pyx

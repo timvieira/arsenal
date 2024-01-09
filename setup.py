@@ -10,7 +10,7 @@ with open('README.md', "r") as fh:
 
 setuptools.setup(
     name='arsenal',
-    version='3.0.1',
+    version='3.0.3',
     author='Tim Vieira',
     author_email='tim.f.vieira@gmail.com',
     description = 'Arsenal of python utilities.',

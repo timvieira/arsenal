@@ -16,6 +16,14 @@ def open_diff(a, b, cmd='meld'):
     os.system('%s /tmp/a /tmp/b' % cmd)
 
 
+#def colordiff(x, y):
+#    print(colors.nocolor(x), file=open('/tmp/x','w', encoding='utf-8'))
+#    print(colors.nocolor(y), file=open('/tmp/y','w', encoding='utf-8'))
+#    cmd = 'colordiff -t --color=always --side-by-side --ignore-space-change /tmp/x /tmp/y'
+#    result = subprocess.run(cmd.split(), stdout=subprocess.PIPE)
+#    return result.stdout.decode('utf-8')
+
+
 def deprecated(use_instead=None, msg=None):
     """
     This is a decorator which can be used to mark functions as deprecated.
@@ -34,6 +42,24 @@ def deprecated(use_instead=None, msg=None):
         return new_func
 
     return wrapped
+
+
+def trace(f):
+    def wrapper(*args):
+        trace.print(f'{f.__name__}({", ".join(map(repr, args))})')
+        trace.indent += 1
+        result = f(*args)
+        trace.indent -= 1
+        trace.print(f' -> {result}')
+        return result
+    return wrapper
+trace.indent = 0
+trace.spaces = '    '
+def _trace(*msg):
+    tab = trace.spaces*trace.indent
+    if trace.on: print(f'{tab}{" ".join(map(str, msg))}')
+trace.print = _trace
+trace.on = True
 
 
 class ddict(dict):

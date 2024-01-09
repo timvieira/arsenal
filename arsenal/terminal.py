@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import sys, os
+import re, os, sys
 from glob import glob
 from subprocess import Popen, PIPE
 
@@ -180,6 +180,35 @@ rightarrow = '→'
 reset = _reset
 
 ansi2html = ansi2html
+
+
+def nocolor(x):
+    "Remove ANSI control codes from the given string `x`."
+    return re.sub('\033\[[0-9;]*m', "", x)
+
+
+# https://www.w3.org/TR/xml-entity-names/025.html
+def branch(xs):
+    ys = []
+    for i, x in enumerate(xs):
+        first = i == 0
+        last = i == len(xs)-1
+        if last and first:
+            h = '└─'
+        elif last:
+            h = '└─'
+        elif first:
+            h = '┌─' #'├─'
+        else:
+            h = '├─'
+        if not x:
+            continue
+        ys.append(h + x[0])
+        indent = '│ ' if not last else '  '
+        for a in x[1:]:
+            ys.append(indent + a)
+    return ys
+
 
 def line(n): return '─'*(n)
 

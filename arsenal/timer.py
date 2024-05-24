@@ -35,7 +35,7 @@ class Benchmark(object):
         best = min(self.timers.values(), key=lambda t: statistic(t.times))
         for name in sorted(self.timers):
             if name != best.name:
-                best.compare(self.timers[name])
+                best.compare(self.timers[name], statistic=statistic)
     def values(self):
         return list(self.timers.values())
     def keys(self):
@@ -129,13 +129,13 @@ class Timer:
     def total(self):
         return sum(self.times)
 
-    def compare(self, other, attr='mean', verbose=True):
+    def compare(self, other, statistic=np.median, verbose=True):
         if len(self.times) == 0 or len(other.times) == 0:
             print('%s %s %s' % (self.name, '???', other.name))
             return
 
-        self_attr = getattr(self, attr)
-        other_attr = getattr(other, attr)
+        self_attr = statistic(self.times)
+        other_attr = statistic(other.times)
         if self_attr <= other_attr:
 
             # use_continuity=True, alternative=None
@@ -152,13 +152,13 @@ class Timer:
                     pval = colors.green % pval
                 else:
                     pval = colors.yellow % pval
-                extra = f'({pval}, {attr}: {other.name}: {other_attr:g}, {self.name}: {self_attr:g})'
+                extra = f'({pval}, {statistic.__name__}: {other.name}: {other_attr:g}, {self.name}: {self_attr:g})'
 
             print(f'{self.name} is %6.4fx faster than {other.name} %s' \
                 % (other_attr / self_attr, extra))
 
         else:
-            other.compare(self, attr=attr, verbose=verbose)
+            other.compare(self, statistic=statistic, verbose=verbose)
 
 #    def compare_many(self, *others, **kw):
 #        for x in sorted(others, key=lambda x: x.name):

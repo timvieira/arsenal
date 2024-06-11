@@ -19,7 +19,7 @@ def p_perm(w, z):
     assert 0 < k <= n
     wz = w[np.array(z, dtype=int)]
     W = wz[::-1].cumsum()
-    return np.product(wz / W)
+    return np.prod(wz / W)
 
 
 def swor_heap1(w, R):

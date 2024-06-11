@@ -150,3 +150,13 @@ class OverviewManager:
             print(x)
         print()
         print(f'passed: {self.passed}, failed: {self.failed}.')
+
+
+if __name__ == '__main__':
+    import sys
+    filename = sys.argv[1]
+    sys.argv = sys.argv[1:]
+    with open(filename) as f: content = f.read()
+    global_vars = {}
+    exec(content, global_vars)
+    testing_framework(global_vars)

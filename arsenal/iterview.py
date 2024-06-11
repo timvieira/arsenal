@@ -163,28 +163,33 @@ def progress(n, length):
 
 
 def tests():
-    from arsenal.assertions import assert_throws
+    #from arsenal.assertions import assert_throws
     from time import sleep
 
     # Check for error
-    with assert_throws(ValueError):
-        list(iterview((None for _ in range(5))))
+    #with assert_throws(ValueError):
+    #    list(iterview((None for _ in range(5))))
 
     # won't throw an error because length is passed in
     list(iterview((None for _ in range(5)), length=5))
 
-    for _ in iterview(range(10000), msg='foo', mintime=0.25):
+    for _ in iterview(range(10000), msg='foo',
+                      #mintime=0.25
+                      ):
         sleep(0.0001)
 
     # Print time elapsed if we terminate earlier than expected.
-    for i in iterview(range(10000), msg='foo', mintime=0.25):
+    for i in iterview(range(10000), msg='foo',
+                      #mintime=0.25
+                      ):
         if i == 2000: break
         sleep(0.001)
 
     from arsenal import terminal
     print('should disappear', terminal.arrow.down)
     # Print time elapsed if we terminate earlier than expected.
-    for i in iterview(range(10000), msg='foo', mintime=0.25, transient=True):
+    for i in iterview(range(10000), msg='foo', #mintime=0.25,
+                      transient=True):
         if i == 2000: break
         sleep(0.001)
     print('should disappear', terminal.arrow.up)

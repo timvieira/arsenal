@@ -28,8 +28,8 @@ def enable_ultratb(mode='Context', **kwargs):
 
 # TODO: look IPython's debugging stuff..
 # http://ipython.org/ipython-doc/dev/api/generated/IPython.core.debugger.html
-from IPython.core.debugger import Tracer
-set_trace = lambda: Tracer()()
+#from IPython.core.debugger import Tracer
+#set_trace = lambda: Tracer()()
 
 
 #from IPython.Debugger import Pdb

@@ -39,6 +39,22 @@ def profiler(use='cprofile', filename='out.prof'):
             print(colors.yellow % 'wrote: %s' % filename, '(use `gprof-viz` to view)')
 
 
+def prof_to_graphviz(f_prof):
+    import gprof2dot
+    from graphviz import Source
+
+    f_dot = f_prof + '.dot'
+
+    gprof2dot.main(['-f', 'pstats', '-o', f_dot, f_prof])
+
+    with open(f_dot) as f:
+        g = Source(f.read())
+
+    os.remove(f_dot)    # cleanup
+
+    return g
+
+
 # TODO:
 #  - maybe we should delete the `out` tempfile
 #  - I don't like that this currently makes a system call to open the image...

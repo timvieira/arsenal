@@ -10,7 +10,7 @@ with open('README.md', "r") as fh:
 
 setuptools.setup(
     name='arsenal',
-    version='3.0.3',
+    version='3.0.4',
     author='Tim Vieira',
     author_email='tim.f.vieira@gmail.com',
     description = 'Arsenal of python utilities.',
@@ -23,7 +23,7 @@ setuptools.setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.10',
     install_requires = [
         #'keyring',        # this is an annoying dependency
         'numpy',
@@ -32,6 +32,7 @@ setuptools.setup(
         'cython',
         'matplotlib',
         'gprof2dot',
+        'graphviz',
         'rich',
         #'blist',
         #'colored',

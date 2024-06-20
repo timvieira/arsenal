@@ -10,6 +10,12 @@ def ansi2html(x):
     return p.communicate()[0].decode('utf-8')
 
 
+def link(url, text=None):
+    if text is None:
+        text = url
+    return f"\033]8;;{url}\a{text}\033]8;;\a"
+
+
 def overline(xs):
     return ''.join(f'{x}\u0305' for x in xs)
 

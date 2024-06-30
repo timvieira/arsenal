@@ -7,7 +7,6 @@ from contextlib import contextmanager
 from arsenal.humanreadable import htime
 from arsenal import colors
 from arsenal.misc import ddict
-from arsenal import iterview, restore_random_state
 from scipy.stats import mannwhitneyu
 
 
@@ -73,6 +72,8 @@ class Benchmark:
             t.plot_survival(*args,**kwargs)
 
     def run(self, methods, reps):
+        from arsenal import iterview, restore_random_state
+
         if isinstance(methods, (tuple, list)):
             methods = {m.__name__: m for m in methods}
         jobs = [

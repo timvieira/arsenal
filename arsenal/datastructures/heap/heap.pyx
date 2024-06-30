@@ -15,10 +15,10 @@ cdef double NaN = np.nan
 # TODO: Use the C++ standard library's implementation of a vector of doubles.
 cdef class Vector:
 
-    cdef public:
-        int cap
-        int end
-        double[:] val
+#    cdef public:
+#        int cap
+#        int end
+#        double[:] val
 
     def __init__(self, cap):
         self.cap = cap
@@ -73,8 +73,8 @@ cdef class Vector:
 
 cdef class MaxHeap:
 
-    cdef public:
-        Vector val
+#    cdef public:
+#        Vector val
 
     def __init__(self, cap=2**8):
         self.val = Vector(cap)
@@ -126,7 +126,7 @@ cdef class MaxHeap:
             i = c
         return i
 
-    def _update(self, int i, double old, double new):
+    cdef int _update(self, int i, double old, double new):
         assert i < self.val.end
         if old == new: return i   # value unchanged
         self.val.val[i] = new         # perform change
@@ -135,7 +135,7 @@ cdef class MaxHeap:
         else:                     # decreased
             return self.down(i)
 
-    def _remove(self, int i):
+    cdef void _remove(self, int i):
         # update the locator stuff for last -> i
         last = self.val.end - 1
         self.swap(i, last)
@@ -161,9 +161,9 @@ cdef class LocatorMaxHeap(MaxHeap):
 
     """
 
-    cdef public:
-        dict key
-        dict loc
+#    cdef public:
+#        dict key
+#        dict loc
 
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -184,7 +184,7 @@ cdef class LocatorMaxHeap(MaxHeap):
     def peek(self):
         return self.key[1], super().peek()
 
-    def _remove(self, int i):
+    cdef void _remove(self, int i):
         # update the locator stuff for last -> i
         last = self.val.end - 1
         self.swap(i, last)
@@ -205,6 +205,9 @@ cdef class LocatorMaxHeap(MaxHeap):
         return self.val.val[self.loc[k]]
 
     def __setitem__(self, k, v):
+        self._setitem(k, v)
+
+    cdef _setitem(self, object k, double v):
         "upsert (update or insert) value associated with key."
         cdef int i
         if k in self:

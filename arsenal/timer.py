@@ -10,54 +10,31 @@ from arsenal.misc import ddict
 from scipy.stats import mannwhitneyu
 
 
-def timers(title=None):
-    return Benchmark(title)
+class Benchmark(dict):
 
-
-class Benchmark:
-
-    def __init__(self, title):
+    def __init__(self, title=None):
         self.title = title
-        self.timers = ddict(Timer)
+        super().__init__()
 
-    def __getitem__(self, name):
-        #if isinstance(name, list):
-        #    b = Benchmark(self.title)
-        #    for x in name:
-        #        b.timers[x] = self.timers[x]
-        #    return b
-        return self.timers[name]
+    def __missing__(self, name):
+        self[name] = c = Timer(name)
+        return c
 
     def compare(self, statistic=np.median):
-        if len(self.timers) == 0:
+        if len(self) == 0:
             return
-        if len(self.timers) == 1:
-            [x] = self.timers.values()
+        if len(self) == 1:
+            [x] = self.values()
             print(x)
             return
-        best = min(self.timers.values(), key=lambda t: statistic(t.times))
-        for name in sorted(self.timers):
+        best = min(self.values(), key=lambda t: statistic(t.times))
+        for name in sorted(self):
             if name != best.name:
-                best.compare(self.timers[name], statistic=statistic)
-
-    def values(self):
-        return list(self.timers.values())
-
-    def keys(self):
-        return list(self.timers.keys())
-
-    def items(self):
-        return list(self.timers.items())
-
-    def __len__(self):
-        return len(self.timers)
-
-    def __iter__(self):
-        return iter(sorted(self.keys()))
+                best.compare(self[name], statistic=statistic)
 
     def plot_feature(self, feature, timecol='timer', ax=None, **kw):
         if ax is None: ax = pl.figure().add_subplot(111)
-        for t in list(self.timers.values()):
+        for t in list(self.values()):
             t.plot_feature(feature=feature,
                            timecol=timecol,
                            ax=ax,
@@ -87,6 +64,8 @@ class Benchmark:
                 with self[name]:
                     methods[name]()
 
+
+timers = Benchmark
 
 class Timer:
     """

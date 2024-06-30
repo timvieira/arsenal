@@ -20,7 +20,7 @@ class Benchmark:
         self.title = title
         self.timers = ddict(Timer)
 
-    def __getitem__(self, name) -> Timer:
+    def __getitem__(self, name):
         #if isinstance(name, list):
         #    b = Benchmark(self.title)
         #    for x in name:

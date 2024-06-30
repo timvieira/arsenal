@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from arsenal.humanreadable import htime
 from arsenal import colors
 from arsenal.misc import ddict
+from arsenal import iterview, restore_random_state
 from scipy.stats import mannwhitneyu
 
 
@@ -14,17 +15,20 @@ def timers(title=None):
     return Benchmark(title)
 
 
-class Benchmark(object):
+class Benchmark:
+
     def __init__(self, title):
         self.title = title
         self.timers = ddict(Timer)
-    def __getitem__(self, name):
+
+    def __getitem__(self, name) -> Timer:
         #if isinstance(name, list):
         #    b = Benchmark(self.title)
         #    for x in name:
         #        b.timers[x] = self.timers[x]
         #    return b
         return self.timers[name]
+
     def compare(self, statistic=np.median):
         if len(self.timers) == 0:
             return
@@ -36,16 +40,22 @@ class Benchmark(object):
         for name in sorted(self.timers):
             if name != best.name:
                 best.compare(self.timers[name], statistic=statistic)
+
     def values(self):
         return list(self.timers.values())
+
     def keys(self):
         return list(self.timers.keys())
+
     def items(self):
         return list(self.timers.items())
+
     def __len__(self):
         return len(self.timers)
+
     def __iter__(self):
         return iter(sorted(self.keys()))
+
     def plot_feature(self, feature, timecol='timer', ax=None, **kw):
         if ax is None: ax = pl.figure().add_subplot(111)
         for t in list(self.timers.values()):
@@ -63,10 +73,8 @@ class Benchmark(object):
             t.plot_survival(*args,**kwargs)
 
     def run(self, methods, reps):
-        from arsenal import iterview, restore_random_state
         if isinstance(methods, (tuple, list)):
             methods = {m.__name__: m for m in methods}
-
         jobs = [
             (name, seed)
             for seed in range(reps)   # TODO: use a better strategy for picking random seeds.

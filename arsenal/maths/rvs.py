@@ -409,7 +409,7 @@ def log_sample(w):
 
 def sample_dict(x, *args, **kwargs):
     "Sample keys from `x` in proportion to their values."
-    keys = np.array(list(x.keys()))
+    keys = np.array(list(x.keys()), dtype=object)
     vals = np.array(list(x.values()))
     return keys[sample(vals, *args, **kwargs)]
 

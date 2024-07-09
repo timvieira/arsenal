@@ -1,3 +1,5 @@
+from heapq import heapify, heappop, heappush
+
 # This implementation is based on
 # https://code.activestate.com/recipes/522995-priority-dict-a-priority-queue-with-updatable-prio/
 

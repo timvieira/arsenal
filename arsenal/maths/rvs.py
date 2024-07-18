@@ -369,8 +369,8 @@ class Empirical:
         assert np.all((0 <= q) & (q <= 1))
         return np.quantile(self.x, q, interpolation='lower')
 
-    def plot(self, confidence=0.95):
-        pl.plot(self.x, self.cdf(self.x))
+    def plot(self, confidence=0.95, color=None, label=None):
+        pl.plot(self.x, self.cdf(self.x), label=label, c=color)
 
         if confidence is not None:
             # show confidence bands (derived from the DKW inequality)
@@ -381,7 +381,8 @@ class Empirical:
                             np.maximum(0, self(self.x) - eps),   # lower
                             np.minimum(1, self(self.x) + eps),   # upper
                             alpha=0.1,
-                            label=f'{confidence:.2f} confidence band')
+                            color=color,
+                            label=f'{label} {confidence:.2f} confidence band')
 
     ppf = quantile
 

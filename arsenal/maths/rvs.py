@@ -400,12 +400,12 @@ def sample(w, size=None, u=None):
     return c.searchsorted(u * c[-1])
 
 
-def log_sample(w):
+def log_sample(w, **kwargs):
     "Sample from unnormalized log-distribution."
     a = np.array(w, dtype=float)
     a -= a.max()
     exp(a, out=a)
-    return sample(a)
+    return sample(a, **kwargs)
 
 
 def sample_dict(x, *args, **kwargs):

@@ -213,7 +213,7 @@ cdef class LocatorMaxHeap(MaxHeap):
         if k in self:
             # update
             i = self.loc[k]
-            super()._update(i, self.val[i], v)
+            self._update(i, self.val[i], v)
         else:
             # insert (put new element last and bubble up)
             i = self.val.push(v)
@@ -264,12 +264,12 @@ class MinMaxHeap:
 
     def popmax(self):
         k, v = self.max.pop()
-        self.min._remove(self.min.loc[k])  # remove it from the min heap
+        del self.min[k]  # remove it from the min heap
         return k, v
 
     def popmin(self):
         k, v = self.min.pop()
-        self.max._remove(self.max.loc[k])  # remove it from the min heap
+        del self.max[k]  # remove it from the max heap
         return k, -v
 
     def check(self):

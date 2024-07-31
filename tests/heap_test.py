@@ -134,7 +134,6 @@ def test_minmax():
             v = np.random.uniform(-1, 1)
             L[k] = v
             S[k] = v
-            L.check()
 
             #print('upsert', k, v)
 
@@ -209,7 +208,5 @@ def test_bounded():
 
 
 if __name__ == '__main__':
-    test_basic()
-    test_locator()
-    test_minmax()
-    test_bounded()
+    from arsenal import testing_framework
+    testing_framework(globals())

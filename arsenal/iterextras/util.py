@@ -6,13 +6,22 @@ from collections import defaultdict
 from arsenal.iterview import iterview
 
 
+SENTINEL = object()
 class head_iter:
     def __init__(self, iterator):
         self.done = False
-        self.head = None
+        self.head = SENTINEL
         self.tail = iter(iterator)
         self.__next__()
     def __lt__(self, other):
+        if self.done:
+            return True
+        if other.done:
+            return False
+        if self.head == SENTINEL:
+            return True
+        if other.head == SENTINEL:
+            return False
         return self.head < other.head
     def __next__(self):
         h = self.head
@@ -20,7 +29,7 @@ class head_iter:
             self.head = self.tail.__next__()
         except StopIteration:
             self.done = True
-            self.head = None
+            self.head = SENTINEL
         return h
 
 

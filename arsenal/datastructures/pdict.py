@@ -48,6 +48,7 @@ class pdict(dict):
         # this would have a cost O(n).
         super(pdict, self).__setitem__(key, val)
         heappush(self._heap, (val, key))
+        return self
 
     def setdefault(self, key, val):
         if key not in self:

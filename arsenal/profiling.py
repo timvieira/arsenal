@@ -7,36 +7,46 @@ import cProfile
 from arsenal import colors
 from contextlib import contextmanager
 
-@contextmanager
-def profiler(use='cprofile', filename='out.prof'):
 
-    if use == 'yep':   # pragma: no cover
-        import yep
-        yep.start(filename)
+class profiler:
 
-    if use == 'cprofile':  # pragma: no cover
-        #import cProfile
-        prof = cProfile.Profile()
-        prof.enable()
+    def __init__(self, use='cprofile', filename='/tmp/out.prof'):
+        self.use = use
+        self.filename = filename
 
-    try:
+    def __enter__(self):
+        if self.use == 'yep':   # pragma: no cover
+            import yep
+            self.prof = yep
+            self.prof.start(self.filename)
+        if self.use == 'cprofile':  # pragma: no cover
+            #import cProfile
+            self.prof = cProfile.Profile()
+            self.prof.enable()
+        return self
 
-        yield
-
-    finally:
-        if use == 'yep':  # pragma: no cover
-            yep.stop()
+    def __exit__(self, *args, **kwargs):
+        if self.use == 'yep':  # pragma: no cover
+            self.prof.stop()
             print(colors.yellow % 'wrote: %s' % filename, '(use `google-pprof` to view)')
             # google-pprof --text /bin/ls imitation.prof
             # google-pprof --evince /bin/ls imitation.prof
             # google-pprof --web /bin/ls --web imitation.prof
-
-        if use == 'cprofile':  # pragma: no cover
+        if self.use == 'cprofile':  # pragma: no cover
             #import pstats
-            prof.disable()
-            prof.dump_stats(filename)
+            self.prof.disable()
+            self.prof.dump_stats(self.filename)
             #pstats.Stats(filename).strip_dirs().sort_stats('time').print_stats()
-            print(colors.yellow % 'wrote: %s' % filename, '(use `gprof-viz` to view)')
+            print(colors.yellow % 'wrote: %s' % self.filename, '(use `gprof-viz` to view)')
+
+    def graphviz(self):
+        if self.use == 'yep':  # pragma: no cover
+            raise NotImplementedError()
+        if self.use == 'cprofile':  # pragma: no cover
+            return prof_to_graphviz(self.filename)
+
+    def open(self):
+        self.graphviz().view()
 
 
 def prof_to_graphviz(f_prof):
@@ -59,7 +69,13 @@ def prof_to_graphviz(f_prof):
 #  - maybe we should delete the `out` tempfile
 #  - I don't like that this currently makes a system call to open the image...
 #  - gprof2dot is on the pythonpath we should be able to avoid the system call
-def profile_viz(cmd, global_dict=None, local_dict=None, img='profile.png', out='profile.tmp', noctx=False):
+def profile_viz(
+        cmd, global_dict=None,
+        local_dict=None,
+        img='/tmp/profile.png',
+        out='/tmp/profile.tmp',
+        noctx=False
+):
     "Run gprof2dot on the output for profiling."
     if noctx:
         cProfile.run(cmd, out)
@@ -89,33 +105,48 @@ def profile_viz(cmd, global_dict=None, local_dict=None, img='profile.png', out='
 #    os.system("kcachegrind %s &" % out)
 
 
-def main():
-    from optparse import OptionParser
-    parser = OptionParser()
-    parser.allow_interspersed_args = False
-    parser.add_option('-o', '--outfile', dest="outfile",
-                      help="Save stats to <outfile>",
-                      default='/tmp/profile.tmp')
+#def main():
+#    from optparse import OptionParser
+#    parser = OptionParser()
+#    parser.allow_interspersed_args = False
+#    parser.add_option('-o', '--outfile', dest="outfile",
+#                      help="Save stats to <outfile>",
+#                      default='/tmp/profile.tmp')
+#
+#    if not sys.argv[1:]:
+#        parser.print_usage()
+#        sys.exit(2)
+#
+#    (options, args) = parser.parse_args()
+#
+#    #viz = kcachegrind
+#    viz = profile_viz
+#
+#    sys.path = [os.getcwd()] + sys.path
+#
+#    if len(args) > 0:
+#        sys.argv[:] = args
+#        sys.path.insert(0, os.path.dirname(sys.argv[0]))
+#        viz('execfile(%r)' % sys.argv[0], out=options.outfile)
+#    else:
+#        parser.print_usage()
+#    return parser
+#
+#
+#if __name__ == '__main__':
+#    main()
 
-    if not sys.argv[1:]:
-        parser.print_usage()
-        sys.exit(2)
 
-    (options, args) = parser.parse_args()
+def test_profiler():
+    import time
 
-    #viz = kcachegrind
-    viz = profile_viz
+    with profiler() as p:
+        for i in range(10):
+            time.sleep(.1)
 
-    sys.path = [os.getcwd()] + sys.path
-
-    if len(args) > 0:
-        sys.argv[:] = args
-        sys.path.insert(0, os.path.dirname(sys.argv[0]))
-        viz('execfile(%r)' % sys.argv[0], out=options.outfile)
-    else:
-        parser.print_usage()
-    return parser
+    p.open()
 
 
 if __name__ == '__main__':
-    main()
+    from arsenal import testing_framework
+    testing_framework(globals())

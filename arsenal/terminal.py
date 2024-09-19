@@ -22,6 +22,7 @@ def overline(xs):
 
 partial = '∂'
 
+visible_space = '␣'
 
 class bb:
     A = '𝔸'

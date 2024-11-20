@@ -13,7 +13,11 @@ from arsenal.timer import Timer, timers, timeit
 #from arsenal.humanreadable import htime
 from arsenal.misc import ddict
 from arsenal.assertions import assert_throws
-from arsenal.robust import timelimit, Timeout
+
+import platform
+if platform.system() != 'Windows':
+    from arsenal.robust import timelimit, Timeout
+
 from arsenal.maths import restore_random_state
 from arsenal.datastructures import *
 from arsenal.testing_framework import *

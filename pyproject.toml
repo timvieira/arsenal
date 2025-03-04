@@ -1,3 +1,40 @@
 [build-system]
-requires = ["setuptools", "wheel", "numpy", 'Cython']
+requires = ["setuptools>=45", "wheel", "numpy", "Cython>=3.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "arsenal"
+version = "3.0.4"
+description = "Arsenal of python utilities"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Tim Vieira", email = "tim.f.vieira@gmail.com"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "cython",
+    "matplotlib",
+    "gprof2dot",
+    "graphviz",
+    "rich",
+    "path.py",
+]
+
+[tool.setuptools]
+packages = {find = {}}
+
+[tool.setuptools.build]
+include-dirs = ["numpy.get_include()"]
+
+[tool.cython]
+# Configure Cython build options
+include = ["arsenal/**/*.pyx"]

@@ -27,14 +27,13 @@ dependencies = [
     "graphviz",
     "rich",
     "path.py",
+    "IPython",
+    "tqdm",
+    "psutil",
 ]
 
-[tool.setuptools]
-packages = {find = {}}
-
-[tool.setuptools.build]
-include-dirs = ["numpy.get_include()"]
+[tool.setuptools.packages.find]
+include = ["*"]
 
 [tool.cython]
-# Configure Cython build options
 include = ["arsenal/**/*.pyx"]

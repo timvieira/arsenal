@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "numpy", "Cython>=3.0"]
+requires = ["setuptools>=45", "wheel", "numpy", "Cython>=3.0", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -31,6 +31,10 @@ dependencies = [
     "tqdm",
     "psutil",
 ]
+
+[tool.setuptools]
+zip-safe = false  # Required for Cython packages
+include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["*"]

@@ -9,9 +9,10 @@ The arsenal is an assortment of python utilities that I can't live without.
     python -m venv venv
     source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-2. Install the package:
+2. Install the package and development dependencies:
 
     pip install -e .
+    pip install build  # Required for building distributions
 
 ## Development Tasks
 
@@ -22,6 +23,38 @@ The Makefile provides several useful commands:
     make test        # Run all tests
     make coverage    # Generate test coverage report
     make clean       # Clean build artifacts and documentation
+
+## Building and Publishing
+
+1. Install build tools:
+
+    pip install build twine
+
+2. Clean old distributions:
+
+    rm -rf dist/ build/ *.egg-info
+
+3. Create distribution packages:
+
+    python -m build
+
+4. Check the distributions:
+
+    twine check dist/*
+
+5. Upload to Test PyPI first:
+
+    twine upload --repository testpypi dist/*
+
+6. Test the installation from Test PyPI:
+
+    pip install --index-url https://test.pypi.org/simple/ arsenal
+
+7. If everything looks good, upload to PyPI:
+
+    twine upload dist/*
+
+Note: You'll need a PyPI account and API token. Store your credentials in `~/.pypirc` or enter them when prompted.
 
 ## Documentation
 

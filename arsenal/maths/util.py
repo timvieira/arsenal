@@ -409,6 +409,20 @@ def log1mexp(x):
             return np.log1p(-np.exp(-a))
 
 
+def logmeanexp(xs):
+    """
+    Numerically stable implementation of log(mean(exp(xs))).
+
+    Nptes:
+      log(mean(exp(xs)))
+      = log(sum(exp(xs))/n)
+      = log(sum(exp(xs))) - log(n)
+      = logsumexp(xs) - log(n)
+
+    """
+    return logsumexp(xs) - np.log(len(xs))
+
+
 # based on implementation from scikits-learn
 def logsumexp(arr, axis=None):
     """Computes the sum of arr assuming arr is in the log domain.

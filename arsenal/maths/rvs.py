@@ -125,7 +125,7 @@ class SumOfExponentials:
         if size is not None: size = (size, self.n)
         return -np.sum(np.log(np.random.uniform(0,1,size=size)) / self.w[None,:], axis=1)
     def mgf(self, t):
-        return self.a / np.product(self.w - t)
+        return self.a / np.prod(self.w - t)
     def d_mgf(self, t, n):
         # TODO: work out the derivative
         return nd.Derivative(self.mgf, n=n)(t)

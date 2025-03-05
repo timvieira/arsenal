@@ -1,0 +1,40 @@
+name: Release to PyPI
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+env:
+  CIBW_SKIP: "*-manylinux_i686"
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # This is here so that the versioning plugin will be able to see tags
+          # and version using them.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11.5
+          cache: 'pip'
+
+      - name: Build package
+        run: |
+          python3 -m pip install --upgrade build cibuildwheel==2.23.2
+          python3 -m cibuildwheel --output-dir dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}

@@ -14,7 +14,15 @@ The arsenal is an assortment of python utilities that I can't live without.
 2. Install the package and development dependencies:
 
 ```bash
+    git clone https://github.com/timvieira/arsenal.git
+    cd arsenal
     pip install -e .
+```
+
+Alternatively, use pip to install from GitHub:
+
+```bash
+    pip install git+https://github.com/timvieira/arsenal.git
 ```
 
 ## Development Tasks
@@ -73,27 +81,6 @@ Note: You'll need a PyPI account and API token. Store your credentials in `~/.py
 ## Documentation
 
 [Read the Docs](https://python-arsenal.readthedocs.io/en/latest/)
-
-## Alternative Installation Methods
-
-If you prefer not to use a virtualenv, you can install directly:
-
-1. Clone and pip-install:
-
-```bash
-    git clone https://github.com/timvieira/arsenal.git
-    cd arsenal 
-    pip install .
-```
-
-2. Use pip for the whole thing:
-
-```bash
-    pip install -r https://raw.githubusercontent.com/timvieira/arsenal/master/requirements.txt
-    pip install git+https://github.com/timvieira/arsenal.git
-```
-
-Note: Just running the second command fails to identify the requirements file.
 
 ## Running Tests
 

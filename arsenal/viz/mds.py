@@ -1,5 +1,5 @@
 import matplotlib.pyplot as pl
-from numpy import sqrt, mean, array, zeros, mat
+from numpy import sqrt, mean, array
 from numpy.linalg import svd
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -15,8 +15,8 @@ def mds(X, dimensions=2):
     """
     E = (-0.5 * X * X)   # square the distances
     # Use mat to get column and row means to act as column and row means.
-    Er = mat(mean(E, axis=1))
-    Es = mat(mean(E, axis=0))
+    Er = array(mean(E, axis=1))
+    Es = array(mean(E, axis=0))
     # From Principles of Multivariate Analysis: A User's Perspective (pg 107).
     F = array(E - Er.T - Es + mean(E))
     # svd to get low rank approximation or F

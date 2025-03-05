@@ -1,3 +1,3 @@
-from .heap import *
-from .orderedset import OrderedSet
-from .unionfind import UnionFind
+from arsenal.datastructures.heap import *
+from arsenal.datastructures.orderedset import OrderedSet
+from arsenal.datastructures.unionfind import UnionFind

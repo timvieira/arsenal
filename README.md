@@ -15,7 +15,6 @@ The arsenal is an assortment of python utilities that I can't live without.
 
 ```bash
     pip install -e .
-    pip install build  # Required for building distributions
 ```
 
 ## Development Tasks
@@ -47,6 +46,7 @@ The Makefile provides several useful commands:
 3. Create distribution packages:
 
 ```bash
+    make cython
     python -m build
 ```
 
@@ -62,13 +62,7 @@ The Makefile provides several useful commands:
     twine upload --repository testpypi dist/*
 ```
 
-6. Test the installation from Test PyPI:
-
-```bash
-    pip install --index-url https://test.pypi.org/simple/ arsenal
-```
-
-7. If everything looks good, upload to PyPI:
+6. If everything looks good, upload to PyPI:
 
 ```bash
     twine upload dist/*

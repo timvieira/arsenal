@@ -28,8 +28,8 @@ jobs:
 
       - name: Build package
         run: |
-          python3 -m pip install --upgrade build
-          python3 -m build
+          python3 -m pip install --upgrade build cibuildwheel==2.23.2
+          python3 -m cibuildwheel --output-dir dist
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

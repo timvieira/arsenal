@@ -8,22 +8,20 @@ The arsenal is an assortment of python utilities that I can't live without.
 
 ## Setup
 
-1. Create and activate a virtual environment:
+Optional: Create and activate a virtual environment:
 
 ```bash
     python -m venv venv
     source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install
-
-   a. To install the latest release:
+To install the latest release:
 
 ```bash
     pip install arsenal
 ```
     
-   b. To install the latest version from GitHub:
+To install the latest version from GitHub:
 
 ```bash
     pip install git+https://github.com/timvieira/arsenal.git

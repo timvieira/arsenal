@@ -17,13 +17,13 @@ The arsenal is an assortment of python utilities that I can't live without.
 
 2. Install
 
-To install the latest release:
+   a. To install the latest release:
 
 ```bash
     pip install arsenal
 ```
     
-    To install the latest version from GitHub:
+   b. To install the latest version from GitHub:
 
 ```bash
     pip install git+https://github.com/timvieira/arsenal.git

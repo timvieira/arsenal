@@ -17,7 +17,7 @@ The arsenal is an assortment of python utilities that I can't live without.
 
 2. Install
 
-   To install the latest release:
+To install the latest release:
 
 ```bash
     pip install arsenal
@@ -29,7 +29,7 @@ The arsenal is an assortment of python utilities that I can't live without.
     pip install git+https://github.com/timvieira/arsenal.git
 ```
 
-    Alternatively,
+Alternatively,
 
 ```bash
     git clone https://github.com/timvieira/arsenal.git

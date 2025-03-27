@@ -2,6 +2,10 @@
 
 The arsenal is an assortment of python utilities that I can't live without.
 
+## Documentation
+
+[Read the Docs](https://python-arsenal.readthedocs.io/en/latest/)
+
 ## Setup
 
 1. Create and activate a virtual environment:
@@ -78,9 +82,6 @@ The Makefile provides several useful commands:
 
 Note: You'll need a PyPI account and API token. Store your credentials in `~/.pypirc` or enter them when prompted.
 
-## Documentation
-
-[Read the Docs](https://python-arsenal.readthedocs.io/en/latest/)
 
 ## Running Tests
 

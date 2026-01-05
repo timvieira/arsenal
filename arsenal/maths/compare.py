@@ -329,7 +329,7 @@ class compare:
         A[:,0] = self.have
 
         [self.coeff, residues, _, _] = lstsq(A, self.want)
-        self.R = float(np.sqrt(residues)) if residues else 0.0
+        self.R = float(np.sqrt(residues)) if residues.size > 0 else 0
 
         # Label with warn or ok.
         ok = 1 if abs(self.coeff - [1, 0]).max() <= 1e-5 else 2

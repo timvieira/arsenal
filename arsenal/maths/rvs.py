@@ -365,7 +365,7 @@ class Empirical:
         return m / n if n > 0 else np.inf
 
     def quantile(self, q):
-        # TODO: this could be made fastet given that x is already sorted.
+        # TODO: this could be made faster given that x is already sorted.
         assert np.all((0 <= q) & (q <= 1))
         return np.quantile(self.x, q, interpolation='lower')
 

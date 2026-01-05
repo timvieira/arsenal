@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import pylab as pl
 from numpy import array, exp, log, dot, abs, multiply, cumsum, arange, \
     asarray, ones, mean, searchsorted, sqrt, isfinite, log1p, expm1
 import scipy.linalg as la
@@ -304,13 +305,52 @@ def normalize_interval(data):
     return x
 
 
-def mean_confidence_interval(a, confidence=0.95):
-    "returns (mean, lower, upper)"
-    a = asarray(a)
-    n = a.shape[0]
-    m = mean(a)
-    h = a.std(ddof=1) / sqrt(n) * stats.t._ppf((1+confidence)/2., n-1)
-    return m, m-h, m+h
+class mean_confidence_interval:
+    "Confidence interval around the mean based on student's t distribution"
+    def __init__(self, a, confidence=0.95):
+        assert 0 <= confidence <= 1
+        a = asarray(a)
+        n = a.shape[0]
+        m = np.mean(a)
+        h = a.std(ddof=1) / sqrt(n) * stats.t._ppf((1+confidence)/2., n-1)
+        self.mean = m
+        self.lower = m-h
+        self.upper = m+h
+        self.confidence = confidence
+
+    def __iter__(self):
+        return iter((self.mean, self.lower, self.upper))
+
+
+class bootstrap_confidence_interval:
+    "Boostrap confidence interval"
+    def __init__(self, data, reps=10000, confidence=0.95, statistic=np.mean):
+        assert 0 <= confidence <= 1
+        n = len(data)
+        samples = np.array([statistic(np.random.choice(data, size=n, replace=True)) for _ in range(reps)])
+        self.estimate = statistic(data)
+        self.lower = np.quantile(samples, 1/2 - confidence/2)
+        self.upper = np.quantile(samples, 1/2 + confidence/2)
+        self.samples = samples
+
+        self.data = data
+        self.statistic = statistic
+        self.confidence = confidence
+
+    def __iter__(self):
+        return iter((self.lower, self.upper))
+
+    def show(self, bins=None, ax=None):
+        if ax is None: ax = pl.figure().add_subplot(111)
+        ax.hist(self.data, bins=bins, color='b', alpha=0.5, density=True, label='data')
+        ax.hist(self.samples, bins=bins, color='r', alpha=0.5, density=True, label='bootstrap')
+        ax.axvline(self.estimate, c='r')
+        ax.axvline(self.lower, c='r', linestyle=':')
+        ax.axvline(self.upper, c='r', linestyle=':')
+        ax.set_title(f'Bootstrapped Confidence Interval ({self.confidence * 100:.1f}%)')
+        ax.legend(loc='best')
+        #ax.figure.tight_layout()
+
 
 def bernstein(samples, delta, R, check=True):
     """Plug-n-chug empirical Bernstein bound, computes "error bars" which hold with

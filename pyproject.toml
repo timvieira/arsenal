@@ -7,7 +7,7 @@ name = "arsenal"
 dynamic = ["version"]
 description = "Arsenal of python utilities"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Tim Vieira", email = "tim.f.vieira@gmail.com"},

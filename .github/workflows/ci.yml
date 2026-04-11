@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install numpy "Cython>=3.0"
+          pip install setuptools numpy "Cython>=3.0"
           pip install -e ".[dev]"
           python setup.py build_ext -i
 

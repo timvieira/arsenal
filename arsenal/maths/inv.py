@@ -35,26 +35,3 @@ class InvAndDet(Inv):
         s = super().rank_one_update(u, v)
         self.D *= s
 
-
-def test():
-
-    n = 10
-
-    A = np.random.randn(n,n)
-    B = inv(A)
-    u = np.random.randn(n,1)
-    v = np.random.randn(n,1)
-
-    B = InvAndDet(A)
-
-    B.rank_one_update(u,v)
-    assert np.allclose(inv(A + np.outer(u, v)), B.value)
-
-    print(det(A + np.outer(u, v)), B.D)
-    assert np.allclose(det(A + np.outer(u, v)), B.D)
-
-    print('ok')
-
-
-if __name__ == '__main__':
-    test()

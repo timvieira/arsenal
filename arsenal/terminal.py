@@ -277,7 +277,6 @@ def marquee(msg=''):
     return ('{0:*^%s}' % console_width()).format(msg)
 
 
-import re
 def render(y, **kwargs):
     """
     Render colorful string using 'reset' to mean 'pop the color stack' rather than
@@ -368,47 +367,3 @@ def percent(num, den):
 percentage = percent
 
 
-def tests():
-    for c in 'black, red, green, yellow, blue, magenta, cyan, white'.split(', '):
-        print('%18s %24s %23s %21s' % (globals()[c] % c,
-                                       getattr(light, c) % f'light.{c}',
-                                       getattr(dark, c) % f'dark.{c}',
-                                       getattr(bg, c) % f'bg.{c}'))
-
-    print(underline % 'underline')
-    print(italic % 'italic')
-    print(strike % 'strike')
-
-    #import numpy as np
-    #for x in np.linspace(0, 1, 15):
-    #    print(color01(x, fmt='%.2f'), end=' ')
-    #print()
-
-    w = console_width()
-    print('Console width:', w, sep=' ')
-    print('='*w)
-    print(marquee(' marquee '))
-
-
-    print()
-    print('Stack-based rendering')
-    print('=====================')
-    g = green % 'green'
-    b = blue % f'blue {g} blue'
-    r = red % f'red {b} red {b} red'
-    x = normal % f'normal {r} normal'
-    print(render(x))
-
-    # SDD: make sure we reset after dark
-    print(render(
-        (light.blue % 'light %s light'
-         % dark.blue % 'dark %s dark'
-         % blue % 'regular'),
-        #debug = True,
-    ))
-
-    print(thumbs_up, thumbs_down)
-
-
-if __name__ == '__main__':
-    tests()

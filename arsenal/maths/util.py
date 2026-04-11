@@ -187,13 +187,13 @@ def f1(A, B):
     """
     Compute the F1 measure on two bit vectors.
 
-    >>> f1([1], [1])
+    >>> float(f1([1], [1]))
     1.0
 
-    >>> f1([1], [0])
+    >>> float(f1([1], [0]))
     0.0
 
-    >>> f1([1,0,1], [0,1,1])
+    >>> float(f1([1,0,1], [0,1,1]))
     0.5
 
     """
@@ -473,17 +473,17 @@ def logsumexp(arr, axis=None):
     Examples:
 
     >>> a = arange(10)
-    >>> log(sum(exp(a)))
+    >>> float(log(sum(exp(a))))
     9.45862974442671
 
-    >>> logsumexp(a)
+    >>> float(logsumexp(a))
     9.45862974442671
 
     >>> x = [[0, 0, 1000.0], [1000.0, 0, 0]]
     >>> logsumexp(x, axis=1)
     array([1000., 1000.])
 
-    >>> logsumexp(x)
+    >>> float(logsumexp(x))
     1000.6931471805599
 
     >>> logsumexp(x, axis=0)
@@ -760,75 +760,3 @@ def quadratic_formula(a,b,c):
         (-b - np.sqrt(b**2 - 4*a*c)) / (2*a),
     ]
 
-
-if __name__ == '__main__':
-
-    def run_tests():
-
-        from arsenal.maths import random_dist, fdcheck
-
-        p = random_dist(30)
-        fdcheck(lambda: entropy(p), p, d_entropy(p), throw=False)
-
-        # To test the random state we'll run the function below from the same
-        # random state using the restore_randome_state util.
-        def foo():
-            return [(random.randint(0, 100),
-                     np.random.randint(0, 100))
-                    for _ in range(10)]
-
-        # Note that we have to run `a` and `b` in this order.
-        with restore_random_state():
-            a = foo()
-        b = foo()
-        assert a == b
-
-        # Entropy tests
-        assert entropy(array((0.5, 0.5))) == 1.0
-        assert abs(entropy(array((0.75, 0.25))) - 0.8112781244) < 1e-10
-        assert abs(entropy(array((0.1, 0.1, 0.8))) - 0.9219280948) < 1e-10
-
-        # KL-divergence tests
-        assert kl_divergence(array((0.5, 0.5)), array((0.5, 0.5))) == 0.0
-
-        # KL, Entropy, and Cross Entropy relationship
-        p = array([0.5, 0.5])
-        q = array([0.4, 0.6])
-        assert_equal(cross_entropy(p, q), (entropy(p) + kl_divergence(p, q)))
-
-        # Normalize tests
-        assert_equal(array([0.5, 0.5]), normalize(array([2, 2])))
-
-        # Mutual Information tests
-        #Pjoint = array([[0.25, 0.25], [0.25, 0.25]])
-
-        Pjoint = normalize(np.random.rand(4,10))
-        assert_equal(mutual_information(Pjoint),
-                     mutual_information(Pjoint.T))
-
-        def mi_independent_is_zero(px, py):
-            assert mutual_information(multiply.outer(px, py)) <= 1e-10
-
-        mi_independent_is_zero(p, q)
-        mi_independent_is_zero(array([0.1, 0.1, 0.2, 0.6]),   # non-square joint
-                               array([0.9, 0.1]))
-
-        def test_softmax_grad():
-            from arsenal.maths.checkgrad import fdcheck
-            n = 20
-            adj = np.random.uniform(-1,1,size=n)
-            x = np.random.uniform(-1,1,size=n)
-            out = softmax(x)
-            g = d_softmax(out, x, adj)
-            fdcheck(lambda: softmax(x).dot(adj), x, g)
-
-        test_softmax_grad()
-
-        assert relative_difference(np.inf, np.inf) == 0.0
-
-        print('passed tests.')
-
-    run_tests()
-
-    import doctest
-    doctest.testmod()

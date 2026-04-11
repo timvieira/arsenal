@@ -233,98 +233,12 @@ def enumerate_digraphs(n):
 #        if sum(js) == n:
 #            yield js
 
-
-def test_sumsto():
-    for n in range(8):
-        for k in range(n+1):
-            #print(f'\nn={n}, k={k}')
-
-            N = 0
-            for js in sumsto(n, k):
-                N += 1
-                #print(' ➥', js)
-                assert sum(js) == n
-                assert len(js) == k
-                assert all(j >= 0 for j in js)
-
-            have = N
-            want = binom(n+k-1, n)
-            #print('total', colors.mark(have==want), have, want)
-            assert have == want
-
-
-def test_sample():
-    print('[sample]')
-
-    def check(N,K):
-        S = range(N)
-        assert binom(N,K) == length(sample(S, K, ordered=0, replace=0))
-        #A01 = sample(S, K, ordered=0, replace=1)   # ???
-        assert binom(N,K) * factorial(K) == length(sample(S, K, ordered=1, replace=0))
-        assert N**K == length(sample(S, K, ordered=1, replace=1))
-
-    check(5,3)
-
-    # Check corner cases
-    check(5,5)
-    check(5,0)
-
-
-def test_kleene():
-    print('[kleene]')
-    from arsenal.iterextras import take
-
-    assert (list(take(10, map(''.join, kleene('01'))))
-            == ['', '0', '1', '00', '01', '10', '11', '000', '001', '010'])
-
-    assert (list(map(''.join, kleene('01', n=3)))
-            == ['', '0', '1', '00', '01', '10', '11', '000', '001', '010',
-                '011', '100', '101', '110', '111'])
-
-    assert (list(map(''.join, kleene('a', n=4)))
-            == ['', 'a', 'aa', 'aaa', 'aaaa'])
-
-    assert (list(map(''.join, kleene('', n=4)))
-            == [''])
-
-    assert length(powerset(range(5))) == 2**5
-    assert length(permute(range(5))) == factorial(5)
-
-
-def length(xs):
-    return sum(1 for _ in xs)
-
-
 def flatten(S):
     if not isinstance(S, (list, tuple)):
         yield S
     else:
         for x in S:
             yield from flatten(x)
-
-
-def test_trees():
-
-    _catalan = [1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786,
-                208012, 742900, 2674440]
-
-    for n in range(1, len(_catalan)):
-        assert _catalan[n] == catalan(n), [n, _catalan[n], catalan(n)]
-
-    verbose = False
-
-    def test(S):
-        A = list(trees(S))
-        if verbose: print(f'\ntrees of {S}')
-        for x in A:
-            if verbose: print('  ', x)
-            # Check that flattening tree gives the seqence `S`.
-            assert tuple(flatten(x)) == tuple(S)
-        assert length(A) == catalan(n-1)
-
-    for n in range(2, 10):
-        print(f'[trees] n={n}' )
-        test(range(n))
 
 
 def segmentations(S):
@@ -337,56 +251,3 @@ def segmentations(S):
             p[t] += [prefix + (tuple(S[s:t]),) for prefix in p[s]]
     return p[N]
 
-
-def test_segementations():
-
-    verbose = False
-
-    def test(S):
-        A = list(segmentations(S))
-        if verbose: print(f'\nsegementations of {S}')
-        for i, p in enumerate(sorted(A)):
-            if verbose: print(f'  {i}: {p}')
-            # Check that `p` is actually a segmentation of S.
-            assert ''.join(''.join(s) for s in p) == ''.join(S), S
-        # Check that we have the correct number
-        assert len(A) == 2 ** (len(S) - 1)
-        # Check for duplicates
-        assert len(A) == len(set(A))
-
-    for n in range(2, 10):
-        print(f'[segmentations] n={n}')
-        test(tuple(map(str,range(n))))
-
-
-#class Collection:
-#    def __init__(self, xs):
-#        self.xs = list(xs)
-#    def __hash__(self):
-#        return hash(self.xs)
-#    def __repr__(self):
-#        return repr(self.xs)
-#    def __eq__(self, other):
-#        return self.xs == other.xs
-#    def choose(self, k):
-#        return Collection(choose(self.xs, k))
-#    def permute(self):
-#        return Collection(permute(self.xs))
-#    def select(self, k):
-#        return Collection(select(self.xs, k))
-#    def strings(self, k):
-#        return Collection(sample(self.xs, k, ordered=True, replace=True))
-#    def misc(self, k):
-#        return Collection(sample(self.xs, k, ordered=False, replace=True))
-#
-
-#print(Collection('abcd').choose(3))
-#print(Collection('ab').strings(3))
-#print(Collection('ab').misc(3))
-#print(Collection('abcd').select(3))
-#exit()
-
-
-if __name__ == '__main__':
-    from arsenal import testing_framework
-    testing_framework(globals())

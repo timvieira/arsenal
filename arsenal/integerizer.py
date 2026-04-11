@@ -35,7 +35,7 @@ class Integerizer(AbstractIntegerizer):
     >>> a[list(range(4))]
     ['a', 'b', 'c', 'd']
 
-    >>> a.freeze()
+    >>> _ = a.freeze()
     >>> a.add('z')
     Traceback (most recent call last):
       ...
@@ -123,7 +123,3 @@ class FeatureHashing(AbstractIntegerizer):
         assert h >= 0
         return h & self.mask
 
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

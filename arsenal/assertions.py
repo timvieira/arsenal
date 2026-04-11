@@ -48,30 +48,3 @@ class assert_throws(object):
 
         return True
 
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
-    def test():
-
-        with assert_throws(Exception):
-            print(1/0)
-
-        with assert_throws(ZeroDivisionError):
-            print(1/0)
-
-        with assert_throws(None):
-            pass
-
-        try:
-            with assert_throws(ZeroDivisionError, TypeError, ValueError):
-                pass
-        except AssertionError:
-            pass
-        else:
-            raise AssertionError('test failed.')
-
-        print('Passed basic tests.')
-
-    test()

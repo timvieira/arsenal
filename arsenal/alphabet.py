@@ -124,7 +124,3 @@ class Alphabet(object):
     encode = __getitem__
     decode = lookup
 
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

@@ -138,9 +138,10 @@ class NumericalDebug:
 
       >>> from arsenal.viz import DEBUG
       >>> d = DEBUG['test1']
-      >>> d.update(want=1, have=1)
-      >>> d.update(want=1, have=1.01)
-      >>> d.update(want=1, have=0.99)
+      >>> _ = d.update(want=1, have=1)
+      >>> _ = d.update(want=1, have=1.01)
+      >>> _ = d.update(want=1, have=0.99)
+      >>> d.df
          want  have
       0     1  1.00
       1     1  1.01
@@ -256,14 +257,3 @@ def scatter_manager(name, with_ax=False, xlabel=None, ylabel=None, title=None, *
         x,y = list(zip(*data))
         ax.scatter(x, y, alpha=0.5, lw=0, **style)
 
-
-def test():
-    d = DEBUG['test1']
-    d.update(want=1, have=1)
-    d.update(want=1, have=1.01)
-    d.update(want=1, have=0.99)
-    print(d.df)
-
-
-if __name__ == '__main__':
-    test()

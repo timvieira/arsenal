@@ -106,7 +106,3 @@ def test_bio2span():
         print()
 
     print('passed test_bio2span')
-
-
-if __name__ == '__main__':
-    test_bio2span()

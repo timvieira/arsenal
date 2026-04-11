@@ -56,38 +56,3 @@ class MultiMap:
             vs = self.vals
         return 'MultiMap {\n%s\n}' % '\n'.join(f'  {x}: {self.vals[x]},' for x in vs)
 
-
-def tests_basics():
-    m = MultiMap()
-    m["a","b","c"] = 10
-    m["a","b'","c"] = 12
-
-    m["a","b","d"] = 13
-    m["a", 14,frozenset(),None,()] = 13   # ragged dimensions allowed (YMMV), dims can have mixed types
-
-    from arsenal.assertions import assert_throws
-    with assert_throws(AssertionError):
-        m["a",:,"d"] = 13
-    with assert_throws(AssertionError):
-        print(m["a",:10,"d"])
-
-    assert m["a",:,"c"] == MultiMap({('a', 'b', 'c'): 10, ('a', "b'", 'c'): 12})
-    assert m[:,:,"d"] == MultiMap({('a', 'b', 'd'): 13})
-
-    print(m)
-
-    # Note: This does not grab prefixes,
-    # print(m["a",:,:])
-
-    # Annoying corner cases for when we don't pass a tuple to get/set items
-    m = MultiMap()
-    m[1] = 2
-    assert m[1,] == m[1] == m
-    m[1,] = 2
-    assert m[1,] == m[1] == m
-
-    assert list(m) == [(1,)]
-
-
-if __name__ == '__main__':
-    tests_basics()

@@ -127,6 +127,7 @@ class SumOfExponentials:
     def mgf(self, t):
         return self.a / np.prod(self.w - t)
     def d_mgf(self, t, n):
+        import numdifftools as nd
         # TODO: work out the derivative
         return nd.Derivative(self.mgf, n=n)(t)
     def mean(self):
@@ -213,45 +214,6 @@ def compare_samples_to_distr(D, samples, a, b, bins):
     fig.tight_layout()
 
     return ax
-
-
-def test_truncated_distribution():
-    import matplotlib.pyplot as pl
-    import scipy.stats as st
-    d = st.lognorm(1.25)
-
-    t = TruncatedDistribution(d, 2, 4)
-
-    print(t.mean(), t.rvs(100_000).mean())
-
-    if 1:
-        us = np.linspace(0.01, 0.99, 1000)
-        xs = np.linspace(d.ppf(0.01), d.ppf(0.99), 1000)
-        pl.plot(xs, t.cdf(xs), label='cdf')
-        pl.plot(t.ppf(us), us, label='ppf')
-        pl.legend(loc='best')
-        pl.xlim(0, 6)
-        pl.show()
-
-    if 1:
-        pl.hist(t.rvs(100000), density=True, bins=200)
-        pl.plot(xs, t.pdf(xs), c='r', lw=3, alpha=0.75)
-        pl.xlim(0, 6)
-        pl.show()
-
-    if 1:
-        us = np.linspace(0.01, 0.99, 100)
-        for u in us:
-            v = t.cdf(t.ppf(u))
-            assert abs(u - v)/abs(u) < 1e-3
-
-    if 1:
-        xs = np.linspace(1, 5, 1000)
-        for x in xs:
-            y = t.ppf(t.cdf(x))
-            if t.pdf(x) > 0:
-                err = abs(x - y)/abs(x)
-                assert err < 1e-3, [err, x, y]
 
 
 def random_dist(*size):
@@ -415,72 +377,3 @@ def sample_dict(x, *args, **kwargs):
     return keys[sample(vals, *args, **kwargs)]
 
 
-def test_mixture():
-
-    d = [st.norm(1, 2), st.norm(2, .5), st.norm(3, .1)]
-
-    w = np.array([.2, .7, .1])
-
-    D = Mixture(w, d)
-
-    S = D.rvs(100_000)
-
-    assert abs(D.mean() - S.mean()) < 0.005, abs(D.mean() - S.mean())
-
-    a, b = -5, 5
-
-    compare_samples_to_distr(D, S, a, b, bins=100)
-    pl.show()
-
-#    if 1:
-#        us = np.linspace(0.01, 0.99, 100)
-#        for u in us:
-#            v = D.cdf(D.ppf(u))
-#            err = abs(u - v)/abs(u)
-#            assert err < 1e-3, err
-#
-#    if 1:
-#        xs = np.linspace(a, b, 100)
-#        for x in xs:
-#            y = D.ppf(D.cdf(x))
-#            if D.pdf(x) > 0:
-#                err = abs(x - y)/abs(x)
-#                assert err < 1e-3, [err, x, y]
-
-
-def test_cdf():
-    n = 1_000
-    x = np.random.normal(0,1,size=n)
-    cdf(x).plot()
-    pl.legend(loc='best')
-    pl.show()
-
-
-def test_sample_dict():
-
-    ws = {'a': 9, 'b': 1, 'c': 0}
-    W = sum(ws.values())
-
-    xs = sample_dict(ws, size=10)
-    assert len(xs) == 10
-
-    N = 1_000_000
-    xs = sample_dict(ws, size=N)
-    from collections import Counter
-    c = Counter(xs)
-    for x in ws:
-        print(ws[x]/W, c[x]/N)
-        assert abs(ws[x]/W - c[x]/N) <= 0.001
-
-    x = sample_dict(ws, u=.5)
-    assert x == 'a'
-
-    x = sample_dict(ws, u=.91)
-    assert x == 'b'
-
-
-if __name__ == '__main__':
-    #test_truncated_distribution()
-    #test_mixture()
-    from arsenal import testing_framework
-    testing_framework(globals())

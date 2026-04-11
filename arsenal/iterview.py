@@ -4,15 +4,17 @@ from time import time
 __all__ = ['iterview']
 
 
-def iterview(
-        x: 'Iterable',
-        msg: 'Prefix message' = None,
-        #mintime: 'show progress at most every `mintime` seconds' = 0.25,
-        length: 'length hint; required when len(x) fails.' = None,
-        width: 'max width of progress bar' = 78,
-        show: 'do not show progress bar if False' = True,
-        transient = False,
-):
+def iterview(x, msg=None, length=None, width=78, show=True, transient=False):
+    """Iterate with a progress bar.
+
+    Args:
+        x: Iterable to iterate over.
+        msg: Prefix message.
+        length: Length hint; required when len(x) fails.
+        width: Max width of progress bar.
+        show: Do not show progress bar if False.
+        transient: Clear progress bar after completion.
+    """
 
     if not show: return x
 
@@ -162,39 +164,3 @@ def progress(n, length):
 #            sys.stderr.write('\r%s%s\n' % (msg, fmt(start, n+1, length, width, done=1)))
 
 
-def tests():
-    #from arsenal.assertions import assert_throws
-    from time import sleep
-
-    # Check for error
-    #with assert_throws(ValueError):
-    #    list(iterview((None for _ in range(5))))
-
-    # won't throw an error because length is passed in
-    list(iterview((None for _ in range(5)), length=5))
-
-    for _ in iterview(range(10000), msg='foo',
-                      #mintime=0.25
-                      ):
-        sleep(0.0001)
-
-    # Print time elapsed if we terminate earlier than expected.
-    for i in iterview(range(10000), msg='foo',
-                      #mintime=0.25
-                      ):
-        if i == 2000: break
-        sleep(0.001)
-
-    from arsenal import terminal
-    print('should disappear', terminal.arrow.down)
-    # Print time elapsed if we terminate earlier than expected.
-    for i in iterview(range(10000), msg='foo', #mintime=0.25,
-                      transient=True):
-        if i == 2000: break
-        sleep(0.001)
-    print('should disappear', terminal.arrow.up)
-
-
-
-if __name__ == '__main__':
-    tests()

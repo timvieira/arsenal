@@ -84,11 +84,3 @@ def verbose_paired_perm_test(xs, ys, nmc=10_000, threshold=0.05, fmt='%.4f'):
 
     return p
 
-
-if __name__ == '__main__':
-    def test():
-        xs = np.array([1,2,3,4,5,6])
-        verbose_paired_perm_test(xs+1, xs)
-        verbose_paired_perm_test(xs, xs+1)
-        verbose_paired_perm_test(xs, xs)
-    test()

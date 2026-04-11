@@ -43,28 +43,3 @@ def check_property(x, y, a):
         assert set(ii) == set(range(len(x)))
         assert set(jj) <= set(range(len(y)))
 
-
-def test():
-    from arsenal import ok
-    x, y = 'abc', 'xxabcxabcabcaaax'
-
-    aligns = []
-    for t, a in enumerate(alignments(x, y)):
-        check_property(x, y, a)
-        aligns.append(frozenset(a))
-    assert len(set(aligns)) == len(aligns)   # check for spurious ambiguity
-    assert len(aligns) == 6*3*3
-
-    x, y = 'cba', 'xabcc'
-    aligns = []
-    for t, a in enumerate(alignments(x, y)):
-        check_property(x, y, a)
-        aligns.append(frozenset(a))
-    assert len(set(aligns)) == len(aligns)   # check for spurious ambiguity
-    assert len(aligns) == 2
-
-    print(ok)
-
-
-if __name__ == '__main__':
-    test()

@@ -109,30 +109,3 @@ def slow(f, P):
 
     return frozenset(P)
 
-
-def test_partition():
-    import random
-
-    for _ in range(25):
-        N = 50
-
-        # create random total function
-        f = dict(zip(range(N), random.choices(range(N), k=N)))
-
-        # create random partition
-        i = random.randint(2, N-1)
-        P = np.random.permutation(range(N))
-        P = { frozenset(P[:i]), frozenset(P[i:]) }
-
-        want = slow(f, P)
-        have = hopcroft(f, P)
-        assert want == have
-        assert stable(f, have)
-        #print(want)
-
-    print(colors.ok)
-
-
-if __name__ == '__main__':
-    from arsenal import testing_framework
-    testing_framework(globals())

@@ -304,7 +304,3 @@ def batch(size, iterable):
     if current:
         yield current
 
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

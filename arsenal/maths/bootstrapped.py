@@ -47,19 +47,3 @@ def bootstrapped_model(xs, ys, degree, n_bootstraps=3000):
                     label='95% predictive interval')
     pl.legend(loc='best')
 
-
-def test_basics():
-
-    n = 1000
-    xs = np.random.uniform(-5, 5, size=n)
-    ys = xs * np.cos(xs*5) + np.random.normal(0,.5,size=n)
-
-    bootstrapped_model(xs, ys, degree=20)
-    pl.show()
-
-
-
-
-if __name__ == '__main__':
-    from arsenal import testing_framework
-    testing_framework(globals())

@@ -22,6 +22,3 @@ def test_sgml_reconstruction():
                 'reconstructed example should only differ in whitespace.'
 
     print('passed sgml reconstruction test.')
-
-if __name__ == '__main__':
-    test_sgml_reconstruction()

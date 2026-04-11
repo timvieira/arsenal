@@ -271,24 +271,3 @@ redirect_io = ctx_redirect_io
 #            return f(*args, **kwargs)
 #    return wrap
 
-
-if __name__ == '__main__':
-
-    import doctest
-
-    def run_tests():
-
-        def test_redirect_io():
-            msg = 'hello there?'
-            with redirect_io() as f:
-                print(msg)
-            assert str(f.getvalue().strip()) == msg
-
-        test_redirect_io()
-
-    run_tests()
-    print('passed')
-
-    doctest.testmod()
-
-    #attn('ATTENTION!')

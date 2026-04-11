@@ -408,22 +408,3 @@ class compare:
         #print df.sort('error', ascending=0)
         return self
 
-
-if __name__ == '__main__':
-
-    def test_compare():
-        n = 100
-        # `a` is a noisy version of `b`, but tends to overestimate.
-        a = np.linspace(0,1,n)
-        b = a + np.random.uniform(-0.01, 0.1, size=n)
-        compare(a,b).show()
-        compare('a', 'b', data=pd.DataFrame({'a': a, 'b': b})).show()
-
-        n = 10000
-        a = np.random.uniform(-0.1, 0.1, size=n)
-        b = np.random.uniform(-0.2, 0.1, size=n)
-        pl.figure()
-        pp_plot(a, b)
-        pl.show()
-
-    test_compare()

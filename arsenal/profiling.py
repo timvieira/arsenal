@@ -28,7 +28,7 @@ class profiler:
     def __exit__(self, *args, **kwargs):
         if self.use == 'yep':  # pragma: no cover
             self.prof.stop()
-            print(colors.yellow % 'wrote: %s' % filename, '(use `google-pprof` to view)')
+            print(colors.yellow % 'wrote: %s' % self.filename, '(use `google-pprof` to view)')
             # google-pprof --text /bin/ls imitation.prof
             # google-pprof --evince /bin/ls imitation.prof
             # google-pprof --web /bin/ls --web imitation.prof
@@ -139,17 +139,3 @@ def profile_viz(
 #if __name__ == '__main__':
 #    main()
 
-
-def test_profiler():
-    import time
-
-    with profiler() as p:
-        for i in range(10):
-            time.sleep(.1)
-
-    p.open()
-
-
-if __name__ == '__main__':
-    from arsenal import testing_framework
-    testing_framework(globals())

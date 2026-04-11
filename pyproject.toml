@@ -21,7 +21,6 @@ dependencies = [
     "numpy",
     "scipy",
     "pandas",
-    "cython",
     "matplotlib",
     "gprof2dot",
     "graphviz",
@@ -30,6 +29,17 @@ dependencies = [
     "IPython",
     "tqdm",
     "psutil",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+]
+docs = [
+    "sphinx",
+    "sphinx-autodoc-typehints",
 ]
 
 [tool.setuptools]
@@ -41,5 +51,27 @@ include-package-data = true
 [tool.setuptools.packages.find]
 include = ["*"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests", "arsenal"]
+addopts = "--doctest-modules"
+
 [tool.cython]
 include = ["arsenal/**/*.pyx"]
+
+[tool.ruff]
+line-length = 90
+indent-width = 4
+target-version = "py310"
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = ["E731", "E701", "F401", "E741", "E743", "E702", "E402", "E401"]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

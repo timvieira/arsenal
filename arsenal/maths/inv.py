@@ -14,7 +14,7 @@ class Inv:
         # https://timvieira.github.io/blog/post/2021/03/25/fast-rank-one-updates-to-matrix-inverse/
         B = self.B
         Bu = B @ u
-        s = 1 + float(v.T @ Bu)
+        s = 1 + float((v.T @ Bu)[0, 0])
         alpha = -1 / s
         # Warning: `overwrite_a=True` silently fails when B is not an order=F array!
         dger(alpha, Bu, v.T @ B, a=B, overwrite_a=1)

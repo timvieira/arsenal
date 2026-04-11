@@ -46,10 +46,13 @@ def timelimit(seconds, sig=signal.SIGALRM):
     def signal_handler(signum, frame):
         raise Timeout(f'Call took longer than {seconds} seconds.')
 
-    signal.signal(sig, signal_handler)
-    signal.setitimer(signal.ITIMER_REAL, seconds)
-    yield
-    signal.setitimer(signal.ITIMER_REAL, 0)   # disables alarm
+    old_handler = signal.signal(sig, signal_handler)
+    old_timer = signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, *old_timer)
+        signal.signal(sig, old_handler)
 
 timelimit.Timeout = Timeout
 

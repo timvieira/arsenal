@@ -1,5 +1,5 @@
 cython:
-	python setup.py build_ext -i
+	pip install -e .
 
 test:
 	python -m pytest tests/

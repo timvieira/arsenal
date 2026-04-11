@@ -22,10 +22,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: |
-          pip install setuptools numpy "Cython>=3.0"
-          pip install -e ".[dev]"
-          python setup.py build_ext -i
+        run: pip install -e ".[dev]"
 
       - name: Test
         run: python -m pytest tests/

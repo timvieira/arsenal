@@ -203,7 +203,7 @@ def find_new_title(d, filename):
         base = os.path.basename(p)
         (root, ext) = os.path.splitext(base)
         m = rx.search(root)
-        if m == None:
+        if m is None:
             replacement = "(001)"
         else:
             increment = int(m.group(1)) + 1

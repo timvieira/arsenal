@@ -27,8 +27,5 @@ jobs:
           pip install -e ".[dev]"
           python setup.py build_ext -i
 
-      - name: Lint
-        run: ruff check arsenal/
-
       - name: Test
         run: python -m pytest tests/

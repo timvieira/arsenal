@@ -23,10 +23,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install numpy "Cython>=3.0"
           pip install -e ".[dev]"
-
-      - name: Build Cython extensions
-        run: python setup.py build_ext -i
+          python setup.py build_ext -i
 
       - name: Lint
         run: ruff check arsenal/

@@ -18,9 +18,9 @@ class head_iter:
             return True
         if other.done:
             return False
-        if self.head == SENTINEL:
+        if self.head is SENTINEL:
             return True
-        if other.head == SENTINEL:
+        if other.head is SENTINEL:
             return False
         return self.head < other.head
     def __next__(self):

@@ -43,7 +43,7 @@ def fit_curve(xs, ys):
     xs = np.array(xs); ys = np.array(ys)
     assert np.all(xs > 0) and np.all(ys > 0)
     a,b = np.polyfit(np.log(xs), np.log(ys), deg=1)
-    label = '${%.2f} \cdot x^{%.2f}$' % (np.exp(b), a)
+    label = r'${%.2f} \cdot x^{%.2f}$' % (np.exp(b), a)
     print('[fit] estimate', label)
     pl.plot(xs, ys, c='r', alpha=0.5, label='data')
     pl.plot(xs, np.exp(b)*xs**a, c='b', alpha=0.5,
@@ -210,7 +210,7 @@ def f1(A, B):
 
 
 def relative_difference(a, b):
-    """Element-wise relative difference of two arrays
+    r"""Element-wise relative difference of two arrays
 
     $$
     \begin{cases}
@@ -689,7 +689,7 @@ def mutual_information(joint):
 
 
 def cross_entropy(p, q):
-    """ Cross Entropy of two vectors,
+    r""" Cross Entropy of two vectors,
 
     CE(p,q) = - \sum_i p[i] log q[i]
 

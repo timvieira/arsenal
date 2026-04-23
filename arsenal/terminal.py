@@ -191,7 +191,7 @@ ansi2html = ansi2html
 
 def nocolor(x):
     "Remove ANSI control codes from the given string `x`."
-    return re.sub('\033\[[0-9;]*m', "", x)
+    return re.sub(r'\033\[[0-9;]*m', "", x)
 
 
 # https://www.w3.org/TR/xml-entity-names/025.html
@@ -288,7 +288,7 @@ def render(y, **kwargs):
 class rendering:
     def __init__(self, y, debug=False):
         y = str(y)
-        xs = re.split('(\x1b\[[0-9;]+m)', y)  # tokenize.
+        xs = re.split(r'(\x1b\[[0-9;]+m)', y)  # tokenize.
 
         if debug:
             msg = lambda *args: print(f'[render]{"    "*len(s)}', *args)
@@ -326,7 +326,7 @@ class rendering:
         return self.value
 
     def __format__(self, spec):
-        [(pad, fmt)] = re.findall('^(-?\d*)(s)$', spec)
+        [(pad, fmt)] = re.findall(r'^(-?\d*)(s)$', spec)
         pad = int(pad)
         if pad > 0:
             return self.value + ' '*max(0, pad - len(self))

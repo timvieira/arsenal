@@ -252,10 +252,6 @@ def reindent(indentation, msg):
 #    return max(len(str(z)) for z in a)
 
 
-def check(x, t='pass', f='fail'):
-    return green % t if x else red % f
-
-
 #def color01(x, fmt='%.10f', min_color=235, max_color=255):
 #    "Colorize numbers in [0,1] based on value; darker means smaller value."
 #    import colored

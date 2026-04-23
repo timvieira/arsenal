@@ -13,7 +13,6 @@ from scipy.sparse.linalg import LinearOperator
 
 from scipy.optimize import minimize
 from scipy.linalg import norm
-from arsenal import iterview
 
 
 def fd_Hessian(f, x, eps=1e-5):

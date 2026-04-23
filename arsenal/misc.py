@@ -80,7 +80,7 @@ class ddict(dict):
 def ignore_error(color='red'):
     try:
         yield
-    except:
+    except Exception:
         etype, evalue, tb = sys.exc_info()
         tb = '\n'.join(traceback.format_exception(etype, evalue, tb))
 

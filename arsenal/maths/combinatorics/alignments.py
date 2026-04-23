@@ -7,12 +7,12 @@ def alignments(x, y):
     yield from _alignments(x, y, 0, set(range(len(y))), [])
 
 
-def _alignments(
-        x, y,
-        cursor: 'cursor into x',
-        remaining: 'available indices in y',
-        align: 'current alignment prefix'
-):
+def _alignments(x, y, cursor, remaining, align):
+    """
+    cursor:    cursor into x
+    remaining: available indices in y
+    align:     current alignment prefix
+    """
     if len(align) == len(x):
         yield align
         return

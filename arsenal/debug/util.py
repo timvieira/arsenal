@@ -84,7 +84,7 @@ def dumpobj(o, callables=False, private=False):
             continue
         try:
             print('%20s: %s' % (a, type(getattr(o,a)).__name__))
-        except:
+        except Exception:
             pass
 
 

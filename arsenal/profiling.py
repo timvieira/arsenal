@@ -48,9 +48,6 @@ class profiler:
     def open(self):
         self.graphviz().view()
 
-    def graphviz(self):
-        return prof_to_graphviz(self.filename)
-
 
 def prof_to_graphviz(f_prof):
     import gprof2dot

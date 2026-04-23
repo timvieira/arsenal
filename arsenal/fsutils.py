@@ -59,7 +59,7 @@ def ensure_dir(f, verbose=False):
 def clear_dir(d):
     try:
         shutil.rmtree(d)
-    except:
+    except Exception:
         pass
     os.mkdir(d)
 
@@ -178,7 +178,7 @@ def secure_filename(filename):
             filename = filename.replace(sep, ' ')
     filename = str(_filename_ascii_strip_re.sub('', '_'.join(
                    filename.split()))).strip('._')
-    filename = re.sub('[\[\]]', '', filename)
+    filename = re.sub(r'[\[\]]', '', filename)
 
     # on nt a couple of special files are present in each folder.  We
     # have to ensure that the target file is not such a filename.  In

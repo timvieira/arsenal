@@ -9,46 +9,6 @@ import itertools
 
 
 
-def sample(S, k, ordered, replace):
-    S = tuple(S)
-
-    if k == 0:
-        yield ()
-    else:
-        for i, s in enumerate(S):
-
-            if     ordered and     replace: X = S[:i] + S[i:]    # string
-            if     ordered and not replace: X = S[:i] + S[i+1:]  # select
-            if not ordered and     replace: X =         S[i:]    # ????
-            if not ordered and not replace: X =         S[i+1:]  # choose
-
-            for x in sample(X, k-1, ordered, replace):
-                yield x + (s,)
-
-
-def select(S, k):
-    "Ordered subsets of size k"
-    return sample(S, k, ordered=True, replace=False)
-
-
-def choose(S, k):
-    """
-    Enumerate unordered subsets of size k from the set S.
-
-    S does not have to be a set, it can be ordered.  The elements returned will each be a k-tuple.
-
-    If `S` is an ordered collection, then the k-tuples returned by this iterator
-    will use the sample order.
-
-    """
-    return sample(S, k, ordered=False, replace=False)
-
-
-def permute(S):
-    "Permutations"
-    return select(S, len(S))
-
-
 def n_selections_with_replacement(n, k):
     """
     Number of positive integers solutions to x₁ + x₂ + ⋯ + x_n = n+k
@@ -108,7 +68,15 @@ def select(S, k):
 
 
 def choose(S, k):
-    "Unordered subsets of size k"
+    """
+    Enumerate unordered subsets of size k from the set S.
+
+    S does not have to be a set, it can be ordered.  The elements returned will each be a k-tuple.
+
+    If `S` is an ordered collection, then the k-tuples returned by this iterator
+    will use the sample order.
+
+    """
     return sample(S, k, ordered=False, replace=False)
 
 

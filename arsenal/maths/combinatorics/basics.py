@@ -91,32 +91,32 @@ def perm_sign(p):
     return -1 if t % 2 else +1
 
 
-try:
-    from blist import sortedlist
-except ImportError:
-    pass
-def _fast_inversions(p):
-    n = len(p)
-    total = 0
-    S = sortedlist()
-    for k in reversed(range(n)):
-        pos = S.bisect_left(p[k])
-        S.add(p[k])
-        total += pos
-    return total
-
-def _slow_inversions(p):
-    n = len(p)
-    t = 0
-    for i in range(n):
-        for j in range(i+1, n):
-            if p[i] > p[j]:
-                t += 1
-    return t
-
 def _inversions(p):
-    #assert _slow_inversions(p) == _fast_inversions(p)
-    return _fast_inversions(p)
+    "Count inversions in O(n log n) via merge sort."
+    a = list(p)
+    buf = [None] * len(a)
+
+    def merge(lo, hi):
+        if hi - lo <= 1:
+            return 0
+        mid = (lo + hi) // 2
+        inv = merge(lo, mid) + merge(mid, hi)
+        i, j, k = lo, mid, lo
+        while i < mid and j < hi:
+            if a[i] <= a[j]:
+                buf[k] = a[i]; i += 1
+            else:
+                buf[k] = a[j]; j += 1
+                inv += mid - i
+            k += 1
+        while i < mid:
+            buf[k] = a[i]; i += 1; k += 1
+        while j < hi:
+            buf[k] = a[j]; j += 1; k += 1
+        a[lo:hi] = buf[lo:hi]
+        return inv
+
+    return merge(0, len(a))
 
 
 # Note: There is no way to fairly enumerate powerset when S is infinite

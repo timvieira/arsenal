@@ -47,12 +47,20 @@ def timelimit(seconds, sig=signal.SIGALRM):
         raise Timeout(f'Call took longer than {seconds} seconds.')
 
     old_handler = signal.signal(sig, signal_handler)
-    old_timer = signal.setitimer(signal.ITIMER_REAL, seconds)
+    old_delay, old_interval = signal.setitimer(signal.ITIMER_REAL, seconds)
+    start = time()
     try:
         yield
     finally:
-        signal.setitimer(signal.ITIMER_REAL, *old_timer)
-        signal.signal(sig, old_handler)
+        signal.setitimer(signal.ITIMER_REAL, 0, 0)   # cancel our timer
+        signal.signal(sig, old_handler)              # restore the prior handler
+        if old_delay > 0:
+            # There was an enclosing timer (an outer timelimit, or pytest-timeout's
+            # signal method).  Restore IT minus the time we just consumed -- restoring
+            # the stale entry-time remaining lets a loop of timelimit() calls keep
+            # resetting the outer deadline so it never fires.
+            remaining = old_delay - (time() - start)
+            signal.setitimer(signal.ITIMER_REAL, max(remaining, 1e-6), old_interval)
 
 timelimit.Timeout = Timeout
 

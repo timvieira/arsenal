@@ -232,24 +232,13 @@ def relative_difference(a, b):
 
     """
 
-    a = array(a).flatten()
-    b = array(b).flatten()
-    #x = np.atleast_2d(array([a, b]))
-    #fs = abs(x).max(axis=0)
-    #fs[fs == 0] = 1
-    #return (abs(x[0,:] - x[1,:]) / fs).flatten()
-
-    es = []
-    for x,y in zip(a,b):
-        if x == y:  # covers inf, but not nan
-            e = 0
-        else:
-            s = max(abs(x), abs(y))
-            if s == 0:
-                s = 1
-            e = abs(x-y) / s
-        es.append(e)
-    return np.array(es)
+    a = np.asarray(a, dtype=float).ravel()
+    b = np.asarray(b, dtype=float).ravel()
+    s = np.maximum(np.abs(a), np.abs(b))
+    s[s == 0] = 1.0
+    with np.errstate(invalid='ignore'):
+        # a == b short-circuits inf == inf -> 0 (matches the original loop).
+        return np.where(a == b, 0.0, np.abs(a - b) / s)
 
 
 
@@ -398,38 +387,23 @@ def lidstone(p, delta):
     return normalize(p + delta)
 
 
-@np.vectorize
 def log1pexp(x):
     """
     Numerically stable implementation of log(1+exp(x)) aka softmax(0,x).
 
     -log1pexp(-x) is log(sigmoid(x))
     """
-    if x <= -37:
-        return exp(x)
-    elif -37 <= x <= 18:
-        return log1p(exp(x))
-    elif 18 < x <= 33.3:
-        return x + exp(-x)
-    else:
-        return x
+    x = np.asarray(x, dtype=float)
+    return np.piecewise(
+        x,
+        [x <= -37, (x > -37) & (x <= 18), (x > 18) & (x <= 33.3)],
+        [lambda v: np.exp(v),
+         lambda v: np.log1p(np.exp(v)),
+         lambda v: v + np.exp(-v),
+         lambda v: v],
+    )
 
 
-@np.vectorize
-def logsubexp(x, y):
-    """
-    Numerically stable computation of subtraction in log-space
-    z = log(exp(x) - exp(y))
-    """
-    if x == y:
-        return -np.inf
-    elif x < y:
-        return np.nan
-    else:
-        return x + log1mexp(y-x)
-
-
-@np.vectorize
 def log1mexp(x):
     """
     Numerically stable implementation of log(1-exp(x))
@@ -439,14 +413,29 @@ def log1mexp(x):
     Source:
     http://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf
     """
-    if x >= 0:
-        return np.nan
-    else:
-        a = abs(x)
-        if 0 < a <= 0.693:
-            return np.log(-np.expm1(-a))
-        else:
-            return np.log1p(-np.exp(-a))
+    x = np.asarray(x, dtype=float)
+    a = np.abs(x)
+    return np.piecewise(
+        x,
+        [x >= 0, (x < 0) & (a <= 0.693)],
+        [lambda v: np.nan,
+         lambda v: np.log(-np.expm1(-np.abs(v))),
+         lambda v: np.log1p(-np.exp(-np.abs(v)))],
+    )
+
+
+def logsubexp(x, y):
+    """
+    Numerically stable computation of subtraction in log-space
+    z = log(exp(x) - exp(y))
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    with np.errstate(invalid='ignore'):
+        return np.where(
+            x == y, -np.inf,
+            np.where(x < y, np.nan, x + log1mexp(y - x)),
+        )
 
 
 def logmeanexp(xs):

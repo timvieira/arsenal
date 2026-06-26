@@ -1,33 +1,39 @@
 """
 OrderedSet -- a set which remembers insertion order.
 """
+from itertools import islice
+
 
 class OrderedSet:
     """
-    Set which remembers insertion ordering allowed iteration while changing size
-    and determinism.
+    Set which remembers insertion ordering. Iteration is stable across
+    additions and removals.
     """
-    __slots__ = 'set', 'list'
+    __slots__ = ('_d',)
     def __init__(self, elems=None):
-        self.set = set()
-        self.list = []
+        self._d = {}
         if elems is not None:
             for x in elems:
-                self.add(x)
+                self._d[x] = None
     def __contains__(self, item):
-        return item in self.set
+        return item in self._d
     def __iter__(self):
-        return iter(self.list)
+        return iter(self._d)
     def add(self, item):
-        if item not in self.set:
-            self.set.add(item)
-            self.list.append(item)
+        self._d[item] = None
     def __len__(self):
-        return len(self.set)
+        return len(self._d)
     def __repr__(self):
-        return 'OrderedSet(%r)' % self.list
-    def __getitem__(self, *args):
-        return self.list.__getitem__(*args)
+        return 'OrderedSet(%r)' % list(self._d)
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return list(self._d)[key]
+        if key < 0:
+            return list(self._d)[key]
+        try:
+            return next(islice(self._d, key, key + 1))
+        except StopIteration:
+            raise IndexError('OrderedSet index out of range')
     def __sub__(self, other):
         new = OrderedSet()
         for x in self:
@@ -46,19 +52,17 @@ class OrderedSet:
             self.add(x)
         return self
     def isdisjoint(self, other):
-        return self.set.isdisjoint(other.set)
+        return self._d.keys().isdisjoint(other._d.keys() if isinstance(other, OrderedSet) else other)
     def __lt__(self, other):
-        return self.set < other.set
+        return self._d.keys() < (other._d.keys() if isinstance(other, OrderedSet) else other)
     def __le__(self, other):
-        return self.set <= other.set
+        return self._d.keys() <= (other._d.keys() if isinstance(other, OrderedSet) else other)
     def __eq__(self, other):
         if isinstance(other, OrderedSet):
-            return self.set == other.set
+            return self._d.keys() == other._d.keys()
         elif isinstance(other, set):
-            return self.set == other
+            return set(self._d) == other
         else:
             return False
     def remove(self, x):
-        "this method is slow; avoid"
-        self.set.remove(x)
-        self.list = [y for y in self.list if x != y]
+        del self._d[x]

@@ -56,7 +56,7 @@ class ShelfBasedCache(object):
         p_args = self.key(args)
         value = None
         recompute = True
-        if self.cache.has_key(p_args):
+        if p_args in self.cache:
             recompute = False
             value = self.cache[p_args]
             if value is None and self.None_is_bad:
